@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "RepairCafeMobile",
+    "slug": "RepairCafeMobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/RCM-favicon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/RepairCafeMobile-large.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/RCM-favicon.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    "web": {
+      "favicon": "./assets/RCM-favicon.png"
+    }
+  }
+}

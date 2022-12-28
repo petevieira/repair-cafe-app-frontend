@@ -11,7 +11,7 @@ import {
 } from 'react-native-paper';
 // Custom Components
 import ResponsiveButton from "../globals/ResponsiveButton"
-import Nav from "../globals/nav"
+import Nav from "../globals/Nav"
 // Styles
 import styles from '../globals/Styles.js'
 

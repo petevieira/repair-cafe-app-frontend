@@ -1,12 +1,12 @@
 
 {
-	"logo_sm": {
-		"img_url": "https://www.dropbox.com/s/hhyrto1volo9fmz/RepairCafeMobile.png?raw=1"
-	},
-	 "logo_lg": {
-		"img_url": "https://www.dropbox.com/s/ve68x4xbex4wwd8/RepairCafeMobile-large.png?raw=1"
-	},
-	"background": {
-	"img_url": "https://www.dropbox.com/s/28e0kbxwk4uvsr3/Wrenches_large_background.png?raw=1"
-	}
+  "logo_sm": {
+    "img_url": "https://www.dropbox.com/s/hhyrto1volo9fmz/RepairCafeMobile.png?raw=1"
+  },
+  "logo_lg": {
+    "img_url": "https://www.dropbox.com/s/ve68x4xbex4wwd8/RepairCafeMobile-large.png?raw=1"
+  },
+  "background": {
+    "img_url": "https://www.dropbox.com/s/28e0kbxwk4uvsr3/Wrenches_large_background.png?raw=1"
+  }
 }

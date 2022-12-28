@@ -7,6 +7,11 @@ export default StyleSheet.create({
     resizeMode:'contain',
     marginLeft: 20,
   },
+  itemImage: {
+    width: "25%",
+    aspectRatio: 1,
+    resizeMode:'contain',
+  },
   container: {
     flex: 1,
     //justifyContent: "center",

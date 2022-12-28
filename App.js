@@ -2,6 +2,7 @@ import * as React from 'react';
 import { View, SafeAreaView, Platform, StatusBar, ScrollView } from 'react-native';
 import {
   Button,
+  Divider,
   Paragraph,
   Dialog,
   Portal,
@@ -14,7 +15,7 @@ import {
 } from 'react-native-paper';
 // Custom Components
 import ResponsiveButton from "./globals/ResponsiveButton"
-import Nav from "./globals/nav"
+import Nav from "./globals/Nav"
 // Styles
 import styles from './globals/Styles'
 // Screens
@@ -24,7 +25,7 @@ import CreatePassword from './components/login/02_CreatePassword'
 import UserAgreement  from './components/login/03_UserAgreement'
 import AccountSuccess from './components/login/04_AccountSuccess'
 import EnterPassword from './components/login/05_EnterPassword'
-
+import MyItems from './components/myItems/01_MyItems'
 
 const HomeRoute2 = () => {
   return(
@@ -34,7 +35,7 @@ const HomeRoute2 = () => {
 
 const HomeRoute = () => {
   return(
-    <AccountSuccess></AccountSuccess>
+    <MyItems></MyItems>
   );
 };
 

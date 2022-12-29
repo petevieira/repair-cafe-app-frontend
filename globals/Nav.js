@@ -6,10 +6,10 @@ import img_data from '../images/rc_images.json';
 
 
 
-const Nav = ({ name }) => (
+const Nav = () => (
   <Appbar.Header style = {{backgroundColor: 'white'}}>
-    <Image source={{ uri: img_data["logo_sm"].img_url }} style={styles.logo} />
-    <Appbar.Content title="About" style = {{alignItems: "flex-end"}}/>
+      <Image source={{ uri: img_data["logo_sm"].img_url }} style={styles.logo} />
+      <Appbar.Content title="About" style = {{alignItems: "flex-end"}}/>
   </Appbar.Header>
 );
 

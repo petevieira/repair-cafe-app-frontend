@@ -35,7 +35,6 @@ const MyItems = () => {
       <View style = {{alignSelf: 'center', alignItems: 'flex-start', justifyContent: 'center', flex: 1, margin: 20}}>
         <ScrollView>
           {fakeUserEventsItems.map((event)=> {
-
             const eventStartDate = format(new Date(event.startDatetime), "MMMM do, yyyy");
             const activeEvent = event.activeEvent;
             const location = event.locationName;
@@ -65,7 +64,7 @@ const MyItems = () => {
             };
 
             return (
-              <View key={event.EventId} style = {{marginBottom: 10}}>
+              <View key={event.eventId} style = {{marginBottom: 10}}>
 
                 <Text>
                 <Text style = {{ fontWeight: 'bold', fontSize: 16}}>{eventLine1}{"\n"}</Text>
@@ -77,7 +76,6 @@ const MyItems = () => {
                 <AddItemButton active = {activeEvent} />
 
                 {event.items.map((item)=> {
-
                   // Item info
                   const itemName = item.itemType.name;
                   const itemImage = item.itemType.imageUrl;

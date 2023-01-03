@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { View, SafeAreaView, Platform, StatusBar, ScrollView } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
   Button,
   Divider,
@@ -19,7 +21,7 @@ import Nav from "./globals/Nav"
 // Styles
 import styles from './globals/Styles'
 // Screens
-import Home from './components/Home'
+import Home from './components/home'
 import EmailEntry from './components/login/01_Email'
 import CreatePassword from './components/login/02_CreatePassword'
 import UserAgreement  from './components/login/03_UserAgreement'
@@ -27,18 +29,36 @@ import AccountSuccess from './components/login/04_AccountSuccess'
 import EnterPassword from './components/login/05_EnterPassword'
 import MyItems from './components/myItems/01_MyItems'
 
+const Stack = createNativeStackNavigator();
+
 const HomeRoute2 = () => {
   return(
     <Home></Home>
   );
 };
 
+// <EmailEntry></EmailEntry>
 const HomeRoute = () => {
+  return(
+    <Stack.Navigator
+      initialRouteName="Email"
+      screenOptions={{headerShown:false}}>
+    <Stack.Screen
+      name="Email"
+      component={EmailEntry}/>
+    <Stack.Screen
+      name="CreatePassword"
+      component={CreatePassword}/>
+    </Stack.Navigator>
+  );
+};
+
+const MyItemsRoute = () => {
   return(
     <MyItems></MyItems>
   );
 };
-
+const QueueRoute = () => <SafeAreaView><Text>Repair Queue</Text></SafeAreaView>;
 
 const _fontConfig = {
   regular: {
@@ -70,9 +90,6 @@ const _colors = {
   primary: '#565656',
 };
 
-const MyItemsRoute = () => <Text>My Items</Text>;
-const QueueRoute = () => <Text>Repair Queue</Text>;
-
 const App = () => {
 
   const [index, setIndex] = React.useState(0);
@@ -90,11 +107,13 @@ const App = () => {
 
   return (
     <Provider theme ={{...MD2LightTheme, colors:_colors, fonts: configureFonts({config: fontConfig, isV3: false})}}>
-      <BottomNavigation
-      navigationState={{ index, routes }}
-      onIndexChange={setIndex}
-      renderScene={renderScene}
-    />
+      <NavigationContainer>
+        <BottomNavigation
+        navigationState={{ index, routes }}
+        onIndexChange={setIndex}
+        renderScene={renderScene}
+      />
+    </NavigationContainer>
     </Provider>
   );
 };

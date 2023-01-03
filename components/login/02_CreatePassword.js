@@ -71,6 +71,7 @@ const CreatePassword = () => {
             value={first}
             autoCorrect={false}
             style={styles.short_text_input}
+            onChangeText={first => setFirst(first)}
           />
           <HelperText type="error" visible={noFirst}>
           Please enter a first name.
@@ -81,6 +82,7 @@ const CreatePassword = () => {
             value={last}
             autoCorrect={false}
             style={styles.short_text_input}
+            onChangeText={last => setLast(last)}
           />
           <HelperText type="error" visible={noLast}>
           Please enter a last name.
@@ -92,6 +94,7 @@ const CreatePassword = () => {
             value={pass1}
             type="outlined"
             style={styles.short_text_input}
+            onChangeText={pass1 => setPass1(pass1)}
           />
           <TextInput
             label="Enter password again"
@@ -100,6 +103,7 @@ const CreatePassword = () => {
             value={pass2}
             type="outlined"
             style={styles.short_text_input}
+            onChangeText={pass2 => setPass2(pass2)}
           />
           <HelperText type="error" visible={nonMatching()}>
             Passwords must match.

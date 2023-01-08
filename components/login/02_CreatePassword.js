@@ -1,16 +1,11 @@
 import * as React from 'react';
-import { View, SafeAreaView, Platform, ScrollView, StatusBar, KeyboardAvoidingView } from 'react-native';
+import {
+  View, SafeAreaView, Platform, ScrollView, StatusBar, KeyboardAvoidingView
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-  Button,
-  HelperText,
-  Paragraph,
-  Dialog,
-  Portal,
-  Provider,
-  TextInput,
-  Text,
-  BottomNavigation
+  Button, HelperText, Paragraph, Dialog, Portal,
+  Provider, TextInput, Text, BottomNavigation
 } from 'react-native-paper';
 // Custom Components
 import Nav from "../../globals/Nav"
@@ -18,53 +13,55 @@ import SubmitButton from "../../globals/SubmitButton"
 // Styles
 import styles from '../../globals/Styles.js'
 
+import UserRequests from '../../requests/user-requests';
 
-const CreatePassword = () => {
-  const [email, setEmail] = React.useState("");
+const CreatePassword = ({route, navigation}) => {
+  // Route parameters
+  const { email } = route.params;
+
+  // State variables
   const [first, setFirst] = React.useState("");
   const [last, setLast] = React.useState("");
   const [pass1, setPass1] = React.useState("");
   const [pass2, setPass2] = React.useState("");
 
-  const getEnteredEmail = async () => {
-    try {
-      const value = await AsyncStorage.getItem('email');
-      console.log(value);
-      if (value !== null) {
-        setEmail(value);
-      }
-    } catch(error) {
-      console.error(error);
-    }
-  };
-  getEnteredEmail();
+  const passwordMinChars = 6; //FIXME get from .env
 
   // Password Match
   const nonMatching = () => {
-    if (pass1 =="" || pass2 =="" || (pass1 == pass2) ) {
-      return false;
-    } else {
-      return true;
+    return (pass1 === "") || (pass2 === "") || (pass1 !== pass2);
+  };
+
+  const noFirst = () => {
+    return first == "";
+  };
+
+  const noLast = () => {
+    return last == "";
+  };
+
+  const signUp = async (email, first, last, password) => {
+    try {
+      const response = await UserRequests.signUp(email, first, last, password);
+      navigation.navigate('MyItems');
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  // First name entered
-  let noFirst = false;
-
-  // Last name entered
-  let noLast = false;
-
-
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
+    <KeyboardAvoidingView behavior={
+      Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
 
       <StatusBar style = "auto" />
       <Nav></Nav>
 
       <ScrollView>
-        <View style = {{alignItems: 'center', justifyContent: 'center', flex: 1}}>
-          <Text style = {{fontSize: 20, marginTop: 15,}}>Welcome to Repair Cafe! {"\n"}</Text>
+        <View style = {
+          {alignItems: 'center', justifyContent: 'center', flex: 1}}>
+          <Text style={{fontSize: 20, marginTop: 15,}}>Welcome to Repair Cafe!{"\n"}</Text>
           <Text>{email}</Text>
+
           <TextInput
             label="First name"
             type="outlined"
@@ -73,9 +70,10 @@ const CreatePassword = () => {
             style={styles.short_text_input}
             onChangeText={first => setFirst(first)}
           />
-          <HelperText type="error" visible={noFirst}>
-          Please enter a first name.
-        </HelperText>
+          <HelperText type="error" visible={noFirst()}>
+            Please enter a first name.
+          </HelperText>
+
           <TextInput
             label="Last name"
             type="outlined"
@@ -84,9 +82,10 @@ const CreatePassword = () => {
             style={styles.short_text_input}
             onChangeText={last => setLast(last)}
           />
-          <HelperText type="error" visible={noLast}>
-          Please enter a last name.
-        </HelperText>
+          <HelperText type="error" visible={noLast()}>
+            Please enter a last name.
+          </HelperText>
+
           <TextInput
             label="Create a password"
             autoCorrect={false}
@@ -96,6 +95,7 @@ const CreatePassword = () => {
             style={styles.short_text_input}
             onChangeText={pass1 => setPass1(pass1)}
           />
+
           <TextInput
             label="Enter password again"
             autoCorrect={false}
@@ -108,24 +108,12 @@ const CreatePassword = () => {
           <HelperText type="error" visible={nonMatching()}>
             Passwords must match.
           </HelperText>
-          <Button mode="outlined"
-            onPress={async () => {
-              try {
-                console.log(`'${first}'`);
-                console.log(`'${last}'`);
-                noFirst = (first.length==0);
-                noLast = (last.length==0);
-
-              } catch (error) {
-                console.error(error);
-              }
+          <SubmitButton
+            onPress={() => {
+              signUp(email, first, last, pass1);
             }}
-            style={{
-            //flex: props.flex_num,
-            ...styles.submit_button,
-          }}>
-          Submit
-        </Button>
+          >
+          </SubmitButton>
         </View>
       </ScrollView>
 

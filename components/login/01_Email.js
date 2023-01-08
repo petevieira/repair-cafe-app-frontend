@@ -22,40 +22,45 @@ import styles from '../../globals/Styles.js'
 
 import UserRequests from '../../requests/user-requests';
 
-
 const EmailEntry = ({navigation}) => {
-
+  // State variables
   const [email, setEmail] = React.useState("");
+  const [emailIsInvalid, setEmailIsInvalid] = React.useState(false);
 
   // Email validation
-  const emailIsInvalid = () => {
+  const validateEmail = () => {
     const reg = /^[a-zA-Z0-9.!#$%&'’*+\/=?^_`{|}~-]{1,64}@([a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{1,63}$/;
-    return (!reg.test(email) && email !== "");
+    return (reg.test(email) || email === '');
   };
 
-  const checkSubmittedEmail = async (email) => {
+  /**
+   * Checks if user email is registered and navigates to the appropriate next
+   * page/screen: sign-up or sign-in
+   * @param {string} email - Email to check registration of
+   */
+  const checkEmailAndNavigate = async (email) => {
     try {
-      // ask backend if email is already registered
+      // Ask backend if email is registered
       const response = await UserRequests.emailIsRegistered(email);
-      // if request succeeds, save user email in async storage
-      await AsyncStorage.setItem('email', email);
-      // if email is already registered, go to sign-in page,
-      //   otherwise, go to sign-up page
-      if (response.data.emailIsRegistered) {
-        navigation.navigate('EnterPassword', { screen: 'EnterPassword' });
+      const { emailIsRegistered, user } = response.data;
+      // Navigate to next screen depending on email status
+      if (emailIsRegistered) {
+        navigation.navigate('EnterPassword', { user: user });
       } else {
-        navigation.navigate('CreatePassword', { screen: 'CreatePassword' });
+        navigation.navigate('CreatePassword', { email: email });
       }
     } catch (error) {
-      console.error("checkEmail error: ", error.response?.data?.msg);
+      console.error(error);
     }
   };
 
   return (
     <KeyboardAvoidingView behavior={
       Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
+
       <StatusBar style = "auto" />
       <Nav></Nav>
+
       <View style = {{alignItems: 'center', justifyContent: 'center', flex: 1}}>
         <TextInput
           label="What is your email?"
@@ -65,22 +70,19 @@ const EmailEntry = ({navigation}) => {
           value={email}
           onChangeText={email => setEmail(email)}
         />
-        <HelperText type="error" visible={emailIsInvalid()}>
+        <HelperText type="error" visible={!validateEmail()}>
           Please enter a valid email address.
         </HelperText>
-        <Button mode="outlined"
+        <SubmitButton
           onPress={() => {
-            if (!emailIsInvalid()) {
-              checkSubmittedEmail(email);
+            if (validateEmail() && email !== '') {
+              checkEmailAndNavigate(email);
             }
           }}
-          style={{
-          //flex: props.flex_num,
-          ...styles.submit_button,
-        }}>
-        Submit
-        </Button>
+        >
+        </SubmitButton>
       </View>
+
     </KeyboardAvoidingView>
   );
 

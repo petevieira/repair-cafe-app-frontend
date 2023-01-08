@@ -43,12 +43,18 @@ const HomeRoute = () => {
     <Stack.Navigator
       initialRouteName="Email"
       screenOptions={{headerShown:false}}>
-    <Stack.Screen
-      name="Email"
-      component={EmailEntry}/>
-    <Stack.Screen
-      name="CreatePassword"
-      component={CreatePassword}/>
+      <Stack.Screen
+        name="Email"
+        component={EmailEntry}/>
+      <Stack.Screen
+        name="CreatePassword"
+        component={CreatePassword}/>
+      <Stack.Screen
+        name="EnterPassword"
+        component={EnterPassword}/>
+      <Stack.Screen
+        name="MyItems"
+        component={MyItems}/>
     </Stack.Navigator>
   );
 };

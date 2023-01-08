@@ -3,12 +3,12 @@ import { Button } from 'react-native-paper';
 import styles from './Styles.js'
 
 
-const SubmitButton = () => (
-   <Button mode="outlined" style={{
+const SubmitButton = (props) => (
+   <Button {...props} mode="outlined" style={{
       //flex: props.flex_num,
-      ...styles.submit_button, 
+      ...styles.submit_button,
     }}>
-    Submit
+      Submit
     </Button>
 );
 

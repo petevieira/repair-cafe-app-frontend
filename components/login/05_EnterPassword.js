@@ -20,35 +20,53 @@ const EnterPassword = ({route, navigation}) => {
 
   // State variables
   const [password, setPassword] = React.useState('');
-  const [passwordInvalid, setPasswordInvalid] = React.useState(false);
+  const [passwordIsInvalid, setPasswordIsInvalid] = React.useState(false);
+  const [passwordHelperText, setPasswordHelperText] = React.useState(false);
 
   const passwordMinChars = 6; //FIXME get from .env
+  let welcomeMsg = ""
 
   // Check parameters are valid
   if (!user?.first) {
-    throw new Error('Error. Expected user info not found');
-    return; //FIXME
+    console.log("User name not found.");
+    welcomeMsg = "Welcome back!\n";
+  } else {
+    // Create user first name with capital first letter for welcome message
+    const first = user.first;
+    const firstCapFirstLetter = first.charAt(0).toUpperCase() + first.slice(1);
+    welcomeMsg = `Welcome back, ${firstCapFirstLetter}!\n`;
   }
 
-  // Create user first name with capital first letter for welcome message
-  const first = user.first;
-  const firstCapFirstLetter = first.charAt(0).toUpperCase() + first.slice(1);
-
-  const passwordIsValid = (pass) => {
-    return (pass.length >= passwordMinChars || pass === "");
+  const validatePassword = (pass) => {
+    if (pass.length < passwordMinChars && pass !== "") {
+      setPasswordHelperText(`Please enter your password`);
+      setPasswordIsInvalid(true);
+    } else if (pass == "") {
+      setPasswordHelperText(`Please enter a valid password (at least ${passwordMinChars} characters)`);
+      setPasswordIsInvalid(true);
+    } else {
+      console.debug("password is valid");
+      setPasswordIsInvalid(false);
+      setPasswordHelperText("");
+    }
   };
 
   const signIn = async (email, password) => {
-    if (password === "") {
+    console.debug(`passwordInvalid: (${passwordIsInvalid})`);
+    if (passwordIsInvalid) {
+      console.debug("not signing in. password is invalid");
       return;
     }
-
+    console.debug("signing in");
     try {
       const response = await UserRequests.signIn(email, password);
-      console.log("response: ", response);
       navigation.navigate('MyItems');
     } catch (error) {
-      console.error("catch error: ", error);
+      if (error.response !== undefined) {
+        alert(error.response.data.msg);
+      } else {
+        alert(error);
+      }
     }
   };
 
@@ -61,9 +79,7 @@ const EnterPassword = ({route, navigation}) => {
       <Nav></Nav>
 
       <View style={{alignItems: 'center', justifyContent: 'center', flex: 1}}>
-        <Text style={{fontSize: 20}}>
-          Welcome back, {firstCapFirstLetter}!{"\n"}
-        </Text>
+        <Text style={{fontSize: 20}}>{welcomeMsg}</Text>
         <TextInput
           label="Enter password"
           autoCorrect={false}
@@ -73,13 +89,13 @@ const EnterPassword = ({route, navigation}) => {
           value={password}
           onChangeText={password => setPassword(password)}
         />
-        <HelperText type="error" visible={passwordInvalid}>
-          Please enter your password.
+        <HelperText type="error" visible={passwordIsInvalid}>
+          {passwordHelperText}
         </HelperText>
 
         <SubmitButton
           onPress={() => {
-            setPasswordInvalid(!passwordIsValid(password));
+            validatePassword(password);
             signIn(user.email, password);
           }}
         >

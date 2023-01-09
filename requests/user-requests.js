@@ -22,7 +22,7 @@ const emailIsRegistered = async (email) => {
     }
     return response.data;
   } catch (error) {
-    return error;
+    return Promise.reject(error);
   }
 }
 

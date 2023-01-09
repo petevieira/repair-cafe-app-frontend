@@ -19,7 +19,7 @@ import Nav from "../../globals/Nav"
 import SubmitButton from "../../globals/SubmitButton"
 // Styles
 import styles from '../../globals/Styles.js'
-
+// For sending requests to the User API
 import UserRequests from '../../requests/user-requests';
 
 const EmailEntry = ({navigation}) => {
@@ -27,15 +27,19 @@ const EmailEntry = ({navigation}) => {
   const [email, setEmail] = React.useState("");
   const [emailIsInvalid, setEmailIsInvalid] = React.useState(false);
 
-  // Email validation
+  /**
+   * Validates the user's email they entered in the email field.
+   * @returns {boolean} - true if valid, false in not
+   */
   const validateEmail = () => {
+    // Email regular expression that must find a match
     const reg = /^[a-zA-Z0-9.!#$%&'’*+\/=?^_`{|}~-]{1,64}@([a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{1,63}$/;
     return (reg.test(email) || email === '');
   };
 
   /**
    * Checks if user email is registered and navigates to the appropriate next
-   * page/screen: sign-up or sign-in
+   * page/screen: sign-up or sign-in.
    * @param {string} email - Email to check registration of
    */
   const checkEmailAndNavigate = async (email) => {
@@ -54,6 +58,7 @@ const EmailEntry = ({navigation}) => {
     }
   };
 
+  // Component's view
   return (
     <KeyboardAvoidingView behavior={
       Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
@@ -75,7 +80,7 @@ const EmailEntry = ({navigation}) => {
         </HelperText>
         <SubmitButton
           onPress={() => {
-            if (validateEmail() && email !== '') {
+            if (email !== "" && validateEmail()) {
               checkEmailAndNavigate(email);
             }
           }}

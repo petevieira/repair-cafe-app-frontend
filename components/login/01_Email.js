@@ -68,7 +68,7 @@ const EmailEntry = ({navigation}) => {
           autoCorrect={false}
           style={styles.short_text_input}
           value={email}
-          onChangeText={email => setEmail(email)}
+          onChangeText={email => setEmail(email.trim())}
         />
         <HelperText type="error" visible={!validateEmail()}>
           Please enter a valid email address.

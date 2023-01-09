@@ -53,8 +53,7 @@ const signIn = async (email, password) => {
     console.log("success data: ", response.data);
     return response.data;
   } catch (error) {
-    console.error(error);
-    throw new Error(error);
+    return error;
   }
 }
 

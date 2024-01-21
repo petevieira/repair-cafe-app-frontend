@@ -5,6 +5,8 @@ import AddEditRepair from '../components/repairs/AddEditRepair';
 import Repairs from '../components/repairs/Repairs';
 import AddEditVolunteer from '../components/volunteers/AddEditVolunteer';
 import Volunteers from '../components/volunteers/Volunteers';
+import Home from '../components/Home';
+import EmailEntry from '../components/login/01_Email';
 
 // Instantiate a stack navigator
 const Stack = createNativeStackNavigator();
@@ -49,6 +51,14 @@ const ScreensNav = (props) => {
       ) : (
         </* Screens that don't require authentication */>
           <Stack.Screen
+            name="Home"
+            component={Home}
+          />
+          <Stack.Screen
+            name="EmailEntry"
+            component={EmailEntry}
+          />
+          <Stack.Screen
             name="Repairs"
             component={Repairs}
           />
@@ -59,10 +69,6 @@ const ScreensNav = (props) => {
           <Stack.Screen
             name="AddEditRepair"
             component={AddEditRepair}
-          />
-          <Stack.Screen
-            name="AddEditVolunteer"
-            component={AddEditVolunteer}
           />
         </>
       )}

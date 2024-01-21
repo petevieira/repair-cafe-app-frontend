@@ -3,8 +3,8 @@
  */
 
 import axios from 'axios';
-import Api from './request-consts';
-import axiosInterceptor from './axios-interceptor';
+import Api from './requests/request-consts';
+import axiosInterceptor from './requests/axios-interceptor';
 // import AsyncStorageHelpers from '../globals/async-storage-helpers';
 
 /**

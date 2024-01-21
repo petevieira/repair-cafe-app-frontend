@@ -3,17 +3,19 @@ import { View, SafeAreaView, Platform, ScrollView, StatusBar, KeyboardAvoidingVi
 import { Button, Divider, Paragraph, Dialog, Portal, Provider, TextInput, HelperText, Text, Modal, BottomNavigation } from 'react-native-paper';
 import DropDown from "react-native-paper-dropdown";
 import { format } from "date-fns";
+import { useNavigation } from '@react-navigation/native';
+import HTMLView from 'react-native-htmlview';
+
 // Custom Components
 import Nav from "../../globals/Nav"
 import SubmitButton from "../../globals/SubmitButton"
 // Styles
 import styles from '../../globals/Styles'
 // Fake data
-import fakeUserEventsItems from '../../images/example_user_events.json';
-import { useNavigation } from '@react-navigation/native';
 import Item from '../../models/Item';
 import CheckBox from "../../globals/CheckBox"
-import HTMLView from 'react-native-htmlview';
+import { AuthContext } from '../../contexts/auth-context';
+
 
 const terms =
 `
@@ -63,25 +65,28 @@ const AddEditRepair = ({route, navigation}) => {
   const item = route.params.item;
   console.debug("item: ", item);
   // State variables
+  const [newRepair, setNewRepair] = React.useState(!item.ownersEmail || !item.type)
   const [acceptsWaiver, setAcceptsWaiver] = React.useState(item.ownerAcceptsWaiver)
-  const [firstName, setFirstName] = React.useState(item.ownerFirstName);
-  const [lastName, setLastName] = React.useState(item.ownerLastName);
-  const [email, setEmail] = React.useState(item.ownerEmail);
+  const [firstName, setFirstName] = React.useState(item.ownersFirstName);
+  const [lastName, setLastName] = React.useState(item.ownersLastName);
+  const [email, setEmail] = React.useState(item.ownersEmail);
   const [itemType, setItemType] = React.useState(item.type);
   const [itemBrand, setItemBrand] = React.useState(item.brand);
   const [itemModel, setItemModel] = React.useState(item.model);
   const [itemSymptoms, setItemSymptoms] = React.useState(item.symptoms);
   const [itemRepairer, setItemRepairer] = React.useState(item.repairer);
+  const [itemRepairerNotes, setItemRepairerNotes] = React.useState(item.repairerNotes);
   const [itemRepairStatus, setItemRepairStatus] = React.useState(item.repairStatus);
 	const [showRepairerDropDown, setShowRepairerDropDown] = React.useState(false);
 	const [showStatusDropDown, setShowStatusDropDown] = React.useState(false);
   const [termsModalVisible, setTermsModalVisible] = React.useState(false);
-
+	const [showAddItemBtn, setShowAddItemBtn] = React.useState(false);
   // const [firstNameValid, setFirstNameValid] = React.useState(true);
   // const [lastNameValid, setLastNameValid] = React.useState(true);
   // const [emailValid, setEmailValid] = React.useState(false);
-
-	const scrollRef = React.useRef();
+  const [state, setState] = React.useContext(AuthContext);
+  // Set whether the user is authenticated from the AuthContext state
+  const authenticated = !!state && state.token !== '' && state.user !== null;
 
   const validateFirstName = (): boolean => {
   	const valid = firstName !== "";
@@ -117,11 +122,12 @@ const AddEditRepair = ({route, navigation}) => {
   	// }
   	console.debug("item: ", item);
   	// navigation.navigate('Repairs');
+  	setShowAddItemBtn(true);
   }
 
   const getTitle = (item: Item) => {
-  	if (!!item.ownerFirstName) {
-  		return `${item.ownerFirstName}'s ${item.type}`;
+  	if (!!item.ownersFirstName) {
+  		return `${item.ownersFirstName}'s ${item.type}`;
   	} else {
 	  	return "New Item"
 	  }
@@ -135,9 +141,12 @@ const AddEditRepair = ({route, navigation}) => {
     <KeyboardAvoidingView behavior={
       Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
 
-      <View style = {{alignItems: 'center', justifyContent: 'center', flex: 1}}>
-	      <ScrollView ref={scrollRef}>
-	      	<Text variant="titleMedium">{getTitle(item)}</Text>
+      <View style = {{
+      	alignItems: 'center',
+      	justifyContent: 'center',
+      }}>
+	      	<Text style={{ fontWeight: 'bold', fontSize: 16 }}>{getTitle(item)}</Text>
+          <Divider style={{ height: 1, backgroundColor: 'black', marginTop: 3}}/>
 
 	        <CheckBox
 	          label={<Text>I agree to the <Text style={{color: "blue"}} onPress={() => {
@@ -148,6 +157,19 @@ const AddEditRepair = ({route, navigation}) => {
 	            setAcceptsWaiver(!acceptsWaiver);
 	          }}
 	        />
+
+	        <TextInput
+	          label="Owner's email"
+	          mode="outlined"
+	          autoCorrect={false}
+	          style={styles.short_text_input}
+	          value={email}
+	          onChangeText={email => setEmail(email.trim())}
+	          // onBlur={() => validateEmail()}
+	        />
+	{/*        <HelperText type="error" visible={!emailValid}>
+	          Please enter a valid email address.
+	        </HelperText>*/}
 
 	        <TextInput
 	          label="Owner's first name"
@@ -175,18 +197,7 @@ const AddEditRepair = ({route, navigation}) => {
 	          Please enter a valid last name or initial.
 	        </HelperText>*/}
 
-	        <TextInput
-	          label="Owner's email"
-	          mode="outlined"
-	          autoCorrect={false}
-	          style={styles.short_text_input}
-	          value={email}
-	          onChangeText={email => setEmail(email.trim())}
-	          // onBlur={() => validateEmail()}
-	        />
-	{/*        <HelperText type="error" visible={!emailValid}>
-	          Please enter a valid email address.
-	        </HelperText>*/}
+
 
 	        <TextInput
 	          label="Item type"
@@ -215,7 +226,6 @@ const AddEditRepair = ({route, navigation}) => {
 	          style={styles.short_text_input}
 	          value={itemModel}
 	          onChangeText={itemModel => setItemModel(itemModel)}
-	          // onBlur={() => validateItemModel()}
 	        />
 
 	        <TextInput
@@ -225,83 +235,85 @@ const AddEditRepair = ({route, navigation}) => {
 	          style={styles.short_text_input}
 	          value={itemSymptoms}
 	          onChangeText={itemSymptoms => setItemSymptoms(itemSymptoms)}
-	          // onBlur={() => validateItemSymptoms()}
 	        />
 
-	        <DropDown
-	          label={"Repairer"}
-	          mode="outlined"
-	          visible={showRepairerDropDown}
-	          showDropDown={() => setShowRepairerDropDown(true)}
-	          onDismiss={() => setShowRepairerDropDown(false)}
-	          value={itemRepairer}
-	          setValue={setItemRepairer}
-	          list={repairerOptions}
-	        />
+	        {authenticated && (
+        		<>
+			        <TextInput
+			          label="Repairer Notes"
+			          mode="outlined"
+			          autoCorrect={false}
+			          style={styles.short_text_input}
+			          value={itemRepairerNotes}
+			          onChangeText={itemRepairerNotes => setItemRepairerNotes(itemRepairerNotes)}
+			        />
 
-	        <DropDown
-	          label={"Repair Status"}
-	          mode="outlined"
-	          visible={showStatusDropDown}
-	          showDropDown={() => setShowStatusDropDown(true)}
-	          onDismiss={() => setShowStatusDropDown(false)}
-	          value={itemRepairStatus}
-	          setValue={setItemRepairStatus}
-	          list={repairStatusOptions}
-	        />
+			        <DropDown
+			          label={"Repairer"}
+			          mode="outlined"
+			          visible={showRepairerDropDown}
+			          showDropDown={() => setShowRepairerDropDown(true)}
+			          onDismiss={() => setShowRepairerDropDown(false)}
+			          value={itemRepairer}
+			          setValue={setItemRepairer}
+			          list={repairerOptions}
+			        />
 
-	        <SubmitButton
-	          text="Save"
-	          // disabled={!validateForm()}
-	          onPress={() => {
-	          	const itemToSave: Item = {
-	          		firstName,
-	          		lastName,
-	          		email,
-	          		itemType,
-	          		itemBrand,
-	          		itemModel,
-	          		itemSymptoms,
-	          		itemRepairer,
-	          		itemRepairStatus
-	          	};
-	          	saveItem(itemToSave)
-	          }}
-	        />
+			        <DropDown
+			          label={"Repair Status"}
+			          mode="outlined"
+			          visible={showStatusDropDown}
+			          showDropDown={() => setShowStatusDropDown(true)}
+			          onDismiss={() => setShowStatusDropDown(false)}
+			          value={itemRepairStatus}
+			          setValue={setItemRepairStatus}
+			          list={repairStatusOptions}
+			        />
+						</>
+					)}
 
-	        <SubmitButton
-	          text="Add Item"
-	          // disabled={!validateForm()}
-	          onPress={() => {
-	          	setItemType("");
-	          	setItemBrand("");
-	          	setItemModel("");
-	          	setItemSymptoms("");
-	          	setItemRepairer("");
-	          	setItemRepairStatus("");
-	          	// const newItem: Item = {
-	          	// 	id: -1,
-	          	// 	firstName,
-	          	// 	lastName,
-	          	// 	email,
-	          	// 	itemType: "",
-	          	// 	itemBrand: "",
-	          	// 	itemModel: "",
-	          	// 	itemSymptoms: "",
-	          	// 	itemRepairer: "",
-	          	// 	itemRepairStatus: ""
-	          	// };
-	          	// navigation.navigate('AddEditRepair', {
-	          		// item: newItem
-	          	// });
-	          	scrollRef.current?.scrollTo({
-						    y: 0,
-						    animated: true,
-						  });
-	          }}
-	        />
+	        <View
+	        	style={{
+	        		flexDirection: 'row',
+	        		justifyContent: "space-evenly",
+	        		alignItems: "center"
+	        	}}
+        	>
+		        <SubmitButton
+		          text="Save"
+		          style={{marginHorizontal: 10}}
+		          // disabled={!validateForm()}
+		          onPress={() => {
+		          	const itemToSave: Item = {
+		          		firstName,
+		          		lastName,
+		          		email,
+		          		itemType,
+		          		itemBrand,
+		          		itemModel,
+		          		itemSymptoms,
+		          		itemRepairer,
+		          		itemRepairStatus
+		          	};
+		          	saveItem(itemToSave)
+		          }}
+		        />
 
-        </ScrollView>
+		        {showAddItemBtn && <SubmitButton
+		          text="Add Item"
+		          style={{marginHorizontal: 10}}
+		          onPress={() => {
+		          	setItemType("");
+		          	setItemBrand("");
+		          	setItemModel("");
+		          	setItemSymptoms("");
+		          	setItemRepairer("");
+		          	setItemRepairStatus("");
+		          	setNewRepair(true);
+		          }}
+		        />}
+	        </View>
+
         <Portal>
           <Modal style={styles.modalStyle} visible={termsModalVisible} onDismiss={() => {setTermsModalVisible(false)}}>
             <HTMLView value={terms}/>

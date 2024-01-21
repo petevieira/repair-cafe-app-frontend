@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native-paper';
@@ -43,15 +42,23 @@ export default function BottomTabs() {
       {/*<Divider width={1} />*/}
       <View
         style={{
+          backgroundColor: "#2684d2",
           flexDirection: "row",
-          margin: 10,
-          marginHorizontal: 300,
-          justifyContent: "space-between",
+          paddingTop: 10,
+          paddingBottom: 10,
+          justifyContent: "space-evenly",
           alignItems: "center"
         }}
       >
         <Tab
-          text="Repairs"
+          text="Home"
+          name="home"
+          handlePress={() => navigation.navigate("Home")}
+          screenName="Home"
+          // routeName={route.name}
+        />
+        <Tab
+          text="Queue"
           name="tools"
           handlePress={() => navigation.navigate("Repairs")}
           screenName="Repairs"

@@ -2,15 +2,12 @@ import * as React from 'react';
 import {
   View, SafeAreaView, Platform, ScrollView, StatusBar, KeyboardAvoidingView
 } from 'react-native';
-import {
-  Button, Paragraph, Dialog, Portal, Provider,
-  TextInput, Text, BottomNavigation, HelperText
-} from 'react-native-paper';
+import { Button, Paragraph, Dialog, Portal, Provider, TextInput, Text, BottomNavigation, HelperText } from 'react-native-paper';
 // Custom Components
 import Nav from "../../globals/Nav"
 import SubmitButton from "../../globals/SubmitButton"
 // Styles
-import styles from '../../globals/Styles.js'
+import styles from '../../globals/Styles'
 
 import UserRequests from '../../requests/user-requests';
 

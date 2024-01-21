@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { TextInput, HelperText, Text, Portal, Modal } from 'react-native-paper';
+import { TextInput, Divider, HelperText, Text, Portal, Modal } from 'react-native-paper';
 import { format } from "date-fns";
 // Custom Components
 import Nav from "../../globals/Nav"
@@ -9,11 +9,10 @@ import CheckBox from "../../globals/CheckBox"
 // Styles
 import styles from '../../globals/Styles'
 // Fake data
-import fakeUserEventsItems from '../../images/example_user_events.json';
 import HTMLView from 'react-native-htmlview';
-import Volunteer from '../../modesl/Volunteer';
+import Volunteer from '../../models/Volunteer';
 
-fakeUserEventsItems.sort((a, b) => (new Date(b.startDatetime)).getTime() - (new Date(a.startDatetime)).getTime());
+// fakeUserEventsItems.sort((a, b) => (new Date(b.startDatetime)).getTime() - (new Date(a.startDatetime)).getTime());
 
 const terms =
 `
@@ -96,8 +95,13 @@ const AddEditVolunteer = ({route, navigation}) => {
     <KeyboardAvoidingView behavior={
       Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
 
-      <View style = {{alignItems: 'center', justifyContent: 'center', flex: 1}}>
-      	<Text variant="titleMedium">Volunteer</Text>
+      <View style = {{
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{"Volunteer"}</Text>
+        <Divider style={{ height: 1, backgroundColor: 'black', marginTop: 3}}/>
+
         <TextInput
           label="First name"
           mode="outlined"

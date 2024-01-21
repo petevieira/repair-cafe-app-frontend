@@ -1,8 +1,9 @@
 import { NavigationContainer } from '@react-navigation/native';
+import { StatusBar, ScrollView } from 'react-native';
+
 import { AuthProvider } from '../contexts/auth-context';
-import { StatusBar } from 'react-native';
-import ScreensNav from '../globals/ScreensNav';
-import BottomTabs from '../globals/BottomTabs';
+import ScreensNav from './ScreensNav';
+import BottomTabs from './BottomTabs';
 import Nav from "./Nav"
 
 /**
@@ -17,7 +18,9 @@ const RootNavigation = () => {
       <AuthProvider>
         <StatusBar style = "auto" />
         <Nav/>
+        <ScrollView style={{ marginTop: 10, marginBottom: 10 }}>
         <ScreensNav/>
+        </ScrollView>
         <BottomTabs/>
       </AuthProvider>
     </NavigationContainer>

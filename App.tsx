@@ -1,4 +1,6 @@
-import { Provider, configureFonts, MD2LightTheme } from 'react-native-paper';
+import { Provider, configureFonts, MD2LightTheme, Text } from 'react-native-paper';
+import { View } from 'react-native';
+
 // Custom Components
 import appFontConfig from './globals/fonts';
 import appColors from './globals/colors';
@@ -8,6 +10,7 @@ import RootNavigation from './globals/RootNavigation';
  * Main application
  */
 const App = () => {
+  console.debug("Loading App");
   return (
     <Provider theme ={{
       ...MD2LightTheme,
@@ -20,5 +23,3 @@ const App = () => {
 };
 
 export default App;
-
-

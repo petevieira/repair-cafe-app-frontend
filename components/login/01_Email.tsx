@@ -3,22 +3,12 @@ import {
   View, SafeAreaView, Platform, ScrollView, StatusBar, KeyboardAvoidingView
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  Button,
-  Paragraph,
-  Dialog,
-  HelperText,
-  Portal,
-  Provider,
-  TextInput,
-  Text,
-  BottomNavigation
-} from 'react-native-paper';
+import { Button, Paragraph, Dialog, HelperText, Portal, Provider, TextInput, Text, BottomNavigation } from 'react-native-paper';
 // Custom Components
 import Nav from "../../globals/Nav"
 import SubmitButton from "../../globals/SubmitButton"
 // Styles
-import styles from '../../globals/Styles.js'
+import styles from '../../globals/Styles'
 // For sending requests to the User API
 import UserRequests from '../../requests/user-requests';
 
@@ -26,6 +16,9 @@ const EmailEntry = ({navigation}) => {
   // State variables
   const [email, setEmail] = React.useState("");
   const [emailIsInvalid, setEmailIsInvalid] = React.useState(false);
+  const [password, setPassword] = React.useState("");
+  const [showPasswordInput, setShowPasswordInput] = React.useState(false);
+
 
   /**
    * Validates the user's email they entered in the email field.
@@ -37,12 +30,28 @@ const EmailEntry = ({navigation}) => {
     return (reg.test(email) || email === '');
   };
 
+  const handleSubmit = () => {
+    if (showPasswordInput) {
+      if (password === "trc") {
+        navigation.navigate("Repairs");
+      }
+    } else {
+      if (email !== "" && validateEmail()) {
+        checkEmailAndNavigate(email);
+      }
+    }
+  };
+
   /**
    * Checks if user email is registered and navigates to the appropriate next
    * page/screen: sign-up or sign-in.
    * @param {string} email - Email to check registration of
    */
   const checkEmailAndNavigate = async (email) => {
+    if (email == "trc@gmail.com") {
+      setShowPasswordInput(true);
+      return;
+    }
     try {
       // Ask backend if email is registered
       const response = await UserRequests.emailIsRegistered(email);
@@ -63,29 +72,37 @@ const EmailEntry = ({navigation}) => {
     <KeyboardAvoidingView behavior={
       Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
 
-      <StatusBar style = "auto" />
-      <Nav></Nav>
-
-      <View style = {{alignItems: 'center', justifyContent: 'center', flex: 1}}>
+      <View style = {{alignItems: 'center', justifyContent: 'center'}}>
         <TextInput
-          label="What is your email?"
-          type="outlined"
+          label="Admin Email"
+          mode={showPasswordInput ? "outlined (disabled)" : "outlined"}
           autoCorrect={false}
           style={styles.short_text_input}
           value={email}
-          onChangeText={email => setEmail(email.trim())}
+          editable={!showPasswordInput}
+          onChangeText={email => setEmail(email.trim().toLowerCase())}
         />
         <HelperText type="error" visible={!validateEmail()}>
           Please enter a valid email address.
         </HelperText>
+        {showPasswordInput &&
+          <>
+            <TextInput
+              label="Admin Password"
+              mode="outlined"
+              autoCorrect={false}
+              style={styles.short_text_input}
+              value={password}
+              onChangeText={password => setPassword(password.trim().toLowerCase())}
+            />
+            <HelperText type="error" visible={!validateEmail()}>
+              Please enter a valid email address.
+            </HelperText>
+          </>
+        }
         <SubmitButton
-          onPress={() => {
-            if (email !== "" && validateEmail()) {
-              checkEmailAndNavigate(email);
-            }
-          }}
-        >
-        </SubmitButton>
+          onPress={() => {handleSubmit()}}
+        />
       </View>
 
     </KeyboardAvoidingView>

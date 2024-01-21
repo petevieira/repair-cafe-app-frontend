@@ -13,7 +13,7 @@ import {
 import Nav from "../../globals/Nav"
 import SubmitButton from "../../globals/SubmitButton"
 // Styles
-import styles from '../../globals/Styles.js'
+import styles from '../../globals/Styles'
 
 
 const UserAgreement = () => {

@@ -14,8 +14,10 @@ export default StyleSheet.create({
   },
   container: {
     flex: 1,
-    //justifyContent: "center",
-    // padding: 20,
+    paddingTop: 15,
+    paddingBottom: 15,
+    paddingLeft: 10,
+    paddingRight: 10,
   },
   content: {
     flex: 6,

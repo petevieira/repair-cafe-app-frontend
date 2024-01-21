@@ -1,39 +1,36 @@
 import { View, SafeAreaView, Platform, ScrollView, StatusBar } from 'react-native';
-import {
-  Button,
-  Paragraph,
-  Dialog,
-  Portal,
-  Provider,
-  TextInput,
-  Text,
-  BottomNavigation
-} from 'react-native-paper';
+import { Button, Paragraph, Dialog, Portal, Provider, TextInput, Text, BottomNavigation } from 'react-native-paper';
 // Custom Components
-import ResponsiveButton from "../globals/ResponsiveButton"
-import Nav from "../globals/Nav"
+import SubmitButton from "../globals/SubmitButton";
+import Nav from "../globals/Nav";
 // Styles
-import styles from '../globals/Styles.js'
+import styles from '../globals/Styles';
+import Item from '../models/Item';
+import { useNavigation } from '@react-navigation/native';
 
 const Home = () => {
+  const navigation = useNavigation();
+
+  const redirectOwner = () => {
+    navigation.navigate('AddEditRepair', {
+      item: new Item()
+    })
+  };
+
+  const redirectVolunteer = () => {
+    navigation.navigate('EmailEntry');
+  };
 
 	return (
     <View style={styles.container}>
-      <StatusBar style = "auto" />
-      <Nav></Nav>
-  		<ScrollView>
-        <View style = {styles.content}>
-          <ResponsiveButton  button_text = {"I have broken items"} ></ResponsiveButton>
-          <ResponsiveButton button_text = {"I am a repairer"}></ResponsiveButton>
-          <ResponsiveButton button_text = {"Who's in the queue?"}> </ResponsiveButton>
-        </View>
-
-        <View style = {{flex: 1, alignItems: "flex-start55  ", justifyContent: "flex-end"}}>
-          <Button mode="text" style = {{width:"100%", alignItems: "flex-start", marginTop: 30}}>
-            Admin Login
-            </Button>
-        </View>
-      </ScrollView>
+      <SubmitButton
+        text={"I have broken items"}
+        onPress={() => {redirectOwner()}}
+      />
+      <SubmitButton
+        text={"I am a volunteer"}
+        onPress={() => {redirectVolunteer()}}
+      />
     </View>
 	);
 

@@ -17,7 +17,6 @@ import SubmitButton from "../../globals/SubmitButton"
 // Styles
 import styles from '../../globals/Styles.js'
 // Fake data
-import fakeUserEventsItems from '../../images/example_user_events.json';
 
 fakeUserEventsItems.sort((a, b) => (new Date(b.startDatetime)).getTime() - (new Date(a.startDatetime)).getTime());
 

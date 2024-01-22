@@ -26,6 +26,19 @@ const emailIsRegistered = async (email) => {
   }
 }
 
+const emailIsRegisteredAsAdmin = async (email) => {
+  try {
+    const response = await axios.post(
+      Api.Users.EMAIL_IS_REGISTERED_AS_ADMIN,
+      { email: email }
+    );
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
 /**
  * Signs user up
  */
@@ -57,4 +70,17 @@ const signIn = async (email, password) => {
   }
 }
 
-export default { emailIsRegistered, signUp, signIn };
+const signInAdmin = async (email, password) => {
+  try {
+    const response = await axios.post(
+      Api.Users.SIGN_IN_ADMIN,
+      { email, password }
+    );
+    console.log("success data: ", response.data);
+    return response.data;
+  } catch (error) {
+    return error;
+  }
+}
+
+export default { emailIsRegistered, emailIsRegisteredAsAdmin, signUp, signIn, signInAdmin };

@@ -3,7 +3,7 @@ import {
   View, SafeAreaView, Platform, ScrollView, StatusBar, KeyboardAvoidingView
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Button, Paragraph, Dialog, HelperText, Portal, Provider, TextInput, Text, BottomNavigation } from 'react-native-paper';
+import { Button, Paragraph, Dialog, HelperText, Portal, Provider, TextInput, Text, BottomNavigation, Snackbar} from 'react-native-paper';
 // Custom Components
 import Nav from "../../globals/Nav"
 import SubmitButton from "../../globals/SubmitButton"
@@ -18,7 +18,8 @@ const EmailEntry = ({navigation}) => {
   const [emailIsInvalid, setEmailIsInvalid] = React.useState(false);
   const [password, setPassword] = React.useState("");
   const [showPasswordInput, setShowPasswordInput] = React.useState(false);
-
+  const [showSnackbar, setShowSnackbar] = React.useState(false);
+  const [snackbarMsg, setSnackbarMsg] = React.useState("");
 
   /**
    * Validates the user's email they entered in the email field.
@@ -31,36 +32,44 @@ const EmailEntry = ({navigation}) => {
   };
 
   const handleSubmit = () => {
-    if (showPasswordInput) {
-      if (password === "trc") {
-        navigation.navigate("Repairs");
+    if (!showPasswordInput) {
+      if (email !== "" && validateEmail()) {
+        emailIsAdmin(email).then((res) => {
+          console.debug("res: ", res);
+          setShowPasswordInput(res);
+        }).catch((err) => {
+          console.error(err);
+        });
       }
     } else {
-      if (email !== "" && validateEmail()) {
-        checkEmailAndNavigate(email);
-      }
+      signIn();
     }
   };
 
-  /**
-   * Checks if user email is registered and navigates to the appropriate next
-   * page/screen: sign-up or sign-in.
-   * @param {string} email - Email to check registration of
-   */
-  const checkEmailAndNavigate = async (email) => {
-    if (email == "trc@gmail.com") {
-      setShowPasswordInput(true);
-      return;
-    }
+  const emailIsAdmin = async () => {
     try {
       // Ask backend if email is registered
-      const response = await UserRequests.emailIsRegistered(email);
-      const { emailIsRegistered, user } = response.data;
-      // Navigate to next screen depending on email status
-      if (emailIsRegistered) {
-        navigation.navigate('EnterPassword', { user: user });
-      } else {
-        navigation.navigate('CreatePassword', { email: email });
+      const response = await UserRequests.emailIsRegisteredAsAdmin(email);
+      if (!response.status) {
+        setSnackbarMsg(response.msg);
+        setShowSnackbar(true);
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.error(error);
+      setSnackbarMsg(error);
+      setShowSnackbar(true);
+      return false;
+    }
+  };
+
+  const signInAdmin = async () => {
+    try {
+      const response = await UserRequests.signInAdmin(email, password);
+      console.debug("response: ", response);
+      if (response.status == 200) {
+        navigation.navigate("Repairs");
       }
     } catch (error) {
       console.error(error);
@@ -90,6 +99,7 @@ const EmailEntry = ({navigation}) => {
             <TextInput
               label="Admin Password"
               mode="outlined"
+              secureTextEntry={true}
               autoCorrect={false}
               style={styles.short_text_input}
               value={password}
@@ -104,8 +114,21 @@ const EmailEntry = ({navigation}) => {
           onPress={() => {handleSubmit()}}
         />
       </View>
-
+      <Portal>
+        <Snackbar
+          visible={showSnackbar}
+          onDismiss={() => {
+            setShowSnackbar(false);
+            setSnackbarMsg("");
+          }}
+          action={{
+            label: "close"
+          }}
+        >{snackbarMsg}
+        </Snackbar>
+      </Portal>
     </KeyboardAvoidingView>
+
   );
 
 };

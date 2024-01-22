@@ -9,8 +9,10 @@ const ITEM_TYPES_PREFIX = `${API_URL}/items-types`;
 
 const Users = {
   EMAIL_IS_REGISTERED: `${USERS_PREFIX}/email-is-registered`,
+  EMAIL_IS_REGISTERED_AS_ADMIN: `${USERS_PREFIX}/email-is-registered-as-admin`,
   SIGN_UP:             `${USERS_PREFIX}/sign-up`,
   SIGN_IN:             `${USERS_PREFIX}/sign-in`,
+  SIGN_IN_ADMIN:       `${USERS_PREFIX}/sign-in-admin`,
   FORGOT_PASSWORD:     `${USERS_PREFIX}/forgot-password`,
   RESET_PASSWORD:      `${USERS_PREFIX}/reset-password`
 };

@@ -9,34 +9,54 @@ import Nav from "../../globals/Nav"
 import SubmitButton from "../../globals/SubmitButton"
 // Styles
 import styles from '../../globals/Styles'
-import UserRequests from '../../requests/repairs-requests';
+import RepairsRequests from '../../requests/repairs-requests';
 import Item from '../../models/Item';
 import { AuthContext } from '../../contexts/auth-context';
+import { Config } from '../../consts/app.consts';
 
 let fakeItems: [Item] = [
-  {id: 0, ownerAcceptsWaiver: true, ownersFirstName: "John1", ownersLastName: "Smith", ownersEmail: "john.smith1@gmail.com", type: "Toaster", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", solution: "", repairer: "Joe", repairerNotes: "", repairStatus: "In Progress"},
-  {id: 1, ownerAcceptsWaiver: false, ownersFirstName: "John2", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Microwave", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", solution: "", repairer: "Scott", repairerNotes: "", repairStatus: "Repaired"},
-  {id: 2, ownerAcceptsWaiver: true, ownersFirstName: "John3", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Hair Dryer", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", solution: "", repairer: "Mark", repairerNotes: "", repairStatus: "Not Repaired"},
-  {id: 3, ownerAcceptsWaiver: true, ownersFirstName: "John4", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Laptop", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", solution: "", repairer: "Pete", repairerNotes: "", repairStatus: ""},
-  {id: 4, ownerAcceptsWaiver: false, ownersFirstName: "John5", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Fan", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", solution: "", repairer: "Mark", repairerNotes: "", repairStatus: ""},
-  {id: 5, ownerAcceptsWaiver: true, ownersFirstName: "John6", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Teddy Bear", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", solution: "", repairer: "Joe", repairerNotes: "", repairStatus: ""},
-  {id: 6, ownerAcceptsWaiver: true, ownersFirstName: "John1", ownersLastName: "Smith", ownersEmail: "john.smith1@gmail.com", type: "Toaster", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", solution: "", repairer: "Joe", repairerNotes: "", repairStatus: "In Progress"},
-  {id: 7, ownerAcceptsWaiver: false, ownersFirstName: "John2", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Microwave", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", solution: "", repairer: "Scott", repairerNotes: "", repairStatus: "Repaired"},
-  {id: 8, ownerAcceptsWaiver: true, ownersFirstName: "John3", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Hair Dryer", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", solution: "", repairer: "Mark", repairerNotes: "", repairStatus: "Not Repaired"},
-  {id: 9, ownerAcceptsWaiver: true, ownersFirstName: "John4", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Laptop", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", solution: "", repairer: "Pete", repairerNotes: "", repairStatus: ""},
-  {id: 10, ownerAcceptsWaiver: false, ownersFirstName: "John5", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Fan", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", solution: "", repairer: "Mark", repairerNotes: "", repairStatus: ""},
-  {id: 11, ownerAcceptsWaiver: true, ownersFirstName: "John6", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Teddy Bear", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", solution: "", repairer: "Joe", repairerNotes: "", repairStatus: ""},
+  {id: 0, ownerAcceptsWaiver: true, ownersFirstName: "John1", ownersLastName: "Smith", ownersEmail: "john.smith1@gmail.com", type: "Toaster", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Joe", repairerLastName: "Smith", notes: "", status: "In Progress", repaired: false},
+  {id: 1, ownerAcceptsWaiver: false, ownersFirstName: "John2", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Microwave", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Scott", repairerLastName: "Smith", notes: "", status: "Repaired", repaired: false},
+  {id: 2, ownerAcceptsWaiver: true, ownersFirstName: "John3", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Hair Dryer", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all",, repairerFirstName: "Mark", repairerLastName: "Smith", notes: "", status: "Not Repaired", repaired: true},
+  {id: 3, ownerAcceptsWaiver: true, ownersFirstName: "John4", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Laptop", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Pete", repairerLastName: "Smith", notes: "", status: "", repaired: false},
+  {id: 4, ownerAcceptsWaiver: false, ownersFirstName: "John5", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Fan", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Mark", repairerLastName: "Smith", notes: "", status: "", repaired: false},
+  {id: 5, ownerAcceptsWaiver: true, ownersFirstName: "John6", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Teddy Bear", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Joe", repairerLastName: "Smith", notes: "", status: "", repaired: true},
+  {id: 6, ownerAcceptsWaiver: true, ownersFirstName: "John1", ownersLastName: "Smith", ownersEmail: "john.smith1@gmail.com", type: "Toaster", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Joe", repairerLastName: "Smith", notes: "", status: "In Progress", repaired: false},
+  {id: 7, ownerAcceptsWaiver: false, ownersFirstName: "John2", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Microwave", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Scott", repairerLastName: "Smith", notes: "", status: "Repaired", repaired: false},
+  {id: 8, ownerAcceptsWaiver: true, ownersFirstName: "John3", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Hair Dryer", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Mark", repairerLastName: "Smith", notes: "", status: "Not Repaired", repaired: true},
+  {id: 9, ownerAcceptsWaiver: true, ownersFirstName: "John4", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Laptop", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Pete", repairerLastName: "Smith", notes: "", status: "", repaired: false},
+  {id: 10, ownerAcceptsWaiver: false, ownersFirstName: "John5", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Fan", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Mark", repairerLastName: "Smith", notes: "", status: "", repaired: false},
+  {id: 11, ownerAcceptsWaiver: true, ownersFirstName: "John6", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Teddy Bear", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Joe", repairerLastName: "Smith", notes: "", status: "", repaired: true},
 ];
 
 const Repairs = () => {
   const navigation = useNavigation();
-  const [items] = React.useState(fakeItems);
+  const [items, setItems] = React.useState([]);
   const [state, setState] = React.useContext(AuthContext);
   // Set whether the user is authenticated from the AuthContext state
   const authenticated = !!state && state.token !== '' && state.user !== null;
 
+  getTodaysItems();
+
   // Today's date
   const todaysDate = format(new Date(), "MMMM do, yyyy");
+
+  const getTodaysRepairs = async () => {
+    if (Config.OFFLINE) {
+      setItems(fakeItems);
+      return;
+    }
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayIso = today.toISOString();
+      const result = await RepairsRequests.getRepairs(todayIso);
+      console.debug("getRepairs result: ", result);
+      setItems(todaysRepairs);
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   const addItem = () => {
     navigation.navigate('AddEditRepair', {

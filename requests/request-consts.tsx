@@ -6,6 +6,7 @@ const USERS_PREFIX      = `${API_URL}/users`;
 const EVENTS_PREFIX     = `${API_URL}/events`;
 const ITEMS_PREFIX      = `${API_URL}/items`;
 const ITEM_TYPES_PREFIX = `${API_URL}/items-types`;
+const VOLUNTEERS_PREFIX = `${API_URL}/volunteers`;
 
 const Users = {
   EMAIL_IS_REGISTERED: `${USERS_PREFIX}/email-is-registered`,
@@ -41,4 +42,9 @@ const ItemTypes = {
   ADD_ITEM_TYPES:      `${ITEM_TYPES_PREFIX}/add-item-types`,
 };
 
-export default { Users, Events, Items, ItemTypes };
+const Volunteers = {
+  ADD_VOLUNTEER:       `${VOLUNTEERS_PREFIX}/add-volunteer`,
+  GET_DAYS_VOLUNTEERS: `${VOLUNTEERS_PREFIX}/get-days-volunteers`,
+};
+
+export default { Users, Events, Items, ItemTypes, Volunteers };

@@ -46,7 +46,7 @@ const terms =
 </html>
 `;
 
-const repairStatusOptions = [
+const statusOptions = [
 	{ label: 'In Queue', value: 'inQueue' },
 	{ label: 'In Progress', value: 'inProgress' },
 	{ label: 'Repaired', value: 'repaired' },
@@ -70,20 +70,19 @@ const AddEditRepair = ({route, navigation}) => {
   const [firstName, setFirstName] = React.useState(item.ownersFirstName);
   const [lastName, setLastName] = React.useState(item.ownersLastName);
   const [email, setEmail] = React.useState(item.ownersEmail);
-  const [itemType, setItemType] = React.useState(item.type);
-  const [itemBrand, setItemBrand] = React.useState(item.brand);
-  const [itemModel, setItemModel] = React.useState(item.model);
-  const [itemSymptoms, setItemSymptoms] = React.useState(item.symptoms);
-  const [itemRepairer, setItemRepairer] = React.useState(item.repairer);
-  const [itemRepairerNotes, setItemRepairerNotes] = React.useState(item.repairerNotes);
-  const [itemRepairStatus, setItemRepairStatus] = React.useState(item.repairStatus);
-	const [showRepairerDropDown, setShowRepairerDropDown] = React.useState(false);
+  const [type, setType] = React.useState(item.type);
+  const [brand, setBrand] = React.useState(item.brand);
+  const [model, setModel] = React.useState(item.model);
+  const [symptoms, setSymptoms] = React.useState(item.symptoms);
+  const [repairerFirstName, setRepairerFirstName] = React.useState(item.repairerFirstName);
+  const [repairerLastName, setRepairerLastName] = React.useState(item.repairerLastName);
+  const [repairerNotes, setItemRepairerNotes] = React.useState(item.repairerNotes);
+  const [status, setStatus] = React.useState(item.status);
+	const [repairerDropDown, setShowRepairerDropDown] = React.useState(false);
 	const [showStatusDropDown, setShowStatusDropDown] = React.useState(false);
   const [termsModalVisible, setTermsModalVisible] = React.useState(false);
 	const [showAddItemBtn, setShowAddItemBtn] = React.useState(false);
-  // const [firstNameValid, setFirstNameValid] = React.useState(true);
-  // const [lastNameValid, setLastNameValid] = React.useState(true);
-  // const [emailValid, setEmailValid] = React.useState(false);
+
   const [state, setState] = React.useContext(AuthContext);
   // Set whether the user is authenticated from the AuthContext state
   const authenticated = !!state && state.token !== '' && state.user !== null;
@@ -200,41 +199,41 @@ const AddEditRepair = ({route, navigation}) => {
 
 
 	        <TextInput
-	          label="Item type"
+	          label="Type"
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
-	          value={itemType}
-	          onChangeText={itemType => setItemType(itemType)}
+	          value={type}
+	          onChangeText={type => setType(type)}
 	          // onBlur={() => validateItemType()}
 	        />
 
 	        <TextInput
-	          label="Item Brand"
+	          label="Brand"
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
-	          value={itemBrand}
-	          onChangeText={itemBrand => setItemBrand(itemBrand)}
+	          value={brand}
+	          onChangeText={brand => setBrand(brand)}
 	          // onBlur={() => validateItemBrand()}
 	        />
 
 	        <TextInput
-	          label="Item Model"
+	          label="Model"
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
-	          value={itemModel}
-	          onChangeText={itemModel => setItemModel(itemModel)}
+	          value={model}
+	          onChangeText={model => setModel(model)}
 	        />
 
 	        <TextInput
-	          label="Item Symptoms"
+	          label="Symptoms"
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
-	          value={itemSymptoms}
-	          onChangeText={itemSymptoms => setItemSymptoms(itemSymptoms)}
+	          value={symptoms}
+	          onChangeText={symptoms => setSymptoms(symptoms)}
 	        />
 
 	        {authenticated && (
@@ -244,7 +243,7 @@ const AddEditRepair = ({route, navigation}) => {
 			          mode="outlined"
 			          autoCorrect={false}
 			          style={styles.short_text_input}
-			          value={itemRepairerNotes}
+			          value={notes}
 			          onChangeText={itemRepairerNotes => setItemRepairerNotes(itemRepairerNotes)}
 			        />
 
@@ -254,8 +253,8 @@ const AddEditRepair = ({route, navigation}) => {
 			          visible={showRepairerDropDown}
 			          showDropDown={() => setShowRepairerDropDown(true)}
 			          onDismiss={() => setShowRepairerDropDown(false)}
-			          value={itemRepairer}
-			          setValue={setItemRepairer}
+			          value={`${repairerFirstName} ${repairerLastName}`}
+			          setValue={setRepairer}
 			          list={repairerOptions}
 			        />
 
@@ -265,9 +264,9 @@ const AddEditRepair = ({route, navigation}) => {
 			          visible={showStatusDropDown}
 			          showDropDown={() => setShowStatusDropDown(true)}
 			          onDismiss={() => setShowStatusDropDown(false)}
-			          value={itemRepairStatus}
-			          setValue={setItemRepairStatus}
-			          list={repairStatusOptions}
+			          value={status}
+			          setValue={setStatus}
+			          list={statusOptions}
 			        />
 						</>
 					)}
@@ -288,12 +287,13 @@ const AddEditRepair = ({route, navigation}) => {
 		          		firstName,
 		          		lastName,
 		          		email,
-		          		itemType,
-		          		itemBrand,
-		          		itemModel,
-		          		itemSymptoms,
-		          		itemRepairer,
-		          		itemRepairStatus
+		          		type,
+		          		brand,
+		          		model,
+		          		symptoms,
+		          		repairerFirstName,
+		          		repairerLastName,
+		          		status
 		          	};
 		          	saveItem(itemToSave)
 		          }}
@@ -303,12 +303,13 @@ const AddEditRepair = ({route, navigation}) => {
 		          text="Add Item"
 		          style={{marginHorizontal: 10}}
 		          onPress={() => {
-		          	setItemType("");
-		          	setItemBrand("");
-		          	setItemModel("");
-		          	setItemSymptoms("");
-		          	setItemRepairer("");
-		          	setItemRepairStatus("");
+		          	setType("");
+		          	setBrand("");
+		          	setModel("");
+		          	setSymptoms("");
+		          	setRepairerFirstName("");
+		          	setRepairerLastName("");
+		          	setStatus("");
 		          	setNewRepair(true);
 		          }}
 		        />}

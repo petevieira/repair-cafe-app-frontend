@@ -1,6 +1,10 @@
 
 const StorageConsts = {
-  AUTH: '@auth'
+  AUTH: '@auth',
 };
 
-export { StorageConsts };
+const Config = {
+  OFFLINE: true,
+}
+
+export { StorageConsts, Config };

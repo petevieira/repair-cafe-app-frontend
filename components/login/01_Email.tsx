@@ -11,9 +11,12 @@ import SubmitButton from "../../globals/SubmitButton"
 import styles from '../../globals/Styles'
 // For sending requests to the User API
 import UserRequests from '../../requests/user-requests';
+import { AuthContext } from '../../contexts/auth-context';
+import AsyncStorageHelpers from '../../globals/async-storage-helpers';
 
 const EmailEntry = ({navigation}) => {
   // State variables
+  const [state, setState] = React.useContext(AuthContext);
   const [email, setEmail] = React.useState("");
   const [emailIsInvalid, setEmailIsInvalid] = React.useState(false);
   const [password, setPassword] = React.useState("");
@@ -42,7 +45,7 @@ const EmailEntry = ({navigation}) => {
         });
       }
     } else {
-      signIn();
+      signInAdmin();
     }
   };
 
@@ -68,9 +71,21 @@ const EmailEntry = ({navigation}) => {
     try {
       const response = await UserRequests.signInAdmin(email, password);
       console.debug("response: ", response);
-      if (response.status == 200) {
-        navigation.navigate("Repairs");
+      if (!response.status) {
+        console.error(response.msg);
+        setSnackbarMsg(response.msg)
+        setShowSnackbar(true)
+        return false;
       }
+      // Add auth token to state
+      setState({
+        ...state, user: response.data.user, token: response.data.token
+      });
+      // Store authentication items
+      const ok = await AsyncStorageHelpers.storeAuth(
+        { user: response.data.user, token: response.data.token }
+      );
+      navigation.navigate("Repairs");
     } catch (error) {
       console.error(error);
     }
@@ -81,7 +96,10 @@ const EmailEntry = ({navigation}) => {
     <KeyboardAvoidingView behavior={
       Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
 
-      <View style = {{alignItems: 'center', justifyContent: 'center'}}>
+      <View
+        style={{alignItems: 'center', justifyContent: 'center'}}
+        accessibilityRole="form"
+      >
         <TextInput
           label="Admin Email"
           mode={showPasswordInput ? "outlined (disabled)" : "outlined"}

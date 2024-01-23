@@ -3,8 +3,8 @@
  */
 
 import axios from 'axios';
-import Api from './requests/request-consts';
-import axiosInterceptor from './requests/axios-interceptor';
+import Api from './request-consts';
+import axiosInterceptor from './axios-interceptor';
 import AsyncStorageHelpers from '../globals/async-storage-helpers';
 import Item from '../models/Item';
 
@@ -13,29 +13,36 @@ import Item from '../models/Item';
  * @param {string} date - Date to get repairs from
  * @returns Promise which resolves to the array of items, or rejects
  */
-const getTodaysItems = async () => {
-  const now = new Date();
+export const getTodaysItems = async () => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayIso = today.toISOString();
   try {
-    let options = {};
-    const authToken = await AsyncStorageHelpers.getAuthToken(authToken);
-    if (authToken) {
-      options = {
-        headers: {'Authorization': `Bearer ${authToken}`}
-      };
+    const response = await axios.get(Api.Items.GET_ITEMS_BASIC + `/${todayIso}`);
+    if (!response) {
+      throw new Error("Error fetching items");
     }
-    response = await axios.post(
-      Api.Repairs.GET_REPAIRS,
-      { date: date },
-      options
-    );
-    console.debug("[getRepairs] response: ", response);
+    console.debug("response: ", response);
     return response.data;
   } catch (error) {
     return Promise.reject(error);
   }
 }
 
-const createItem = async (item: Item) => {
+export const addBasicItem = async (item: Item) => {
+  try {
+    const response = await axios.post(
+      Api.Items.ADD_BASIC_ITEM, { item: item });
+    if (!response) {
+      throw new Error("Error saving item");
+    }
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export const createItem = async (item: Item) => {
   try {
     let options = {};
     const authToken = await AsyncStorageHelpers.getAuthToken(authToken);
@@ -56,6 +63,6 @@ const createItem = async (item: Item) => {
   }
 }
 
-const updateItem = async (item: Item) => {
+export const updateItem = async (item: Item) => {
 
 }

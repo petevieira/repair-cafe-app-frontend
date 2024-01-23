@@ -4,7 +4,7 @@ const StorageConsts = {
 };
 
 const Config = {
-  OFFLINE: true,
+  OFFLINE: false,
 }
 
 export { StorageConsts, Config };

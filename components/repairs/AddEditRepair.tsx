@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { View, SafeAreaView, Platform, ScrollView, StatusBar, KeyboardAvoidingView, Image} from 'react-native';
-import { Button, Divider, Paragraph, Dialog, Portal, Provider, TextInput, HelperText, Text, Modal, BottomNavigation } from 'react-native-paper';
+import { Button, Divider, Paragraph, Dialog, Portal, Provider, TextInput, HelperText, Text, Modal, BottomNavigation, Snackbar } from 'react-native-paper';
 import DropDown from "react-native-paper-dropdown";
 import { format } from "date-fns";
 import { useNavigation } from '@react-navigation/native';
@@ -15,7 +15,8 @@ import styles from '../../globals/Styles'
 import Item from '../../models/Item';
 import CheckBox from "../../globals/CheckBox"
 import { AuthContext } from '../../contexts/auth-context';
-
+import { getTodaysVolunteers } from '../../requests/volunteer-requests';
+import { addBasicItem } from '../../requests/item-requests';
 
 const terms =
 `
@@ -61,31 +62,57 @@ const repairerOptions = [
 ];
 
 const AddEditRepair = ({route, navigation}) => {
+	console.debug("[AddEditRepair]");
   // const navigation = useNavigation();
   const item = route.params.item;
-  console.debug("item: ", item);
   // State variables
   const [newRepair, setNewRepair] = React.useState(!item.ownersEmail || !item.type)
   const [acceptsWaiver, setAcceptsWaiver] = React.useState(item.ownerAcceptsWaiver)
-  const [firstName, setFirstName] = React.useState(item.ownersFirstName);
-  const [lastName, setLastName] = React.useState(item.ownersLastName);
-  const [email, setEmail] = React.useState(item.ownersEmail);
+  const [ownersFirstName, setOwnersFirstName] = React.useState(item.ownersFirstName);
+  const [ownersLastName, setOwnersLastName] = React.useState(item.ownersLastName);
+  const [ownersEmail, setOwnersEmail] = React.useState(item.ownersEmail);
   const [type, setType] = React.useState(item.type);
   const [brand, setBrand] = React.useState(item.brand);
   const [model, setModel] = React.useState(item.model);
   const [symptoms, setSymptoms] = React.useState(item.symptoms);
   const [repairerFirstName, setRepairerFirstName] = React.useState(item.repairerFirstName);
   const [repairerLastName, setRepairerLastName] = React.useState(item.repairerLastName);
-  const [repairerNotes, setItemRepairerNotes] = React.useState(item.repairerNotes);
+  const [repairerNotes, setRepairerNotes] = React.useState(item.repairerNotes);
   const [status, setStatus] = React.useState(item.status);
-	const [repairerDropDown, setShowRepairerDropDown] = React.useState(false);
-	const [showStatusDropDown, setShowStatusDropDown] = React.useState(false);
+	const [showRepairerDropdown, setShowRepairerDropdown] = React.useState(false);
+	const [showStatusDropdown, setShowStatusDropdown] = React.useState(false);
   const [termsModalVisible, setTermsModalVisible] = React.useState(false);
 	const [showAddItemBtn, setShowAddItemBtn] = React.useState(false);
+	const [repairerList, setRepairerList] = React.useState([]);
+	const [volunteers, setVolunteers] = React.useState([]);
+  const [snackbarMsg, setSnackbarMsg] = React.useState("");
+  const [showSnackbar, setShowSnackbar] = React.useState(false);
+  const [gotVolunteers, setGotVolunteers] = React.useState(false);
 
   const [state, setState] = React.useContext(AuthContext);
   // Set whether the user is authenticated from the AuthContext state
   const authenticated = !!state && state.token !== '' && state.user !== null;
+
+  const getVolunteers = async () => {
+  	setGotVolunteers(true);
+    try {
+      const response = await getTodaysVolunteers();
+      console.debug("reponse: ", response);
+      // if (!response.status) {
+        // throw new Error(response.msg);
+      // }
+      let list = [];
+      response.data.volunteers.forEach((v, idx) => {
+      	list.push({ label: `${v.firstName} ${v.lastName}`, value: idx});
+      });
+      setRepairerList(list);
+      setVolunteers(response.data.volunteers);
+    } catch (error) {
+      console.error(error);
+      setSnackbarMsg(error);
+      setShowSnackbar(true);
+    }
+  }
 
   const validateFirstName = (): boolean => {
   	const valid = firstName !== "";
@@ -115,10 +142,16 @@ const AddEditRepair = ({route, navigation}) => {
   	return firstNameValid && lastNameValid && emailValid;
   }
 
-  const saveItem = (item: Item) => {
+  const saveItem = async (item: Item) => {
   	// if (!validateFirstName() || !validateLastName() || !validateEmail()) {
   		// return;
   	// }
+  	try {
+	  	const response = await addBasicItem(item);
+	  	console.debug("[saveItem]: ", response);
+	  } catch (error) {
+	  	console.error(error);
+	  }
   	console.debug("item: ", item);
   	// navigation.navigate('Repairs');
   	setShowAddItemBtn(true);
@@ -132,9 +165,12 @@ const AddEditRepair = ({route, navigation}) => {
 	  }
   }
 
+  React.useEffect(() => {
+  	if (!gotVolunteers) {
+  		getVolunteers();
+  	}
+  });
 
-  // Today's date
-  const today = format(new Date(), "MMMM do, yyyy");
   // Component's view
   return (
     <KeyboardAvoidingView behavior={
@@ -162,8 +198,8 @@ const AddEditRepair = ({route, navigation}) => {
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
-	          value={email}
-	          onChangeText={email => setEmail(email.trim())}
+	          value={ownersEmail}
+	          onChangeText={ownersEmail => setOwnersEmail(ownersEmail.trim())}
 	          // onBlur={() => validateEmail()}
 	        />
 	{/*        <HelperText type="error" visible={!emailValid}>
@@ -175,8 +211,8 @@ const AddEditRepair = ({route, navigation}) => {
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
-	          value={firstName}
-	          onChangeText={firstName => setFirstName(firstName)}
+	          value={ownersFirstName}
+	          onChangeText={ownersFirstName => setOwnersFirstName(ownersFirstName)}
 	          // onBlur={() => validateFirstName()}
 	        />
 	{/*        <HelperText type="error" visible={!firstNameValid}>
@@ -188,8 +224,8 @@ const AddEditRepair = ({route, navigation}) => {
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
-	          value={lastName}
-	          onChangeText={lastName => setLastName(lastName)}
+	          value={ownersLastName}
+	          onChangeText={ownersLastName => setOwnersLastName(ownersLastName)}
 	          // onBlur={() => validateLastName()}
 	        />
 	{/*        <HelperText type="error" visible={!lastNameValid}>
@@ -239,31 +275,33 @@ const AddEditRepair = ({route, navigation}) => {
 	        {authenticated && (
         		<>
 			        <TextInput
-			          label="Repairer Notes"
+			          label="Repair Notes"
 			          mode="outlined"
 			          autoCorrect={false}
 			          style={styles.short_text_input}
-			          value={notes}
-			          onChangeText={itemRepairerNotes => setItemRepairerNotes(itemRepairerNotes)}
+			          value={repairerNotes}
+			          onChangeText={repairerNotes => setRepairerNotes(repairerNotes)}
 			        />
 
 			        <DropDown
 			          label={"Repairer"}
 			          mode="outlined"
-			          visible={showRepairerDropDown}
-			          showDropDown={() => setShowRepairerDropDown(true)}
-			          onDismiss={() => setShowRepairerDropDown(false)}
+			          visible={showRepairerDropdown}
+			          showDropDown={() => setShowRepairerDropdown(true)}
+			          onDismiss={() => setShowRepairerDropdown(false)}
 			          value={`${repairerFirstName} ${repairerLastName}`}
-			          setValue={setRepairer}
-			          list={repairerOptions}
+			          // setValue={() => {
+			          	// setRepairerFirstName(volunteers[])
+			          // }}
+			          list={repairerList}
 			        />
 
 			        <DropDown
 			          label={"Repair Status"}
 			          mode="outlined"
-			          visible={showStatusDropDown}
-			          showDropDown={() => setShowStatusDropDown(true)}
-			          onDismiss={() => setShowStatusDropDown(false)}
+			          visible={showStatusDropdown}
+			          showDropDown={() => setShowStatusDropdown(true)}
+			          onDismiss={() => setShowStatusDropdown(false)}
 			          value={status}
 			          setValue={setStatus}
 			          list={statusOptions}
@@ -284,13 +322,14 @@ const AddEditRepair = ({route, navigation}) => {
 		          // disabled={!validateForm()}
 		          onPress={() => {
 		          	const itemToSave: Item = {
-		          		firstName,
-		          		lastName,
-		          		email,
+		          		ownersFirstName,
+		          		ownersLastName,
+		          		ownersEmail,
 		          		type,
 		          		brand,
 		          		model,
 		          		symptoms,
+		          		repairerNotes,
 		          		repairerFirstName,
 		          		repairerLastName,
 		          		status
@@ -320,6 +359,20 @@ const AddEditRepair = ({route, navigation}) => {
             <HTMLView value={terms}/>
           </Modal>
         </Portal>
+
+	      <Portal>
+	        <Snackbar
+	          visible={showSnackbar}
+	          onDismiss={() => {
+	            setShowSnackbar(false);
+	            setSnackbarMsg("");
+	          }}
+	          action={{
+	            label: "close"
+	          }}
+	        >{snackbarMsg}
+	        </Snackbar>
+	      </Portal>
       </View>
 
     </KeyboardAvoidingView>

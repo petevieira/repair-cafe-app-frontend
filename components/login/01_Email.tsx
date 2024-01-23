@@ -52,7 +52,7 @@ const EmailEntry = ({navigation}) => {
   const emailIsAdmin = async () => {
     try {
       // Ask backend if email is registered
-      const response = await UserRequests.emailIsRegisteredAsAdmin(email);
+      const response = await UserRequests.userIsAdmin(email);
       if (!response.status) {
         setSnackbarMsg(response.msg);
         setShowSnackbar(true);
@@ -70,7 +70,7 @@ const EmailEntry = ({navigation}) => {
   const signInAdmin = async () => {
     try {
       const response = await UserRequests.signInAdmin(email, password);
-      console.debug("response: ", response);
+      console.debug("[signInAdmin] response: ", response);
       if (!response.status) {
         console.error(response.msg);
         setSnackbarMsg(response.msg)

@@ -1,37 +1,43 @@
 class Item {
-  id: string;
+  _id: string;
+  acceptsWaiver: boolean;
   ownersFirstName: string;
   ownersLastName: string;
   ownersEmail: string;
   brand: string;
   model: string;
   symptoms: string;
-  repairer: string;
-  repairerNotes: string;
+  repairerFirstName: string;
+  repairerLastName: string;
+  notes: string;
   repairStatus: string;
 
   constructor(
     id: string = "",
+    acceptsWaiver: boolean = false,
     ownersFirstName: string = "",
     ownersLastName: string = "",
     ownersEmail: string,
     brand: string = "",
     model: string = "",
     symptoms: string = "",
-    repairer: string = "",
-    repairerNotes: string = "",
+    repairerFirstName: string = "",
+    repairerLastName: string = "",
+    notes: string = "",
     repairStatus: string = ""
   ) {
-    this.id = id;
+    this._id = id;
+    this.acceptsWaiver = acceptsWaiver;
     this.ownersEmail = ownersEmail;
     this.ownersFirstName = ownersFirstName;
     this.ownersLastName = ownersLastName;
     this.brand = brand;
     this.model = model;
     this.symptoms = symptoms;
-    this.repairer = repairer;
-    this.repairerNotes = repairerNotes;
-    this.repairStatus = repairStatus;
+    this.repairerFirstName = repairerFirstName;
+    this.repairerLastName = repairerLastName;
+    this.notes = notes;
+    this.status = status;
   }
 };
 

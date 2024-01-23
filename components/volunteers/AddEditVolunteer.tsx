@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { TextInput, Divider, HelperText, Text, Portal, Modal } from 'react-native-paper';
+import { TextInput, Divider, HelperText, Text, Portal, Modal, Snackbar } from 'react-native-paper';
 import { format } from "date-fns";
 // Custom Components
 import Nav from "../../globals/Nav"
@@ -11,6 +11,8 @@ import styles from '../../globals/Styles'
 // Fake data
 import HTMLView from 'react-native-htmlview';
 import Volunteer from '../../models/Volunteer';
+import { addVolunteer, getVolunteer, updateVolunteer } from '../../requests/volunteer-requests';
+import { AuthContext } from '../../contexts/auth-context';
 
 // fakeUserEventsItems.sort((a, b) => (new Date(b.startDatetime)).getTime() - (new Date(a.startDatetime)).getTime());
 
@@ -44,24 +46,30 @@ const terms =
 `;
 
 const AddEditVolunteer = ({route, navigation}) => {
-  const volunteer = route.params.volunteer;
+  const paramVolunteer = route.params.volunteer;
 
   // State variables
-  const [firstName, setFirstName] = React.useState(volunteer.firstName);
-  const [lastName, setLastName] = React.useState(volunteer.lastName);
-  const [email, setEmail] = React.useState(volunteer.email);
-  const [acceptsWaiver, setAcceptsWaiver] = React.useState(volunteer.acceptsWaiver);
+  const [id, setId] = React.useState("");
+  const [waiverBoxChecked, setWaiverBoxChecked] = React.useState(false);
+  const [volunteer, setVolunteer] = React.useState(new Volunteer());
+  // const [firstName, setFirstName] = React.useState(volunteer.firstName ?? "");
+  // const [lastName, setLastName] = React.useState(volunteer.lastName ?? "");
+  // const [email, setEmail] = React.useState(volunteer.email ?? "");
+  // const [acceptsWaiver, setAcceptsWaiver] = React.useState(volunteer.acceptsWaiver ?? false);
   const [termsModalVisible, setTermsModalVisible] = React.useState(false);
   // const [firstNameValid, setFirstNameValid] = React.useState(true);
   // const [lastNameValid, setLastNameValid] = React.useState(true);
   // const [emailValid, setEmailValid] = React.useState(false);
-
+  const [state, setState] = React.useContext(AuthContext);
+  // Set whether the user is authenticated from the AuthContext state
+  const authenticated = !!state && state.token !== '' && state.user !== null;
   // const validateFirstName = (): boolean => {
   // 	const valid = firstName !== "";
 	// 	setFirstNameValid(valid);
 	// 	return valid;
   // }
-
+  const [snackbarMsg, setSnackbarMsg] = React.useState("");
+  const [showSnackbar, setShowSnackbar] = React.useState(false);
   // const validateLastName = (): boolean => {
   // 	const valid = lastName !== "";
   // 	setLastNameValid(valid);
@@ -84,9 +92,60 @@ const AddEditVolunteer = ({route, navigation}) => {
   // 	return firstNameValid && lastNameValid && emailValid;
   // }
 
-  const saveVolunteer = (volunteer: Volunteer) => {
-    console.debug("Saving volunteer: ", volunteer);
+  const addSaveVolunteer = async (volunteer: Volunteer) => {
+    console.debug("[AddEditVolunteer::addVolunteer]");
+    if (!authenticated) {
+      setSnackbarMsg("You need to be signed in as an admin to add volunteers");
+      setShowSnackbar(true);
+      return;
+    }
+    try {
+      let response = null;
+      if (!!volunteer._id) {
+        response = await updateVolunteer(volunteer);
+      } else {
+        response = await addVolunteer(volunteer);
+      }
+      if (!response.status) {
+        console.error(response.msg);
+        setSnackbarMsg(response.msg);
+        setShowSnackbar(true);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   }
+
+  const getExistingVolunteer = async (id: string) => {
+    console.debug("[getExistingVolunteer]");
+    try {
+      const response = await getVolunteer(id);
+      if (!response.status) {
+        throw new Error(response.msg);
+      }
+      console.debug("Got volunteer details: ", response.data.volunteer);
+      setVolunteer(response.data.volunteer);
+      setId(response.data.volunteer.id);
+      console.debug("Setting waive box to ", response.data.volunteer.acceptsWaiver);
+      setWaiverBoxChecked(response.data.volunteer.acceptsWaiver);
+    } catch (error) {
+      console.error(error);
+      setSnackbarMsg(error);
+      setShowSnackbar(true);
+    }
+  }
+
+  React.useEffect(() => {
+    console.debug("efft vol: ", paramVolunteer);
+    if (!!paramVolunteer._id) {
+      getExistingVolunteer(paramVolunteer._id);
+    } else {
+      console.debug("set volunteer to param volunteer");
+      setVolunteer(paramVolunteer);
+      console.debug("Setting waive box to param ", paramVolunteer.acceptsWaiver ?? false);
+      setWaiverBoxChecked(paramVolunteer.acceptsWaiver ?? false);
+    }
+  }, []);
 
   // Today's date
   const today = format(new Date(), "MMMM do, yyyy");
@@ -101,14 +160,13 @@ const AddEditVolunteer = ({route, navigation}) => {
       }}>
         <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{"Volunteer"}</Text>
         <Divider style={{ height: 1, backgroundColor: 'black', marginTop: 3}}/>
-
         <TextInput
           label="First name"
           mode="outlined"
           autoCorrect={false}
           style={styles.short_text_input}
-          value={firstName}
-          onChangeText={firstName => setFirstName(firstName)}
+          value={volunteer.firstName}
+          onChangeText={newFirstName => setVolunteer({...volunteer, firstName: newFirstName})}
           // onBlur={() => validateFirstName()}
         />
 {/*        <HelperText type="error" visible={!firstNameValid}>
@@ -120,8 +178,8 @@ const AddEditVolunteer = ({route, navigation}) => {
           mode="outlined"
           autoCorrect={false}
           style={styles.short_text_input}
-          value={lastName}
-          onChangeText={lastName => setLastName(lastName)}
+          value={volunteer.lastName}
+          onChangeText={newLastName => setVolunteer({...volunteer, lastName: newLastName})}
           // onBlur={() => validateLastName()}
         />
 {/*        <HelperText type="error" visible={!lastNameValid}>
@@ -133,8 +191,8 @@ const AddEditVolunteer = ({route, navigation}) => {
           mode="outlined"
           autoCorrect={false}
           style={styles.short_text_input}
-          value={email}
-          onChangeText={email => setEmail(email.trim())}
+          value={volunteer.email}
+          onChangeText={newEmail => setVolunteer({...volunteer, email: newEmail.trim()})}
           // onBlur={() => validateEmail()}
         />
 {/*        <HelperText type="error" visible={!emailValid}>
@@ -145,23 +203,18 @@ const AddEditVolunteer = ({route, navigation}) => {
           label={<Text>I agree to the <Text style={{color: "blue"}} onPress={() => {
             setTermsModalVisible(true);
           }}>terms and conditions</Text></Text>}
-          status={acceptsWaiver ? 'checked' : 'unchecked'}
-          onPress={() => {
-            setAcceptsWaiver(!acceptsWaiver);
+          status={waiverBoxChecked ? 'checked' : 'unchecked'}
+          onPress={async () => {
+            setVolunteer({...volunteer, acceptsWaiver: !waiverBoxChecked});
+            setWaiverBoxChecked(!waiverBoxChecked);
           }}
         />
 
         <SubmitButton
-          // disabled={!validateForm()}
+          disabled={!waiverBoxChecked}
           text="Save"
           onPress={() => {
-            const volunteer: Volunteer = {
-              firstName: firstName,
-              lastName: lastName,
-              email: email,
-              acceptsWaiver: acceptsWaiver
-            };
-            saveVolunteer(volunteer);
+            addSaveVolunteer(volunteer);
           	// if (!validateFirstName() || !validateLastName() || !validateEmail()) {
           		// return;
           	// }
@@ -170,9 +223,27 @@ const AddEditVolunteer = ({route, navigation}) => {
         >
         </SubmitButton>
         <Portal>
-          <Modal style={styles.modalStyle} visible={termsModalVisible} onDismiss={() => {setTermsModalVisible(false)}}>
+          <Modal
+            style={styles.modalStyle}
+            visible={termsModalVisible}
+            onDismiss={() => {setTermsModalVisible(false)}}
+          >
             <HTMLView value={terms}/>
           </Modal>
+        </Portal>
+
+        <Portal>
+          <Snackbar
+            visible={showSnackbar}
+            onDismiss={() => {
+              setShowSnackbar(false);
+              setSnackbarMsg("");
+            }}
+            action={{
+              label: "close"
+            }}
+          >{snackbarMsg}
+          </Snackbar>
         </Portal>
       </View>
 

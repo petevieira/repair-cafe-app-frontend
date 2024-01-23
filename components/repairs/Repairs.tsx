@@ -30,6 +30,7 @@ let fakeItems: [Item] = [
 ];
 
 const Repairs = () => {
+  console.debug("[Repairs]");
   const navigation = useNavigation();
   const [items, setItems] = React.useState([]);
   const [snackbarMsg, setSnackbarMsg] = React.useState("");
@@ -63,30 +64,25 @@ const Repairs = () => {
   }
 
   const addItem = () => {
+    console.debug("add Item pressed");
     navigation.navigate('AddEditRepair', {
       item: new Item()
     });
   }
 
   const itemTapped = (item) => {
+    console.debug("[Repairs::itemTapped]");
     if (!authenticated) {
       return;
     }
-    console.debug("item: ", item.type)
     navigation.navigate('AddEditRepair', {
       item: item
     });
   }
 
   React.useEffect(() => {
-    console.debug("got items?: ", attemptedToGetItems);
-    if (!attemptedToGetItems) {
-      getItems();
-    }
-    return () => {
-      setAttemptedToGetItems(false);
-    }
-  });
+    getItems();
+  }, []);
 
   return (
     <View style={styles.container}>

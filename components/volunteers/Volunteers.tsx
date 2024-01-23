@@ -45,7 +45,7 @@ const Volunteers = () => {
   }
 
   const volunteerTapped = (volunteer: Volunteer) => {
-    console.debug("volunteer: ", volunteer)
+    console.debug("[volunteerTapped] volunteer: ", volunteer)
     navigation.navigate('AddEditVolunteer', {
       volunteer: volunteer
     });
@@ -67,10 +67,8 @@ const Volunteers = () => {
   };
 
   React.useEffect(() => {
-    if (!gotVolunteers) {
-      getVolunteers();
-    }
-  }, [volunteers]);
+    getVolunteers();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -92,7 +90,7 @@ const Volunteers = () => {
 
             {volunteers.map((volunteer) => (
               <DataTable.Row key={volunteer._id}
-                onPress={(authenticated ? volunteerTapped(volunteer) : undefined)}
+                onPress={(!authenticated ? undefined : () => {volunteerTapped(volunteer)})}
               >
                 <DataTable.Cell>{volunteer.firstName}</DataTable.Cell>
                 <DataTable.Cell>{volunteer.lastName}</DataTable.Cell>

@@ -16,7 +16,7 @@ import Item from '../../models/Item';
 import CheckBox from "../../globals/CheckBox"
 import { AuthContext } from '../../contexts/auth-context';
 import { getTodaysVolunteers } from '../../requests/volunteer-requests';
-import { addBasicItem } from '../../requests/item-requests';
+import { addBasicItem, addFullItem, getItem, updateItem } from '../../requests/item-requests';
 
 const terms =
 `
@@ -62,23 +62,25 @@ const repairerOptions = [
 ];
 
 const AddEditRepair = ({route, navigation}) => {
-	console.debug("[AddEditRepair]");
-  // const navigation = useNavigation();
-  const item = route.params.item;
+	console.debug("[AddEditRepair] param.item: ", route.params.item);
+	const paramItem = route.params.item;
   // State variables
-  const [newRepair, setNewRepair] = React.useState(!item.ownersEmail || !item.type)
-  const [acceptsWaiver, setAcceptsWaiver] = React.useState(item.ownerAcceptsWaiver)
-  const [ownersFirstName, setOwnersFirstName] = React.useState(item.ownersFirstName);
-  const [ownersLastName, setOwnersLastName] = React.useState(item.ownersLastName);
-  const [ownersEmail, setOwnersEmail] = React.useState(item.ownersEmail);
-  const [type, setType] = React.useState(item.type);
-  const [brand, setBrand] = React.useState(item.brand);
-  const [model, setModel] = React.useState(item.model);
-  const [symptoms, setSymptoms] = React.useState(item.symptoms);
-  const [repairerFirstName, setRepairerFirstName] = React.useState(item.repairerFirstName);
-  const [repairerLastName, setRepairerLastName] = React.useState(item.repairerLastName);
-  const [repairerNotes, setRepairerNotes] = React.useState(item.repairerNotes);
-  const [status, setStatus] = React.useState(item.status);
+  const [itemDetails, setItemDetails] = React.useState(new Item());
+  const [waiverBoxChecked, setWaiverBoxChecked] = React.useState(false);
+  const [pageTitle, setPageTitle] = React.useState("");
+  // const [acceptsWaiver, setAcceptsWaiver] = React.useState(false);
+  // const [ownersFirstName, setOwnersFirstName] = React.useState("");
+  // const [ownersLastName, setOwnersLastName] = React.useState("");
+  // const [ownersEmail, setOwnersEmail] = React.useState("");
+  // const [id, setId] = React.useState("");
+  // const [type, setType] = React.useState("");
+  // const [brand, setBrand] = React.useState("");
+  // const [model, setModel] = React.useState("");
+  // const [symptoms, setSymptoms] = React.useState("");
+  // const [repairerFirstName, setRepairerFirstName] = React.useState("");
+  // const [repairerLastName, setRepairerLastName] = React.useState("");
+  // const [notes, setNotes] = React.useState("");
+  // const [status, setStatus] = React.useState("");
 	const [showRepairerDropdown, setShowRepairerDropdown] = React.useState(false);
 	const [showStatusDropdown, setShowStatusDropdown] = React.useState(false);
   const [termsModalVisible, setTermsModalVisible] = React.useState(false);
@@ -87,32 +89,10 @@ const AddEditRepair = ({route, navigation}) => {
 	const [volunteers, setVolunteers] = React.useState([]);
   const [snackbarMsg, setSnackbarMsg] = React.useState("");
   const [showSnackbar, setShowSnackbar] = React.useState(false);
-  const [gotVolunteers, setGotVolunteers] = React.useState(false);
 
   const [state, setState] = React.useContext(AuthContext);
   // Set whether the user is authenticated from the AuthContext state
   const authenticated = !!state && state.token !== '' && state.user !== null;
-
-  const getVolunteers = async () => {
-  	setGotVolunteers(true);
-    try {
-      const response = await getTodaysVolunteers();
-      console.debug("reponse: ", response);
-      // if (!response.status) {
-        // throw new Error(response.msg);
-      // }
-      let list = [];
-      response.data.volunteers.forEach((v, idx) => {
-      	list.push({ label: `${v.firstName} ${v.lastName}`, value: idx});
-      });
-      setRepairerList(list);
-      setVolunteers(response.data.volunteers);
-    } catch (error) {
-      console.error(error);
-      setSnackbarMsg(error);
-      setShowSnackbar(true);
-    }
-  }
 
   const validateFirstName = (): boolean => {
   	const valid = firstName !== "";
@@ -147,29 +127,106 @@ const AddEditRepair = ({route, navigation}) => {
   		// return;
   	// }
   	try {
-	  	const response = await addBasicItem(item);
-	  	console.debug("[saveItem]: ", response);
+  		let response = null;
+  		if (authenticated) {
+  			if (!!item._id) {
+  				response = await updateItem(item);
+  			} else {
+			  	response = await addFullItem(item);
+  			}
+		  } else {
+		  	response = await addBasicItem(item);
+		  }
+		  if (!response.status) {
+		  	console.error(response.msg);
+	      setSnackbarMsg(response.msg);
+	      setShowSnackbar(true);
+		  }
 	  } catch (error) {
 	  	console.error(error);
 	  }
-  	console.debug("item: ", item);
   	// navigation.navigate('Repairs');
   	setShowAddItemBtn(true);
   }
 
-  const getTitle = (item: Item) => {
-  	if (!!item.ownersFirstName) {
-  		return `${item.ownersFirstName}'s ${item.type}`;
+  const setTitle = (item: Item) => {
+  	if (!!item?.ownersFirstName) {
+  		setPageTitle(`${item.ownersFirstName}'s ${item.type}`);
   	} else {
-	  	return "New Item"
+	  	setPageTitle("New Item");
 	  }
   }
 
-  React.useEffect(() => {
-  	if (!gotVolunteers) {
-  		getVolunteers();
+  const isNewItem = (item) => {
+  	return !item || !item._id;
+  }
+
+  // const setItemState = (item) => {
+  	// setItem(item);
+  	// setId(item._id);
+  	// setOwnersEmail(item.ownersEmail);
+  	// setOwnersFirstName(item.ownersFirstName);
+  	// setOwnersLastName(item.ownersLastName);
+  	// setType(item.type);
+  	// setBrand(item.brand);
+  	// setModel(item.model);
+  	// setSymptoms(item.symptoms);
+  	// setNotes(item.notes);
+  	// setRepairerFirstName(item.repairerFirstName);
+  	// setRepairerLastName(item.repairerLastName);
+  	// setStatus(item.status);
+  // }
+
+  const getVolunteers = async () => {
+    try {
+      const response = await getTodaysVolunteers();
+      let list = [];
+      response.data.volunteers.forEach((v, idx) => {
+      	list.push({ label: `${v.firstName} ${v.lastName}`, value: idx});
+      });
+      setRepairerList(list);
+      setVolunteers(response.data.volunteers);
+    } catch (error) {
+      console.error(error);
+      setSnackbarMsg(error);
+      setShowSnackbar(true);
+    }
+  }
+
+  const addMissingItemProperties = (item) => {
+  	item.acceptsWaiver = item.acceptsWaiver ?? false;
+  	return item;
+  }
+
+  const getFullItem = async (item) => {
+  	if (isNewItem(item)) {
+  		setPageTitle("New Item");
+  		setItemDetails(item);
+  		setWaiverBoxChecked(item.acceptsWaiver);
+  		return;
   	}
-  });
+
+  	try {
+  		const response = await getItem(item._id);
+  		console.debug("[Got full item: ", response.data.item);
+  		setTitle(response.data.item);
+  		setItemDetails(response.data.item);
+  		console.debug("box: ", waiverBoxChecked);
+  		console.debug("box: ", response.data.item.acceptsWaiver);
+  		setWaiverBoxChecked(response.data.item.acceptsWaiver);
+  		console.debug("box: ", waiverBoxChecked);
+  	} catch (error) {
+  		console.error(error);
+  	}
+  };
+
+  React.useEffect(() => {
+		getVolunteers();
+  }, []);
+
+  React.useEffect(() => {
+  	getFullItem(paramItem);
+  }, []);
 
   // Component's view
   return (
@@ -180,16 +237,17 @@ const AddEditRepair = ({route, navigation}) => {
       	alignItems: 'center',
       	justifyContent: 'center',
       }}>
-	      	<Text style={{ fontWeight: 'bold', fontSize: 16 }}>{getTitle(item)}</Text>
+	      	<Text style={{ fontWeight: 'bold', fontSize: 16 }}>{pageTitle}</Text>
           <Divider style={{ height: 1, backgroundColor: 'black', marginTop: 3}}/>
 
 	        <CheckBox
 	          label={<Text>I agree to the <Text style={{color: "blue"}} onPress={() => {
 	            setTermsModalVisible(true);
 	          }}>terms and conditions</Text></Text>}
-	          status={acceptsWaiver ? 'checked' : 'unchecked'}
+	          status={waiverBoxChecked ? 'checked' : 'unchecked'}
 	          onPress={() => {
-	            setAcceptsWaiver(!acceptsWaiver);
+	            setItemDetails({...itemDetails, acceptsWaiver: !waiverBoxChecked});
+	            setWaiverBoxChecked(!waiverBoxChecked);
 	          }}
 	        />
 
@@ -198,8 +256,8 @@ const AddEditRepair = ({route, navigation}) => {
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
-	          value={ownersEmail}
-	          onChangeText={ownersEmail => setOwnersEmail(ownersEmail.trim())}
+	          value={itemDetails.ownersEmail ?? ""}
+	          onChangeText={newEmail => setItemDetails({ ...itemDetails, ownersEmail: newEmail.trim()})}
 	          // onBlur={() => validateEmail()}
 	        />
 	{/*        <HelperText type="error" visible={!emailValid}>
@@ -211,8 +269,8 @@ const AddEditRepair = ({route, navigation}) => {
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
-	          value={ownersFirstName}
-	          onChangeText={ownersFirstName => setOwnersFirstName(ownersFirstName)}
+	          value={itemDetails.ownersFirstName ?? ""}
+	          onChangeText={newFirstName => setItemDetails({...itemDetails, ownersFirstName: newFirstName.trim()})}
 	          // onBlur={() => validateFirstName()}
 	        />
 	{/*        <HelperText type="error" visible={!firstNameValid}>
@@ -224,8 +282,8 @@ const AddEditRepair = ({route, navigation}) => {
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
-	          value={ownersLastName}
-	          onChangeText={ownersLastName => setOwnersLastName(ownersLastName)}
+	          value={itemDetails.ownersLastName ?? ""}
+	          onChangeText={newLastName => setItemDetails({...itemDetails, ownersLastName: newLastName})}
 	          // onBlur={() => validateLastName()}
 	        />
 	{/*        <HelperText type="error" visible={!lastNameValid}>
@@ -239,8 +297,8 @@ const AddEditRepair = ({route, navigation}) => {
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
-	          value={type}
-	          onChangeText={type => setType(type)}
+	          value={itemDetails.type ?? ""}
+	          onChangeText={newType => setItemDetails({...itemDetails, type: newType})}
 	          // onBlur={() => validateItemType()}
 	        />
 
@@ -249,8 +307,8 @@ const AddEditRepair = ({route, navigation}) => {
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
-	          value={brand}
-	          onChangeText={brand => setBrand(brand)}
+	          value={itemDetails.brand ?? ""}
+	          onChangeText={newBrand => setItemDetails({...itemDetails, brand: newBrand})}
 	          // onBlur={() => validateItemBrand()}
 	        />
 
@@ -259,8 +317,8 @@ const AddEditRepair = ({route, navigation}) => {
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
-	          value={model}
-	          onChangeText={model => setModel(model)}
+	          value={itemDetails.model ?? ""}
+	          onChangeText={newModel => setItemDetails({...itemDetails, model: newModel})}
 	        />
 
 	        <TextInput
@@ -268,8 +326,8 @@ const AddEditRepair = ({route, navigation}) => {
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
-	          value={symptoms}
-	          onChangeText={symptoms => setSymptoms(symptoms)}
+	          value={itemDetails.symptoms ?? ""}
+	          onChangeText={newSymptoms => setItemDetails({...itemDetails, symptoms: newSymptoms})}
 	        />
 
 	        {authenticated && (
@@ -279,22 +337,22 @@ const AddEditRepair = ({route, navigation}) => {
 			          mode="outlined"
 			          autoCorrect={false}
 			          style={styles.short_text_input}
-			          value={repairerNotes}
-			          onChangeText={repairerNotes => setRepairerNotes(repairerNotes)}
+			          value={itemDetails.notes ?? ""}
+			          onChangeText={newNotes => setItemDetails({...itemDetails, notes: newNotes})}
 			        />
 
-			        <DropDown
+			        {repairerList.length > 0 && <DropDown
 			          label={"Repairer"}
 			          mode="outlined"
 			          visible={showRepairerDropdown}
 			          showDropDown={() => setShowRepairerDropdown(true)}
 			          onDismiss={() => setShowRepairerDropdown(false)}
-			          value={`${repairerFirstName} ${repairerLastName}`}
+			          value={itemDetails.repairerFirstName ? `${itemDetails.repairerFirstName} ${itemDetails.repairerLastName}` : ""}
 			          // setValue={() => {
 			          	// setRepairerFirstName(volunteers[])
 			          // }}
 			          list={repairerList}
-			        />
+			        />}
 
 			        <DropDown
 			          label={"Repair Status"}
@@ -302,8 +360,8 @@ const AddEditRepair = ({route, navigation}) => {
 			          visible={showStatusDropdown}
 			          showDropDown={() => setShowStatusDropdown(true)}
 			          onDismiss={() => setShowStatusDropdown(false)}
-			          value={status}
-			          setValue={setStatus}
+			          value={itemDetails.status ?? ""}
+			          setValue={() => {newStatus => setItemDetails({...itemDetails, status: newStatus})}}
 			          list={statusOptions}
 			        />
 						</>
@@ -321,20 +379,7 @@ const AddEditRepair = ({route, navigation}) => {
 		          style={{marginHorizontal: 10}}
 		          // disabled={!validateForm()}
 		          onPress={() => {
-		          	const itemToSave: Item = {
-		          		ownersFirstName,
-		          		ownersLastName,
-		          		ownersEmail,
-		          		type,
-		          		brand,
-		          		model,
-		          		symptoms,
-		          		repairerNotes,
-		          		repairerFirstName,
-		          		repairerLastName,
-		          		status
-		          	};
-		          	saveItem(itemToSave)
+		          	saveItem(itemDetails)
 		          }}
 		        />
 
@@ -342,13 +387,7 @@ const AddEditRepair = ({route, navigation}) => {
 		          text="Add Item"
 		          style={{marginHorizontal: 10}}
 		          onPress={() => {
-		          	setType("");
-		          	setBrand("");
-		          	setModel("");
-		          	setSymptoms("");
-		          	setRepairerFirstName("");
-		          	setRepairerLastName("");
-		          	setStatus("");
+		          	setItemDetails(new Item());
 		          	setNewRepair(true);
 		          }}
 		        />}

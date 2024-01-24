@@ -43,6 +43,7 @@ const Repairs = () => {
   const todaysDate = format(new Date(), "MMMM do, yyyy");
 
   const getItems = async (signal) => {
+    setState({...state, showLoader: true});
     setAttemptedToGetItems(true);
     // if (Config.OFFLINE) {
     //   setItems(fakeItems);
@@ -61,6 +62,7 @@ const Repairs = () => {
       setSnackbarMsg(error);
       setShowSnackbar(true);
     }
+    setState({...state, showLoader: false});
   }
 
   const addItem = () => {

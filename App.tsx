@@ -1,4 +1,4 @@
-import { Provider, configureFonts, MD2LightTheme, Text } from 'react-native-paper';
+import { Provider, configureFonts, MD2LightTheme, Text, ActivityIndicator, Portal } from 'react-native-paper';
 import { View } from 'react-native';
 
 // Custom Components
@@ -14,7 +14,7 @@ const App = () => {
   return (
     <Provider theme ={{
       ...MD2LightTheme,
-      colors: appColors, 
+      colors: appColors,
       fonts: configureFonts({config: appFontConfig, isV3: false})
     }}>
       <RootNavigation/>

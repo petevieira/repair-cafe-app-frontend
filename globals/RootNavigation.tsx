@@ -1,9 +1,11 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar, ScrollView } from 'react-native';
+import { Portal, ActivityIndicator } from 'react-native-paper';
 
 import { AuthProvider } from '../contexts/auth-context';
 import ScreensNav from './ScreensNav';
 import BottomTabs from './BottomTabs';
+import Loader from './Loader';
 import Nav from "./Nav"
 
 /**
@@ -22,6 +24,7 @@ const RootNavigation = () => {
         <ScreensNav/>
         </ScrollView>
         <BottomTabs/>
+        <Loader/>
       </AuthProvider>
     </NavigationContainer>
   );

@@ -47,40 +47,24 @@ const terms =
 </html>
 `;
 
-const statusOptions = [
-	{ label: 'In Queue', value: 'inQueue' },
-	{ label: 'In Progress', value: 'inProgress' },
-	{ label: 'Repaired', value: 'repaired' },
-	{ label: 'Undiagnosed', value: 'undiagnosed' },
-	{ label: 'Needs parts', value: 'needsParts' },
+const statusesList = [
+	{ label: 'In Queue', value: 0 },
+	{ label: 'In Progress', value: 1 },
+	{ label: 'Repaired', value: 2 },
+	{ label: 'Undiagnosed', value: 3 },
+	{ label: 'Needs parts', value: 4 },
 ];
 
-const repairerOptions = [
-	{ label: 'John S.', value: 'johnS' },
-	{ label: 'Steve Johnson', value: 'steveJohnson' },
-	{ label: 'Lauren Dahlin', value: 'laurenDahlin' },
+const volunteersList = [
+	{ label: 'John S.', value: 0 },
+	{ label: 'Steve Johnson', value: 1 },
+	{ label: 'Lauren Dahlin', value: 2 },
 ];
 
 const AddEditRepair = ({route, navigation}) => {
-	console.debug("[AddEditRepair] param.item: ", route.params.item);
-	const paramItem = route.params.item;
-  // State variables
   const [itemDetails, setItemDetails] = React.useState(new Item());
   const [waiverBoxChecked, setWaiverBoxChecked] = React.useState(false);
   const [pageTitle, setPageTitle] = React.useState("");
-  // const [acceptsWaiver, setAcceptsWaiver] = React.useState(false);
-  // const [ownersFirstName, setOwnersFirstName] = React.useState("");
-  // const [ownersLastName, setOwnersLastName] = React.useState("");
-  // const [ownersEmail, setOwnersEmail] = React.useState("");
-  // const [id, setId] = React.useState("");
-  // const [type, setType] = React.useState("");
-  // const [brand, setBrand] = React.useState("");
-  // const [model, setModel] = React.useState("");
-  // const [symptoms, setSymptoms] = React.useState("");
-  // const [repairerFirstName, setRepairerFirstName] = React.useState("");
-  // const [repairerLastName, setRepairerLastName] = React.useState("");
-  // const [notes, setNotes] = React.useState("");
-  // const [status, setStatus] = React.useState("");
 	const [showRepairerDropdown, setShowRepairerDropdown] = React.useState(false);
 	const [showStatusDropdown, setShowStatusDropdown] = React.useState(false);
   const [termsModalVisible, setTermsModalVisible] = React.useState(false);
@@ -89,10 +73,14 @@ const AddEditRepair = ({route, navigation}) => {
 	const [volunteers, setVolunteers] = React.useState([]);
   const [snackbarMsg, setSnackbarMsg] = React.useState("");
   const [showSnackbar, setShowSnackbar] = React.useState(false);
-
+  const [repairerIdx, setRepairerIdx] = React.useState(-1);
+  const [statusIdx, setStatusIdx] = React.useState(-1);
   const [state, setState] = React.useContext(AuthContext);
+
   // Set whether the user is authenticated from the AuthContext state
   const authenticated = !!state && state.token !== '' && state.user !== null;
+
+	const paramItem = route.params.item;
 
   const validateFirstName = (): boolean => {
   	const valid = firstName !== "";
@@ -122,31 +110,28 @@ const AddEditRepair = ({route, navigation}) => {
   	return firstNameValid && lastNameValid && emailValid;
   }
 
-  const saveItem = async (item: Item) => {
-  	// if (!validateFirstName() || !validateLastName() || !validateEmail()) {
-  		// return;
-  	// }
+  const saveItem = async () => {
   	try {
   		let response = null;
   		if (authenticated) {
-  			if (!!item._id) {
-  				response = await updateItem(item);
+  			if (!!itemDetails._id) {
+  				response = await updateItem(itemDetails);
   			} else {
-			  	response = await addFullItem(item);
+			  	response = await addFullItem(itemDetails);
   			}
 		  } else {
-		  	response = await addBasicItem(item);
+		  	response = await addBasicItem(itemDetails);
 		  }
 		  if (!response.status) {
 		  	console.error(response.msg);
 	      setSnackbarMsg(response.msg);
 	      setShowSnackbar(true);
+	      return;
 		  }
+	  	navigation.navigate('Repairs');
 	  } catch (error) {
 	  	console.error(error);
 	  }
-  	// navigation.navigate('Repairs');
-  	setShowAddItemBtn(true);
   }
 
   const setTitle = (item: Item) => {
@@ -161,25 +146,9 @@ const AddEditRepair = ({route, navigation}) => {
   	return !item || !item._id;
   }
 
-  // const setItemState = (item) => {
-  	// setItem(item);
-  	// setId(item._id);
-  	// setOwnersEmail(item.ownersEmail);
-  	// setOwnersFirstName(item.ownersFirstName);
-  	// setOwnersLastName(item.ownersLastName);
-  	// setType(item.type);
-  	// setBrand(item.brand);
-  	// setModel(item.model);
-  	// setSymptoms(item.symptoms);
-  	// setNotes(item.notes);
-  	// setRepairerFirstName(item.repairerFirstName);
-  	// setRepairerLastName(item.repairerLastName);
-  	// setStatus(item.status);
-  // }
-
-  const getVolunteers = async () => {
+  const getVolunteers = async (signal) => {
     try {
-      const response = await getTodaysVolunteers();
+      const response = await getTodaysVolunteers(signal);
       let list = [];
       response.data.volunteers.forEach((v, idx) => {
       	list.push({ label: `${v.firstName} ${v.lastName}`, value: idx});
@@ -198,7 +167,7 @@ const AddEditRepair = ({route, navigation}) => {
   	return item;
   }
 
-  const getFullItem = async (item) => {
+  const getFullItem = async (item, signal) => {
   	if (isNewItem(item)) {
   		setPageTitle("New Item");
   		setItemDetails(item);
@@ -207,26 +176,75 @@ const AddEditRepair = ({route, navigation}) => {
   	}
 
   	try {
-  		const response = await getItem(item._id);
-  		console.debug("[Got full item: ", response.data.item);
+  		const response = await getItem(item._id, signal);
   		setTitle(response.data.item);
   		setItemDetails(response.data.item);
-  		console.debug("box: ", waiverBoxChecked);
-  		console.debug("box: ", response.data.item.acceptsWaiver);
   		setWaiverBoxChecked(response.data.item.acceptsWaiver);
-  		console.debug("box: ", waiverBoxChecked);
   	} catch (error) {
   		console.error(error);
   	}
   };
 
   React.useEffect(() => {
-		getVolunteers();
+  	const abortController = new AbortController();
+  	const signal = abortController.signal;
+		getVolunteers(signal);
+  	return () => {
+  		abortController.abort();
+  	}
   }, []);
 
   React.useEffect(() => {
-  	getFullItem(paramItem);
+  	const abortController = new AbortController();
+  	const signal = abortController.signal;
+  	getFullItem(paramItem, signal);
+  	return () => {
+  		abortController.abort();
+  	}
   }, []);
+
+  React.useEffect(() => {
+  	if (statusIdx >= 0) {
+	  	setItemDetails({...itemDetails, status: statusesList[statusIdx].label})
+	  }
+  }, [statusIdx]);
+
+  React.useEffect(() => {
+  	if (repairerIdx >= 0) {
+	  	setItemDetails({
+	  		...itemDetails,
+	  		repairerFirstName: volunteers[repairerIdx].firstName,
+	  		repairerLastName: volunteers[repairerIdx].lastName
+	  	});
+	  }
+	  return () => {
+	  	setItemDetails(new Item());
+	  }
+  }, [repairerIdx]);
+
+  React.useEffect(() => {
+		statusesList.forEach((s, idx) => {
+			if (s.label === itemDetails.status) {
+				setStatusIdx(idx);
+			}
+			return () => {
+				setStatusIdx(-1);
+			}
+		});
+  }, [itemDetails]);
+
+  React.useEffect(() => {
+		volunteers.forEach((v, idx) => {
+			if (v.firstName === itemDetails.repairerFirstName
+				&& v.lastName === itemDetails.repairerLastName
+			) {
+				setRepairerIdx(idx);
+			}
+		});
+		return () => {
+			setRepairerIdx(-1);
+		}
+  }, [volunteers, itemDetails]);
 
   // Component's view
   return (
@@ -347,10 +365,8 @@ const AddEditRepair = ({route, navigation}) => {
 			          visible={showRepairerDropdown}
 			          showDropDown={() => setShowRepairerDropdown(true)}
 			          onDismiss={() => setShowRepairerDropdown(false)}
-			          value={itemDetails.repairerFirstName ? `${itemDetails.repairerFirstName} ${itemDetails.repairerLastName}` : ""}
-			          // setValue={() => {
-			          	// setRepairerFirstName(volunteers[])
-			          // }}
+			          value={repairerIdx}
+			          setValue={setRepairerIdx}
 			          list={repairerList}
 			        />}
 
@@ -360,9 +376,9 @@ const AddEditRepair = ({route, navigation}) => {
 			          visible={showStatusDropdown}
 			          showDropDown={() => setShowStatusDropdown(true)}
 			          onDismiss={() => setShowStatusDropdown(false)}
-			          value={itemDetails.status ?? ""}
-			          setValue={() => {newStatus => setItemDetails({...itemDetails, status: newStatus})}}
-			          list={statusOptions}
+			          value={statusIdx}
+			          setValue={setStatusIdx}
+			          list={statusesList}
 			        />
 						</>
 					)}
@@ -382,15 +398,6 @@ const AddEditRepair = ({route, navigation}) => {
 		          	saveItem(itemDetails)
 		          }}
 		        />
-
-		        {showAddItemBtn && <SubmitButton
-		          text="Add Item"
-		          style={{marginHorizontal: 10}}
-		          onPress={() => {
-		          	setItemDetails(new Item());
-		          	setNewRepair(true);
-		          }}
-		        />}
 	        </View>
 
         <Portal>

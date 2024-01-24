@@ -42,7 +42,7 @@ const Repairs = () => {
   // Today's date
   const todaysDate = format(new Date(), "MMMM do, yyyy");
 
-  const getItems = async () => {
+  const getItems = async (signal) => {
     setAttemptedToGetItems(true);
     // if (Config.OFFLINE) {
     //   setItems(fakeItems);
@@ -50,7 +50,7 @@ const Repairs = () => {
     // }
     try {
       console.debug("sdfsdf");
-      const response = await getTodaysItems();
+      const response = await getTodaysItems(signal);
       console.debug("today's items: ", response.data.items);
       if (!response.status) {
         throw new Error(response.msg);
@@ -81,7 +81,13 @@ const Repairs = () => {
   }
 
   React.useEffect(() => {
-    getItems();
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+    getItems(signal);
+    return () => {
+      abortController.abort();
+      setItems(new Item());
+    }
   }, []);
 
   return (

@@ -8,13 +8,16 @@ import axiosInterceptor from './axios-interceptor';
 import AsyncStorageHelpers from '../globals/async-storage-helpers';
 import Item from '../models/Item';
 
-export const getItem = async (id: string) => {
+export const getItem = async (id: string, signal) => {
   if (!id) {
     console.error("Can't get item. 'id' not defined");
     return null;
   }
   try {
-    const response = await axios.get(Api.Items.GET_ITEM + `/${id}`);
+    const response = await axios.get(
+      Api.Items.GET_ITEM + `/${id}`,
+      { signal }
+    );
     if (!response) {
       throw new Error("Error fetching item");
     }
@@ -29,12 +32,15 @@ export const getItem = async (id: string) => {
  * @param {string} date - Date to get repairs from
  * @returns Promise which resolves to the array of items, or rejects
  */
-export const getTodaysItems = async () => {
+export const getTodaysItems = async (signal) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const todayIso = today.toISOString();
   try {
-    const response = await axios.get(Api.Items.GET_ITEMS_BASIC + `/${todayIso}`);
+    const response = await axios.get(
+      Api.Items.GET_ITEMS_BASIC + `/${todayIso}`,
+      { signal }
+    );
     if (!response) {
       throw new Error("Error fetching items");
     }
@@ -110,7 +116,7 @@ export const updateItem = async (item: Item) => {
     if (!authToken) {
       throw new Error("[updateItem] failed to get auth token");
     }
-
+    console.debug("[updateItem: ", item);
     const response = await axios.put(
       Api.Items.UPDATE_ITEM,
       {

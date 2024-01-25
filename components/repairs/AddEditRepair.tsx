@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { View, SafeAreaView, Platform, ScrollView, StatusBar, KeyboardAvoidingView, Image} from 'react-native';
-import { Button, Divider, Paragraph, Dialog, Portal, Provider, TextInput, HelperText, Text, Modal, BottomNavigation, Snackbar } from 'react-native-paper';
+import { View, Platform, KeyboardAvoidingView } from 'react-native';
+import { Button, Dialog, Portal, TextInput, HelperText, Text, Modal, Snackbar } from 'react-native-paper';
 import DropDown from "react-native-paper-dropdown";
 import { format } from "date-fns";
 import { useNavigation } from '@react-navigation/native';
@@ -16,7 +16,7 @@ import Item from '../../models/Item';
 import CheckBox from "../../globals/CheckBox"
 import { AuthContext } from '../../contexts/auth-context';
 import { getTodaysVolunteers } from '../../requests/volunteer-requests';
-import { addBasicItem, addFullItem, getItem, updateItem } from '../../requests/item-requests';
+import { addBasicItem, addFullItem, getItem, updateItem, deleteItem } from '../../requests/item-requests';
 import { ProductCategoryValues, RepairStatusValues, RepairBarrierValues} from '../../globals/ords';
 
 const terms =
@@ -92,6 +92,7 @@ const AddEditRepair = ({route, navigation}) => {
   const [statusFocused, setStatusFocused] = React.useState(false);
   const [productCategoryIdx, setProductCategoryIdx] = React.useState(miscCategoryIdx)
   const [productCategoryFocused, setProductCategoryFocused] = React.useState(false);
+	const [showDeleteConfirmationDialog, setShowDeleteConfirmationDialog] = React.useState(false);
 
   // Set whether the user is authenticated from the AuthContext state
   const authenticated = !!state && state.token !== '' && state.user !== null;
@@ -145,6 +146,32 @@ const AddEditRepair = ({route, navigation}) => {
 	      return;
 		  }
 	  	navigation.navigate('Repairs');
+	  } catch (error) {
+	  	console.error(error);
+	  }
+  }
+
+  const deleteCurrentItem = async () => {
+  	if (!itemDetails._id) {
+  		setSnackbarMsg("Item can't be deleted. It doesn't have an _id.");
+  		setShowSnackbar(true);
+  		return;
+  	}
+  	try {
+	  	const response = await deleteItem(itemDetails._id);
+		  if (!response.status) {
+		  	console.error(response.msg);
+	      setSnackbarMsg(response.msg);
+	      setShowSnackbar(true);
+	      return;
+		  }
+		  setSnackbarMsg("Item deleted");
+		  setShowSnackbar(true);
+		  setTimeout(() => {
+		  	setSnackbarMsg("");
+		  	setShowSnackbar(false);
+		  	navigation.navigate('Repairs');
+		  }, 1000);
 	  } catch (error) {
 	  	console.error(error);
 	  }
@@ -462,9 +489,21 @@ const AddEditRepair = ({route, navigation}) => {
 	        	style={{
 	        		flexDirection: 'row',
 	        		justifyContent: "space-evenly",
-	        		alignItems: "center"
+	        		alignItems: "center",
+	        		marginBottom: 15
 	        	}}
         	>
+
+		        { authenticated && !!itemDetails._id &&
+		        	<SubmitButton
+			          text="Delete"
+			          style={{marginHorizontal: 10}}
+			          onPress={() => {
+			          	setShowDeleteConfirmationDialog(true);
+			          }}
+			        />
+			      }
+
 		        <SubmitButton
 		          text="Save"
 		          style={{marginHorizontal: 10}}
@@ -493,6 +532,25 @@ const AddEditRepair = ({route, navigation}) => {
 	          }}
 	        >{snackbarMsg}
 	        </Snackbar>
+	      </Portal>
+
+	      <Portal>
+	      	<Dialog
+	      		visible={showDeleteConfirmationDialog}
+	      		onDismiss={() => { setShowDeleteConfirmationDialog(false) }}
+	      	>
+	      		<Dialog.Title>Alert</Dialog.Title>
+	      		<Dialog.Content>
+	      			<Text>Are you sure you want to delete {itemDetails.ownersFirstName} {itemDetails.ownersLastName}'s {itemDetails.type}</Text>
+	      		</Dialog.Content>
+	      		<Dialog.Actions>
+	      			<Button onPress={() => {setShowDeleteConfirmationDialog(false)}}>Cancel</Button>
+	      			<Button onPress={() => {
+	      				deleteCurrentItem(itemDetails);
+	      				setShowDeleteConfirmationDialog(false);
+	      			}}>Delete</Button>
+	      		</Dialog.Actions>
+	      	</Dialog>
 	      </Portal>
       </View>
 

@@ -144,3 +144,30 @@ export const updateItem = async (item: Item) => {
     console.error(error);
   }
 }
+
+export const deleteItem = async (id: string) => {
+  if (!id) {
+    console.error("Can't delete item. 'id' not defined");
+    return { status: null };
+  }
+  try {
+    const authToken = await AsyncStorageHelpers.getAuth(authToken);
+    if (!authToken) {
+      throw new Error("[getVolunteer] failed to get auth token");
+    }
+    const response = await axios.delete(
+      Api.Items.DELETE_ITEM + `/${id}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${authToken.token}`
+        }
+      }
+    );
+    if (!response) {
+      throw new Error("Error deleting item");
+    }
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};

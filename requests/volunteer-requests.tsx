@@ -97,3 +97,30 @@ export const getVolunteer = async (id: string) => {
     console.error(error);
   }
 }
+
+export const deleteVolunteer = async (id: string) => {
+  if (!id) {
+    console.error("Can't delete volunteer. 'id' not defined");
+    return { status: false };
+  }
+  try {
+    const authToken = await AsyncStorageHelpers.getAuth(authToken);
+    if (!authToken) {
+      throw new Error("[getVolunteer] failed to get auth token");
+    }
+    const response = await axios.delete(
+      Api.Volunteers.DELETE_VOLUNTEER + `/${id}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${authToken.token}`
+        }
+      }
+    );
+    if (!response) {
+      throw new Error("Error deleting volunteer");
+    }
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { TextInput, Divider, HelperText, Text, Portal, Modal, Snackbar } from 'react-native-paper';
+import { Button, TextInput, HelperText, Text, Portal, Modal, Dialog, Snackbar } from 'react-native-paper';
 import { format } from "date-fns";
 // Custom Components
 import Nav from "../../globals/Nav"
@@ -11,7 +11,7 @@ import styles from '../../globals/Styles'
 // Fake data
 import HTMLView from 'react-native-htmlview';
 import Volunteer from '../../models/Volunteer';
-import { addVolunteer, getVolunteer, updateVolunteer } from '../../requests/volunteer-requests';
+import { addVolunteer, getVolunteer, updateVolunteer, deleteVolunteer } from '../../requests/volunteer-requests';
 import { AuthContext } from '../../contexts/auth-context';
 
 // fakeUserEventsItems.sort((a, b) => (new Date(b.startDatetime)).getTime() - (new Date(a.startDatetime)).getTime());
@@ -68,6 +68,7 @@ const AddEditVolunteer = ({route, navigation}) => {
 	// 	setFirstNameValid(valid);
 	// 	return valid;
   // }
+  const [showDeleteConfirmationDialog, setShowDeleteConfirmationDialog] = React.useState(false);
   const [snackbarMsg, setSnackbarMsg] = React.useState("");
   const [showSnackbar, setShowSnackbar] = React.useState(false);
   // const validateLastName = (): boolean => {
@@ -113,6 +114,38 @@ const AddEditVolunteer = ({route, navigation}) => {
         return;
       }
       navigation.navigate("Volunteers");
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+    const deleteCurrentVolunteer = async () => {
+    if (!volunteer._id) {
+      setSnackbarMsg("Volunteer can't be deleted. It doesn't have an _id.");
+      setShowSnackbar(true);
+      return;
+    }
+    try {
+      const response = await deleteVolunteer(volunteer._id);
+      console.debug("dv response: ", response);
+      if (!response) {
+        console.error("Unknown error");
+        setSnackbarMsg("Unknown error");
+        setShowSnackbar(true);
+        return;
+      } else if (!response.status) {
+        console.error(response.msg);
+        setSnackbarMsg(response.msg);
+        setShowSnackbar(true);
+        return;
+      }
+      setSnackbarMsg("Volunteer deleted");
+      setShowSnackbar(true);
+      setTimeout(() => {
+        setSnackbarMsg("");
+        setShowSnackbar(false);
+        navigation.navigate('Volunteers');
+      }, 1000);
     } catch (error) {
       console.error(error);
     }
@@ -214,18 +247,39 @@ const AddEditVolunteer = ({route, navigation}) => {
           }}
         />
 
-        <SubmitButton
-          disabled={!waiverBoxChecked}
-          text="Save"
-          onPress={() => {
-            addSaveVolunteer(volunteer);
-          	// if (!validateFirstName() || !validateLastName() || !validateEmail()) {
-          		// return;
-          	// }
-	        	// navigation.navigate('Repairs');
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: "space-evently",
+            alignItems: "center",
+            marginBottom: 15
           }}
         >
-        </SubmitButton>
+            { authenticated && !!volunteer._id &&
+              <SubmitButton
+                text="Delete"
+                style={{marginHorizontal: 10}}
+                onPress={() => {
+                  setShowDeleteConfirmationDialog(true);
+                }}
+              />
+            }
+
+          <SubmitButton
+            disabled={!waiverBoxChecked}
+            text="Save"
+            onPress={() => {
+              addSaveVolunteer(volunteer);
+            	// if (!validateFirstName() || !validateLastName() || !validateEmail()) {
+            		// return;
+            	// }
+  	        	// navigation.navigate('Repairs');
+            }}
+          >
+          </SubmitButton>
+        </View>
+
+
         <Portal>
           <Modal
             style={styles.modalStyle}
@@ -248,6 +302,25 @@ const AddEditVolunteer = ({route, navigation}) => {
             }}
           >{snackbarMsg}
           </Snackbar>
+        </Portal>
+
+        <Portal>
+          <Dialog
+            visible={showDeleteConfirmationDialog}
+            onDismiss={() => { setShowDeleteConfirmationDialog(false) }}
+          >
+            <Dialog.Title>Alert</Dialog.Title>
+            <Dialog.Content>
+              <Text>Are you sure you want to delete {volunteer.firstName} {volunteer.lastName}</Text>
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button onPress={() => {setShowDeleteConfirmationDialog(false)}}>Cancel</Button>
+              <Button onPress={() => {
+                deleteCurrentVolunteer(volunteer);
+                setShowDeleteConfirmationDialog(false);
+              }}>Delete</Button>
+            </Dialog.Actions>
+          </Dialog>
         </Portal>
       </View>
 

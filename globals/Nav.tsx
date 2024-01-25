@@ -6,7 +6,7 @@ import img_data from '../images/rc_images.json';
 
 const Nav = () => (
   <Appbar.Header style = {{backgroundColor: 'white'}}>
-      <Image source={{ uri: img_data["logo_new"].img_url }} style={styles.logo} />
+      <Image source={require("../assets/trc-logo-transparent.png")} style={styles.logo} />
       <Appbar.Content title="About" style = {{alignItems: "flex-end"}}/>
   </Appbar.Header>
 );

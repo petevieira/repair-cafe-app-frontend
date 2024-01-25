@@ -1,3 +1,4 @@
+const process = require('process');
 
 let API_URL = process.env.API_URL;
 

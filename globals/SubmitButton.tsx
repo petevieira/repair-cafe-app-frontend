@@ -6,7 +6,6 @@ import styles from './Styles'
 const SubmitButton = (props) => {
 
   const { style, text, ...rest } = props;
-  console.debug("style: ", style);
   return (
     <Button {...rest}
       mode="outlined"

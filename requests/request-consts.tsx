@@ -1,6 +1,5 @@
 
-// import { API_URL } from '@env';
-const API_URL = 'http://localhost:3000';
+let API_URL = process.env.API_URL;
 
 const USERS_PREFIX      = `${API_URL}/users`;
 const ITEMS_PREFIX      = `${API_URL}/items`;

@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
+    "start": "API_URL=http://localhost:3000 expo start",
+    "android": "npm run start --android",
+    "ios": "npm run start --ios",
+    "web": "npm run start --web",
     "ts:check": "tsc"
   },
   "dependencies": {
@@ -17,6 +17,7 @@
     "@react-navigation/stack": "^6.3.10",
     "axios": "^1.2.2",
     "date-fns": "^2.29.3",
+    "dotenv": "^16.4.1",
     "expo": "^47.0.14",
     "expo-status-bar": "~1.4.2",
     "react": "18.1.0",

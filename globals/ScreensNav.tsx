@@ -22,16 +22,17 @@ const ScreensNav = (props) => {
   const [state, setState] = React.useContext(AuthContext);
 
   // Set whether the user is authenticated from the AuthContext state
-  const authenticated = !!state && state.token !== '' && state.user !== null;
+  let authenticated = !!state && state.token !== '' && state.user !== null;
 
   return (
     <Stack.Navigator
       initialRouteName={props?.initialRouteName ?? "Email"}
-      screenOptions={{ headerShown: false }}
+      screenOptions={{ headerShown: false, unmountOnBlur: true }}
     >
       {authenticated ? (
         </* Screens that require authentication */>
           <Stack.Screen
+            style={{marginBottom: 20}}
             name="Repairs"
             component={Repairs}
           />
@@ -40,12 +41,17 @@ const ScreensNav = (props) => {
             component={Volunteers}
           />
           <Stack.Screen
+            style={{marginBottom: 20}}
             name="AddEditRepair"
             component={AddEditRepair}
           />
           <Stack.Screen
             name="AddEditVolunteer"
             component={AddEditVolunteer}
+          />
+          <Stack.Screen
+            name="Home"
+            component={Home}
           />
         </>
       ) : (

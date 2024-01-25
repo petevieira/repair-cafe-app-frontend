@@ -110,7 +110,9 @@ const AddEditVolunteer = ({route, navigation}) => {
         console.error(response.msg);
         setSnackbarMsg(response.msg);
         setShowSnackbar(true);
+        return;
       }
+      navigation.navigate("Volunteers");
     } catch (error) {
       console.error(error);
     }
@@ -158,10 +160,23 @@ const AddEditVolunteer = ({route, navigation}) => {
         alignItems: 'center',
         justifyContent: 'center',
       }}>
-        <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{"Volunteer"}</Text>
-        <Divider style={{ height: 1, backgroundColor: 'black', marginTop: 3}}/>
+        <Text style={{ fontWeight: 'bold', fontSize: 22 }}>{"Volunteer"}</Text>
+
         <TextInput
-          label="First name"
+          label={<><Text style={{color: '#717171'}}>Email</Text><Text style={{color: 'red'}}>*</Text></>}
+          mode="outlined"
+          autoCorrect={false}
+          style={styles.short_text_input}
+          value={volunteer.email}
+          onChangeText={newEmail => setVolunteer({...volunteer, email: newEmail.trim()})}
+          // onBlur={() => validateEmail()}
+        />
+{/*        <HelperText type="error" visible={!emailValid}>
+          Please enter a valid email address.
+        </HelperText>*/}
+
+        <TextInput
+          label={<><Text style={{color: '#717171'}}>First name</Text><Text style={{color: 'red'}}>*</Text></>}
           mode="outlined"
           autoCorrect={false}
           style={styles.short_text_input}
@@ -174,7 +189,7 @@ const AddEditVolunteer = ({route, navigation}) => {
         </HelperText>*/}
 
         <TextInput
-          label="Last name"
+          label={<><Text style={{color: '#717171'}}>Last name</Text><Text style={{color: 'red'}}>*</Text></>}
           mode="outlined"
           autoCorrect={false}
           style={styles.short_text_input}
@@ -186,23 +201,12 @@ const AddEditVolunteer = ({route, navigation}) => {
           Please enter a valid last name or initial.
         </HelperText>*/}
 
-        <TextInput
-          label="Email"
-          mode="outlined"
-          autoCorrect={false}
-          style={styles.short_text_input}
-          value={volunteer.email}
-          onChangeText={newEmail => setVolunteer({...volunteer, email: newEmail.trim()})}
-          // onBlur={() => validateEmail()}
-        />
-{/*        <HelperText type="error" visible={!emailValid}>
-          Please enter a valid email address.
-        </HelperText>*/}
+
 
         <CheckBox
           label={<Text>I agree to the <Text style={{color: "blue"}} onPress={() => {
             setTermsModalVisible(true);
-          }}>terms and conditions</Text></Text>}
+          }}>terms and conditions</Text><Text style={{color: 'red'}}>*</Text></Text>}
           status={waiverBoxChecked ? 'checked' : 'unchecked'}
           onPress={async () => {
             setVolunteer({...volunteer, acceptsWaiver: !waiverBoxChecked});

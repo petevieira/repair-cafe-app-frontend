@@ -30,4 +30,14 @@ const getAuth = async () => {
   }
 }
 
-export default { storeAuth, getAuth };
+const removeAuth = async () => {
+  try {
+    await AsyncStorage.removeItem(StorageConsts.AUTH);
+    return true;
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+export default { storeAuth, getAuth, removeAuth };

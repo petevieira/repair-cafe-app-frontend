@@ -7,6 +7,8 @@ import ScreensNav from './ScreensNav';
 import BottomTabs from './BottomTabs';
 import Loader from './Loader';
 import Nav from "./Nav"
+import styles from './Styles'
+
 
 /**
  * A component that wraps the ScreensNav stack navigator in an
@@ -20,8 +22,9 @@ const RootNavigation = () => {
       <AuthProvider>
         <StatusBar style = "auto" />
         <Nav/>
-        <ScrollView style={{ marginTop: 10, marginBottom: 10 }}>
-        <ScreensNav/>
+        <ScrollView
+          contentContainerStyle={styles.content}>
+          <ScreensNav/>
         </ScrollView>
         <BottomTabs/>
         <Loader/>

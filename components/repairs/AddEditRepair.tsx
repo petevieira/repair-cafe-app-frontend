@@ -5,7 +5,7 @@ import DropDown from "react-native-paper-dropdown";
 import { format } from "date-fns";
 import { useNavigation } from '@react-navigation/native';
 import HTMLView from 'react-native-htmlview';
-
+import { Dropdown } from 'react-native-element-dropdown';
 // Custom Components
 import Nav from "../../globals/Nav"
 import SubmitButton from "../../globals/SubmitButton"
@@ -17,6 +17,7 @@ import CheckBox from "../../globals/CheckBox"
 import { AuthContext } from '../../contexts/auth-context';
 import { getTodaysVolunteers } from '../../requests/volunteer-requests';
 import { addBasicItem, addFullItem, getItem, updateItem } from '../../requests/item-requests';
+import { ProductCategoryValues, RepairStatusValues, RepairBarrierValues} from '../../globals/ords';
 
 const terms =
 `
@@ -48,18 +49,30 @@ const terms =
 `;
 
 const statusesList = [
-	{ label: 'In Queue', value: 0 },
-	{ label: 'In Progress', value: 1 },
-	{ label: 'Repaired', value: 2 },
-	{ label: 'Undiagnosed', value: 3 },
-	{ label: 'Needs parts', value: 4 },
+	{ value: 0, label: 'In Queue'  },
+	{ value: 1, label: 'In Progress'  },
+	{ value: 2, label: 'Complete' },
 ];
+
+const ordsProductCategoryList = ProductCategoryValues.map((el, idx) => {
+	return { label: el.text, value: idx };
+});
+
+const ordsRepairStatusList = RepairStatusValues.map((el, idx) => {
+	return { label: el, value: idx };
+});
+
+const ordsRepairBarrierList = RepairBarrierValues.map((el, idx) => {
+	return { label: el, value: idx };
+});
 
 const volunteersList = [
 	{ label: 'John S.', value: 0 },
 	{ label: 'Steve Johnson', value: 1 },
 	{ label: 'Lauren Dahlin', value: 2 },
 ];
+
+const miscCategoryIdx = 17;
 
 const AddEditRepair = ({route, navigation}) => {
   const [itemDetails, setItemDetails] = React.useState(new Item());
@@ -76,6 +89,9 @@ const AddEditRepair = ({route, navigation}) => {
   const [repairerIdx, setRepairerIdx] = React.useState(-1);
   const [statusIdx, setStatusIdx] = React.useState(-1);
   const [state, setState] = React.useContext(AuthContext);
+  const [statusFocused, setStatusFocused] = React.useState(false);
+  const [productCategoryIdx, setProductCategoryIdx] = React.useState(miscCategoryIdx)
+  const [productCategoryFocused, setProductCategoryFocused] = React.useState(false);
 
   // Set whether the user is authenticated from the AuthContext state
   const authenticated = !!state && state.token !== '' && state.user !== null;
@@ -167,23 +183,49 @@ const AddEditRepair = ({route, navigation}) => {
   	return item;
   }
 
+  const initStatus = (item) => {
+		item.status = "In Queue";
+		setStatusIdx(0);
+		return item;
+	}
+
   const getFullItem = async (item, signal) => {
+  	setState({...state, showLoader: true});
   	if (isNewItem(item)) {
   		setPageTitle("New Item");
+  		item = initStatus(item);
   		setItemDetails(item);
   		setWaiverBoxChecked(item.acceptsWaiver);
+	  	setState({...state, showLoader: false});
   		return;
   	}
 
   	try {
   		const response = await getItem(item._id, signal);
-  		setTitle(response.data.item);
-  		setItemDetails(response.data.item);
+  		let fullItem = response.data.item;
+  		setTitle(fullItem);
+  		if (!fullItem.status) {
+				fullItem = initStatus(fullItem);
+  		}
+  		if (!fullItem.type) {
+  			fullItem.type = ordsProductCategoryList[miscCategoryIdx].label;
+  			setProductCategoryIdx(miscCategoryIdx);
+  		}
+  		setItemDetails(fullItem);
   		setWaiverBoxChecked(response.data.item.acceptsWaiver);
   	} catch (error) {
   		console.error(error);
   	}
+  	setState({...state, showLoader: false});
   };
+
+  const okayToSave = () => {
+  	return (waiverBoxChecked
+  		&& !!itemDetails.ownersFirstName
+  		&& !!itemDetails.ownersLastName
+  		&& !!itemDetails.ownersEmail
+  		&& !!itemDetails.type)
+  }
 
   React.useEffect(() => {
   	const abortController = new AbortController();
@@ -199,6 +241,7 @@ const AddEditRepair = ({route, navigation}) => {
   	const signal = abortController.signal;
   	getFullItem(paramItem, signal);
   	return () => {
+  		console.debug("AddEditRepair unmounted")
   		abortController.abort();
   	}
   }, []);
@@ -208,6 +251,12 @@ const AddEditRepair = ({route, navigation}) => {
 	  	setItemDetails({...itemDetails, status: statusesList[statusIdx].label})
 	  }
   }, [statusIdx]);
+
+  React.useEffect(() => {
+  	if (productCategoryIdx >= 0) {
+  		setItemDetails({...itemDetails, type: ordsProductCategoryList[productCategoryIdx].label});
+  	}
+  }, [productCategoryIdx]);
 
   React.useEffect(() => {
   	if (repairerIdx >= 0) {
@@ -255,13 +304,12 @@ const AddEditRepair = ({route, navigation}) => {
       	alignItems: 'center',
       	justifyContent: 'center',
       }}>
-	      	<Text style={{ fontWeight: 'bold', fontSize: 16 }}>{pageTitle}</Text>
-          <Divider style={{ height: 1, backgroundColor: 'black', marginTop: 3}}/>
+	      	<Text style={{ fontWeight: 'bold', fontSize: 22 }}>{pageTitle}</Text>
 
 	        <CheckBox
 	          label={<Text>I agree to the <Text style={{color: "blue"}} onPress={() => {
 	            setTermsModalVisible(true);
-	          }}>terms and conditions</Text></Text>}
+	          }}>terms and conditions</Text><Text style={{color: 'red'}}>*</Text></Text>}
 	          status={waiverBoxChecked ? 'checked' : 'unchecked'}
 	          onPress={() => {
 	            setItemDetails({...itemDetails, acceptsWaiver: !waiverBoxChecked});
@@ -270,7 +318,7 @@ const AddEditRepair = ({route, navigation}) => {
 	        />
 
 	        <TextInput
-	          label="Owner's email"
+	          label={<><Text style={{color: '#717171'}}>Owner's email</Text><Text style={{color: 'red'}}>*</Text></>}
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
@@ -283,7 +331,7 @@ const AddEditRepair = ({route, navigation}) => {
 	        </HelperText>*/}
 
 	        <TextInput
-	          label="Owner's first name"
+	          label={<><Text style={{color: '#717171'}}>Owner's first name</Text><Text style={{color: 'red'}}>*</Text></>}
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
@@ -296,7 +344,7 @@ const AddEditRepair = ({route, navigation}) => {
 	        </HelperText>*/}
 
 	        <TextInput
-	          label="Owner's last name"
+	          label={<><Text style={{color: '#717171'}}>Owner's last name</Text><Text style={{color: 'red'}}>*</Text></>}
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
@@ -308,16 +356,40 @@ const AddEditRepair = ({route, navigation}) => {
 	          Please enter a valid last name or initial.
 	        </HelperText>*/}
 
-
+	      	<View style={styles.dropdownContainer}>
+		      	<View style={[styles.label]}>
+	            <Text style={{color: '#717171'}}>Product Category<Text style={{color: 'red'}}>*</Text></Text>
+          	</View>
+            <Dropdown
+              style={[styles.dropdown, productCategoryFocused && {borderWidth: 2}]}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              inputSearchStyle={styles.inputSearchStyle}
+              itemTextStyle={styles.itemTextStyle}
+              iconStyle={styles.iconStyle}
+              data={ordsProductCategoryList}
+              search
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              placeholder="Select Product Category"
+              searchPlaceholder="Search..."
+              value={productCategoryIdx}
+              onFocus={() => setProductCategoryFocused(true)}
+              onBlur={() => setProductCategoryFocused(false)}
+              onChange={v => {
+                setProductCategoryIdx(v.value);
+              }}
+            />
+          </View>
 
 	        <TextInput
-	          label="Type"
+	          label={<><Text style={{color: '#717171'}}>Symptoms</Text><Text style={{color: 'red'}}>*</Text></>}
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
-	          value={itemDetails.type ?? ""}
-	          onChangeText={newType => setItemDetails({...itemDetails, type: newType})}
-	          // onBlur={() => validateItemType()}
+	          value={itemDetails.symptoms ?? ""}
+	          onChangeText={newSymptoms => setItemDetails({...itemDetails, symptoms: newSymptoms})}
 	        />
 
 	        <TextInput
@@ -339,15 +411,6 @@ const AddEditRepair = ({route, navigation}) => {
 	          onChangeText={newModel => setItemDetails({...itemDetails, model: newModel})}
 	        />
 
-	        <TextInput
-	          label="Symptoms"
-	          mode="outlined"
-	          autoCorrect={false}
-	          style={styles.short_text_input}
-	          value={itemDetails.symptoms ?? ""}
-	          onChangeText={newSymptoms => setItemDetails({...itemDetails, symptoms: newSymptoms})}
-	        />
-
 	        {authenticated && (
         		<>
 			        <TextInput
@@ -359,17 +422,28 @@ const AddEditRepair = ({route, navigation}) => {
 			          onChangeText={newNotes => setItemDetails({...itemDetails, notes: newNotes})}
 			        />
 
-			        {repairerList.length > 0 && <DropDown
-			          label={"Repairer"}
-			          mode="outlined"
-			          visible={showRepairerDropdown}
-			          showDropDown={() => setShowRepairerDropdown(true)}
-			          onDismiss={() => setShowRepairerDropdown(false)}
-			          value={repairerIdx}
-			          setValue={setRepairerIdx}
-			          list={repairerList}
-			        />}
+			        {
+			        	repairerList.length > 0 && <>
+			        	<View
+				      		style={{marginTop: 15, width: '90%', maxWidth: 500}}
+				      	>
+				        	<DropDown
+				          label={"Repairer"}
+				          mode="outlined"
+				          visible={showRepairerDropdown}
+				          showDropDown={() => setShowRepairerDropdown(true)}
+				          onDismiss={() => setShowRepairerDropdown(false)}
+				          value={repairerIdx}
+				          setValue={setRepairerIdx}
+				          list={repairerList}
+					        />
+				        </View>
+				        </>
+			      	}
 
+			      	<View
+			      		style={{marginTop: 15, width: '90%', maxWidth: 500}}
+			      	>
 			        <DropDown
 			          label={"Repair Status"}
 			          mode="outlined"
@@ -380,6 +454,7 @@ const AddEditRepair = ({route, navigation}) => {
 			          setValue={setStatusIdx}
 			          list={statusesList}
 			        />
+			        </View>
 						</>
 					)}
 
@@ -393,7 +468,7 @@ const AddEditRepair = ({route, navigation}) => {
 		        <SubmitButton
 		          text="Save"
 		          style={{marginHorizontal: 10}}
-		          // disabled={!validateForm()}
+		          disabled={!okayToSave()}
 		          onPress={() => {
 		          	saveItem(itemDetails)
 		          }}

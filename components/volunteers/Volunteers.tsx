@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { View, SafeAreaView, Platform, ScrollView, StatusBar, KeyboardAvoidingView, Image} from 'react-native';
-import { Button, Divider, Paragraph, Dialog, Portal, Provider, TextInput, Text, BottomNavigation, DataTable, Snackbar } from 'react-native-paper';
+import { Button, Portal, TextInput, Text, DataTable, Snackbar, FAB } from 'react-native-paper';
 import { format } from "date-fns";
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 // Custom Components
 import Nav from "../../globals/Nav"
 import SubmitButton from "../../globals/SubmitButton"
@@ -26,7 +26,6 @@ const Volunteers = () => {
   const [volunteers, setVolunteers] = React.useState([]);
   const [snackbarMsg, setSnackbarMsg] = React.useState("");
   const [showSnackbar, setShowSnackbar] = React.useState(false);
-  const [gotVolunteers, setGotVolunteers] = React.useState(false);
   const [state, setState] = React.useContext(AuthContext);
   // Set whether the user is authenticated from the AuthContext state
   const authenticated = !!state && state.token !== '' && state.user !== null;
@@ -52,36 +51,41 @@ const Volunteers = () => {
   };
 
   const getVolunteers = async () => {
-    setGotVolunteers(true);
+    setState({...state, showLoader: true});
+
     try {
       const response = await getTodaysVolunteers();
       if (!response.status) {
         throw new Error(response.msg);
       }
+      console.debug("setting volunteers");
       setVolunteers(response.data.volunteers);
     } catch (error) {
       console.error(error);
       setSnackbarMsg(error);
       setShowSnackbar(true);
     }
+    setState({...state, showLoader: false});
   };
 
-  React.useEffect(() => {
-    getVolunteers();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      getVolunteers();
+      return () => {
+        console.debug("Volunteers unmounted");
+      }
+    }, [])
+  );
 
   return (
     <View style={styles.container}>
+      {authenticated && <FAB
+        icon="plus"
+        style={styles.fab}
+        onPress={() => addVolunteer()}
+      />}
       <View style = {{marginBottom: 10}}>
-        <Text style = {{ fontWeight: 'bold', fontSize: 16, marginLeft: 'auto', marginRight: 'auto'}}>Volunteers{"\n"}</Text>
-        {authenticated &&
-          <SubmitButton
-            text="+ Add Volunteer"
-            onPress={() => {addVolunteer()}}
-          />
-        }
-
-        <ScrollView>
+        <Text style = {{ fontWeight: 'bold', fontSize: 22, marginLeft: 'auto', marginRight: 'auto'}}>Volunteers{"\n"}</Text>
           <DataTable>
             <DataTable.Header>
               <DataTable.Title>First</DataTable.Title>
@@ -97,7 +101,6 @@ const Volunteers = () => {
               </DataTable.Row>
             ))}
           </DataTable>
-        </ScrollView>
       </View>
       <Portal>
         <Snackbar

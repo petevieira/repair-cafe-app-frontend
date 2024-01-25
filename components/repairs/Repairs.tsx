@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { View, SafeAreaView, Platform, ScrollView, StatusBar, KeyboardAvoidingView, Image} from 'react-native';
-import { Button, Divider, Paragraph, Dialog, Portal, Provider, TextInput, Text, BottomNavigation, DataTable, Snackbar } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import { Button, Portal, TextInput, Text, DataTable, Snackbar, FAB } from 'react-native-paper';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { format } from "date-fns";
 
 // Custom Components
@@ -38,24 +38,24 @@ const Repairs = () => {
   const [state, setState] = React.useContext(AuthContext);
   // Set whether the user is authenticated from the AuthContext state
   const authenticated = !!state && state.token !== '' && state.user !== null;
-  const [attemptedToGetItems, setAttemptedToGetItems] = React.useState(false);
   // Today's date
   const todaysDate = format(new Date(), "MMMM do, yyyy");
 
+  // const getItems = async (signal) => {
   const getItems = async (signal) => {
+    console.debug("[getItems]");
     setState({...state, showLoader: true});
-    setAttemptedToGetItems(true);
     // if (Config.OFFLINE) {
     //   setItems(fakeItems);
     //   return;
     // }
+
     try {
-      console.debug("sdfsdf");
-      const response = await getTodaysItems(signal);
-      console.debug("today's items: ", response.data.items);
+      const response = await getTodaysItems();
       if (!response.status) {
         throw new Error(response.msg);
       }
+      console.debug("setting items");
       setItems(response.data.items);
     } catch (error) {
       console.error(error);
@@ -82,27 +82,30 @@ const Repairs = () => {
     });
   }
 
-  React.useEffect(() => {
-    const abortController = new AbortController();
-    const signal = abortController.signal;
-    getItems(signal);
-    return () => {
-      abortController.abort();
-      setItems(new Item());
-    }
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      // const abortController = new AbortController();
+      // const signal = abortController.signal;
+      // getItems(signal);
+      console.debug("get items");
+      getItems();
+      return () => {
+        console.debug("Repairs unmounted");
+        // abortController.abort();
+        // setItems(new Item());
+      }
+    },[])
+  );
 
   return (
     <View style={styles.container}>
-      <Text style = {{textAlign: "center", fontWeight: 'bold', fontSize: 16, marginLeft: 'auto', marginRight: 'auto'}}>Repair Queue{"\n"}({todaysDate})</Text>
-      {authenticated &&
-        <View style={{marginHorizontal: 'auto'}}>
-          <SubmitButton
-            text="+ New Item"
-            onPress={() => {addItem()}}
-          />
-        </View>
-      }
+      <FAB
+        icon="plus"
+        style={styles.fab}
+        onPress={() => {addItem()}}
+      />
+      <Text style={{textAlign: "center", fontWeight: 'bold', fontSize: 22, marginLeft: 'auto', marginRight: 'auto'}}>Repair Queue</Text>
+      <Text style={{textAlign: "center"}}>({todaysDate})</Text>
       <DataTable>
         <DataTable.Header>
           <DataTable.Title>#</DataTable.Title>
@@ -111,12 +114,12 @@ const Repairs = () => {
           <DataTable.Title>Status</DataTable.Title>
         </DataTable.Header>
 
-        {items.map((item) => (
+        {items.map((item, idx) => (
           <DataTable.Row
             key={item._id}
             onPress={authenticated ? (() => itemTapped(item)) : undefined}
           >
-            <DataTable.Cell>{item.id}</DataTable.Cell>
+            <DataTable.Cell>{idx+1}</DataTable.Cell>
             <DataTable.Cell>{item.type}</DataTable.Cell>
             <DataTable.Cell>{item.ownersFirstName} {item.ownersLastName}</DataTable.Cell>
             <DataTable.Cell>{item.status}</DataTable.Cell>

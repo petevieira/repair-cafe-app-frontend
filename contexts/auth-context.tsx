@@ -16,7 +16,8 @@ const AuthContext = React.createContext();
 const AuthProvider = ({ children }) => {
   const [state, setState] = React.useState({
     user: null,
-    token: ''
+    token: '',
+    showLoader: false
   });
 
   // Get the navigation property  of the screen this provider is inside,
@@ -45,7 +46,7 @@ const AuthProvider = ({ children }) => {
         let res = error.response;
         if (res.status === 401 && res.config && !res.config.__isRetryRequest) {
           await AsyncStorage.storeAuth('');
-          setState({ user: null, token: '' });
+          setState({ ...state, user: null, token: '' });
           navigation.navigate('Email');
         }
       }

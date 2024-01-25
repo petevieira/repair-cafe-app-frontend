@@ -1,19 +1,23 @@
 import * as React from 'react';
+import { View, SafeAreaView } from 'react-native';
 import { Portal, ActivityIndicator } from 'react-native-paper';
 import { AuthContext } from '../contexts/auth-context';
+import styles from '../globals/Styles'
 
 const Loader = () => {
   const [state, setState] = React.useContext(AuthContext);
 
-  return (
-    <Portal>
-      <ActivityIndicator
-        animating={state.showLoader}
-        size="large"
-        style={{position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center'}}
-      />
-    </Portal>
-  )
+  if (state.showLoader) {
+    return (
+        <ActivityIndicator
+          animating={state.showLoader}
+          size="large"
+          style={styles.loader}
+        />
+    );
+  } else {
+    return null;
+  }
 };
 
 export default Loader;

@@ -23,6 +23,7 @@ const EmailEntry = ({navigation}) => {
   const [showPasswordInput, setShowPasswordInput] = React.useState(false);
   const [showSnackbar, setShowSnackbar] = React.useState(false);
   const [snackbarMsg, setSnackbarMsg] = React.useState("");
+  let pwdInputRef = React.useRef();
 
   /**
    * Validates the user's email they entered in the email field.
@@ -40,6 +41,10 @@ const EmailEntry = ({navigation}) => {
         emailIsAdmin(email).then((res) => {
           console.debug("res: ", res);
           setShowPasswordInput(res);
+          // Checking here maybe b/c it's a race condition for it to load first?
+          if (!!pwdInputRef.current) {
+            pwdInputRef.current.focus();
+          }
         }).catch((err) => {
           console.error(err);
         });
@@ -106,6 +111,7 @@ const EmailEntry = ({navigation}) => {
           autoCorrect={false}
           style={styles.short_text_input}
           value={email}
+          autoFocus={true}
           editable={!showPasswordInput}
           onChangeText={email => setEmail(email.trim().toLowerCase())}
         />
@@ -121,6 +127,7 @@ const EmailEntry = ({navigation}) => {
               autoCorrect={false}
               style={styles.short_text_input}
               value={password}
+              ref={pwdInputRef}
               onChangeText={password => setPassword(password.trim().toLowerCase())}
             />
             <HelperText type="error" visible={!validateEmail()}>

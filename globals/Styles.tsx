@@ -50,6 +50,7 @@ export default StyleSheet.create({
   },
   submit_button: {
     marginTop: 20,
+    marginHorizontal: 20
   },
   modalStyle: {
     backgroundColor: 'white',

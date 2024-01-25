@@ -3,13 +3,17 @@ import { Button } from 'react-native-paper';
 import styles from './Styles'
 
 
-const SubmitButton = (props) => (
-   <Button {...props} mode="outlined" style={{
-      //flex: props.flex_num,
-      ...styles.submit_button,
-    }}>
-      {props.text || "Submit"}
+const SubmitButton = (props) => {
+
+  const { style, text, ...rest } = props;
+  console.debug("style: ", style);
+  return (
+    <Button {...rest}
+      mode="outlined"
+      style={[styles.submit_button, style]}>
+      {text || "Submit"}
     </Button>
-);
+  )
+};
 
 export default SubmitButton;

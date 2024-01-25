@@ -496,8 +496,10 @@ const AddEditRepair = ({route, navigation}) => {
 
 		        { authenticated && !!itemDetails._id &&
 		        	<SubmitButton
+                buttonColor='red'
+                textColor="white"
+                rippleColor="rgba(168,37,33,0.4)"
 			          text="Delete"
-			          style={{marginHorizontal: 10}}
 			          onPress={() => {
 			          	setShowDeleteConfirmationDialog(true);
 			          }}

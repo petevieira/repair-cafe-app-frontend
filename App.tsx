@@ -10,7 +10,7 @@ import RootNavigation from './globals/RootNavigation';
  * Main application
  */
 const App = () => {
-  console.debug("Loading App");
+  console.debug("Loading App...");
   return (
     <Provider theme ={{
       ...MD2LightTheme,

@@ -1,6 +1,6 @@
-const process = require('process');
+// import {API_URL} from 'react-native-dotenv';
 
-let API_URL = process.env.API_URL;
+const API_URL = 'http://13.52.61.112:3000';
 
 const USERS_PREFIX      = `${API_URL}/users`;
 const ITEMS_PREFIX      = `${API_URL}/items`;

@@ -11,9 +11,13 @@ const axiosInterceptor = axios.interceptors.response.use(
   (response) => response, (error) => {
 
   if (typeof error.response === 'undefined') {
-    alert('A network error occurred. '
+    console.error("cors error: ", error);
+    console.error('A network error occurred. '
       + 'This could be a CORS issue or a dropped internet connection. '
-      + 'It is not possible for us to know.')
+      + 'It is not possible for us to know.');
+    // alert('A network error occurred. '
+    //   + 'This could be a CORS issue or a dropped internet connection. '
+    //   + 'It is not possible for us to know.')
   }
   return Promise.reject(error)
 })

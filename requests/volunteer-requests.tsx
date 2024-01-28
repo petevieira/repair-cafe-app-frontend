@@ -22,6 +22,7 @@ export const getTodaysVolunteers = async (signal) => {
       { signal }
     );
     if (!response) {
+      console.error("error: ", response);
       throw new Error("Error fetching volunteers");
     }
     return response.data;

@@ -4,7 +4,7 @@
 
 import axios from 'axios';
 import Api from './request-consts';
-import axiosInterceptor from './axios-interceptor';
+// import axiosInterceptor from './axios-interceptor';
 
 const userIsAdmin = async (email) => {
   try {

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "RepairCafeMobile",
-    "slug": "RepairCafeMobile",
+    "name": "TRC App",
+    "slug": "TRC App",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/favicon.png",
@@ -26,10 +26,16 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/trc-logo-transparent.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "org.trc.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "0238b59e-a034-4777-88e8-769b0635713f"
+      }
     }
   }
 }

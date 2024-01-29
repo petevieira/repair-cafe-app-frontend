@@ -4,10 +4,10 @@
     "slug": "RepairCafeMobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/RCM-favicon.png",
+    "icon": "./assets/favicon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/RepairCafeMobile-large.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -18,17 +18,18 @@
       "**/*"
     ],
     "ios": {
+      "icon": "./assets/ios-icon.png",
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.RepairCafeMobile"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/RCM-favicon.png",
+        "foregroundImage": "./assets/trc-logo-transparent.png",
         "backgroundColor": "#FFFFFF"
       }
     },
     "web": {
-      "favicon": "./assets/RCM-favicon.png"
+      "favicon": "./assets/favicon.png"
     }
   }
 }

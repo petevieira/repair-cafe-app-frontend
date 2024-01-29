@@ -6,6 +6,7 @@
     "android": "npm run start --android",
     "ios": "npm run start --ios",
     "web": "npm run start --web",
+    "build:web": "npx expo export:web",
     "ts:check": "tsc"
   },
   "dependencies": {

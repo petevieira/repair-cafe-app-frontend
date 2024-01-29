@@ -2,9 +2,9 @@ import { Provider, configureFonts, MD2LightTheme, Text, ActivityIndicator, Porta
 import { View } from 'react-native';
 
 // Custom Components
-import appFontConfig from './globals/fonts';
-import appColors from './globals/colors';
-import RootNavigation from './globals/RootNavigation';
+import appFontConfig from './src/globals/fonts';
+import appColors from './src/globals/colors';
+import RootNavigation from './src/globals/RootNavigation';
 
 /**
  * Main application

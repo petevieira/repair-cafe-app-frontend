@@ -1,6 +1,4 @@
-// import {API_URL} from 'react-native-dotenv';
-
-const API_URL = 'http://13.52.61.112:3000';
+import { API_URL } from '@env';
 
 const USERS_PREFIX      = `${API_URL}/users`;
 const ITEMS_PREFIX      = `${API_URL}/items`;

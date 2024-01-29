@@ -11,13 +11,12 @@ const ThemeProvider = () => {
     }
   }
 
+  const { theme } = this.state;
+
   return (
-    const { theme } = this.state
-    return (
-      <ThemeContext.Provider value={this.state} theme={theme} >
-        { this.props.children }
-      </ThemeContext.Provider>
-    )
+    <ThemeContext.Provider value={this.state} theme={theme}>
+      { this.props.children }
+    </ThemeContext.Provider>
   )
 }
 

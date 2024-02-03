@@ -1,5 +1,6 @@
-import { Provider, configureFonts, MD2LightTheme, Text, ActivityIndicator, Portal } from 'react-native-paper';
+import { Provider, configureFonts, MD3LightTheme } from 'react-native-paper';
 import { View } from 'react-native';
+import { PaperProvider } from 'react-native-paper';
 
 // Custom Components
 import appFontConfig from './src/globals/fonts';
@@ -12,13 +13,14 @@ import RootNavigation from './src/globals/RootNavigation';
 const App = () => {
   console.debug("Loading App...");
   return (
-    <Provider theme ={{
-      ...MD2LightTheme,
+    <PaperProvider theme ={{
+      ...MD3LightTheme,
+      mode: 'adaptive',
       colors: appColors,
-      fonts: configureFonts({config: appFontConfig, isV3: false})
+      fonts: configureFonts({config: appFontConfig})
     }}>
       <RootNavigation/>
-    </Provider>
+    </PaperProvider>
   );
 };
 

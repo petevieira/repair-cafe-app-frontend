@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Platform, KeyboardAvoidingView } from 'react-native';
+import { View, Platform, KeyboardAvoidingView, ScrollView } from 'react-native';
 import { Button, Dialog, Portal, TextInput, HelperText, Text, Modal, Snackbar } from 'react-native-paper';
 import DropDown from "react-native-paper-dropdown";
 import { format } from "date-fns";
@@ -326,7 +326,7 @@ const AddEditRepair = ({route, navigation}) => {
   return (
     <KeyboardAvoidingView behavior={
       Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
-
+      <ScrollView>
       <View style = {{
       	alignItems: 'center',
       	justifyContent: 'center',
@@ -555,6 +555,7 @@ const AddEditRepair = ({route, navigation}) => {
 	      	</Dialog>
 	      </Portal>
       </View>
+      </ScrollView>
 
     </KeyboardAvoidingView>
   );

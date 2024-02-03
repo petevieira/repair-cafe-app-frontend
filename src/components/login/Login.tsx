@@ -13,23 +13,27 @@ import styles from '../../globals/Styles'
 import UserRequests from '../../requests/user-requests';
 import { AuthContext } from '../../contexts/auth-context';
 import AsyncStorageHelpers from '../../globals/async-storage-helpers';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
-const EmailEntry = ({navigation}) => {
+const Login = ({navigation}) => {
   // State variables
   const [state, setState] = React.useContext(AuthContext);
   const [email, setEmail] = React.useState("");
   const [emailIsInvalid, setEmailIsInvalid] = React.useState(false);
   const [password, setPassword] = React.useState("");
+  const [enableEmail, setEnableEmail] = React.useState(true);
   const [showPasswordInput, setShowPasswordInput] = React.useState(false);
   const [showSnackbar, setShowSnackbar] = React.useState(false);
   const [snackbarMsg, setSnackbarMsg] = React.useState("");
+  const [emailsValid, setEmailsValid] = React.useState(false);
+  const [emailsBlurred, setEmailsBlurred] = React.useState(false);
   let pwdInputRef = React.useRef();
 
   /**
    * Validates the user's email they entered in the email field.
    * @returns {boolean} - true if valid, false in not
    */
-  const validateEmail = () => {
+  const emailIsValid = () => {
     // Email regular expression that must find a match
     const reg = /^[a-zA-Z0-9.!#$%&'’*+\/=?^_`{|}~-]{1,64}@([a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{1,63}$/;
     return (reg.test(email) || email === '');
@@ -37,16 +41,24 @@ const EmailEntry = ({navigation}) => {
 
   const handleSubmit = () => {
     if (!showPasswordInput) {
-      if (email !== "" && validateEmail()) {
+      if (email === '') {
+        setEmailsValid(false);
+      }
+      if (email !== "" && emailIsValid()) {
+        setState({...state, showLoader: true});
         emailIsAdmin(email).then((res) => {
           console.debug("res: ", res);
           setShowPasswordInput(res);
+          setState({...state, showLoader: false});
           // Checking here maybe b/c it's a race condition for it to load first?
-          if (!!pwdInputRef.current) {
-            pwdInputRef.current.focus();
-          }
+          setTimeout(() => {
+            if (!!pwdInputRef.current) {
+              pwdInputRef.current.focus();
+            }
+          }, 500);
         }).catch((err) => {
           console.error(err);
+          setState({...state, showLoader: false});
         });
       }
     } else {
@@ -55,9 +67,11 @@ const EmailEntry = ({navigation}) => {
   };
 
   const emailIsAdmin = async () => {
+    setState({...state, showLoader: true});
     try {
       // Ask backend if email is registered
       const response = await UserRequests.userIsAdmin(email);
+      setState({...state, showLoader: false});
       if (!response.status) {
         setSnackbarMsg(response.msg);
         setShowSnackbar(true);
@@ -68,9 +82,16 @@ const EmailEntry = ({navigation}) => {
       console.error(error);
       setSnackbarMsg(error);
       setShowSnackbar(true);
+      setState({...state, showLoader: false});
       return false;
     }
   };
+
+  const clearContent = () => {
+    setEmail('');
+    setPassword('');
+    setShowPasswordInput(false);
+  }
 
   const signInAdmin = async () => {
     try {
@@ -96,51 +117,72 @@ const EmailEntry = ({navigation}) => {
     }
   };
 
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        console.debug("Login unmounted");
+        clearContent();
+      }
+    },[])
+  );
+
   // Component's view
   return (
-    <KeyboardAvoidingView behavior={
-      Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
 
       <View
-        style={{alignItems: 'center', justifyContent: 'center'}}
+        style={styles.container}
         accessibilityRole="form"
       >
-        <TextInput
-          label="Admin Email"
-          mode={showPasswordInput ? "outlined (disabled)" : "outlined"}
-          autoCorrect={false}
-          style={styles.short_text_input}
-          value={email}
-          autoFocus={true}
-          editable={!showPasswordInput}
-          onChangeText={email => setEmail(email.trim().toLowerCase())}
-        />
-        <HelperText type="error" visible={!validateEmail()}>
-          Please enter a valid email address.
-        </HelperText>
-        {showPasswordInput &&
-          <>
-            <TextInput
-              label="Admin Password"
-              mode="outlined"
-              secureTextEntry={true}
-              autoCorrect={false}
-              style={styles.short_text_input}
-              value={password}
-              ref={pwdInputRef}
-              onChangeText={password => setPassword(password.trim().toLowerCase())}
-            />
-            <HelperText type="error" visible={!validateEmail()}>
-              Please enter a valid email address.
-            </HelperText>
-          </>
-        }
-        <SubmitButton
-          onPress={() => {handleSubmit()}}
-        />
+        <View
+          style={styles.content}>
+          <TextInput
+            label="Admin Email"
+            mode={enableEmail ? "outlined" : "outlined (disabled)"}
+            autoCorrect={false}
+            style={styles.short_text_input}
+            value={email}
+            autoFocus={true}
+            editable={{enableEmail}}
+            onPress={() => {setEnableEmail(true)}}
+            onFocus={() => {
+              setEmailsBlurred(false);
+              setEnableEmail(true);
+            }}
+            onBlur={() => {
+              setEmailsValid(emailIsValid());
+              setEmailsBlurred(true);
+            }}
+            onChangeText={email => setEmail(email.trim().toLowerCase())}
+          />
+          <HelperText type="error" visible={emailsBlurred && !emailsValid}>
+            Woops! Please enter a valid email.
+          </HelperText>
+          {showPasswordInput &&
+            <>
+              <TextInput
+                label="Admin Password"
+                mode="outlined"
+                secureTextEntry={true}
+                autoCorrect={false}
+                style={styles.short_text_input}
+                value={password}
+                ref={pwdInputRef}
+                onChangeText={password => setPassword(password.trim().toLowerCase())}
+              />
+            </>
+          }
+          <SubmitButton
+            onPress={() => {handleSubmit()}}
+          />
+        </View>
       </View>
       <Portal>
         <Snackbar
+          duration={2000}
+          style={styles.snackbar}
           visible={showSnackbar}
           onDismiss={() => {
             setShowSnackbar(false);
@@ -158,4 +200,4 @@ const EmailEntry = ({navigation}) => {
 
 };
 
-export default EmailEntry;
+export default Login;

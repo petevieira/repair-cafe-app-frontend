@@ -30,14 +30,16 @@ let fakeItems: [Item] = [
 ];
 
 const Repairs = () => {
-  console.debug("[Repairs]");
-  const navigation = useNavigation();
   const [items, setItems] = React.useState([]);
   const [snackbarMsg, setSnackbarMsg] = React.useState("");
   const [showSnackbar, setShowSnackbar] = React.useState(false);
   const [state, setState] = React.useContext(AuthContext);
+  const [repairsRetrieved, setRepairsRetrieved] = React.useState(false);
+
   // Set whether the user is authenticated from the AuthContext state
-  const authenticated = !!state && state.token !== '' && state.user !== null;
+  let authenticated = !!state && state.token !== '' && state.user !== null;
+  const navigation = useNavigation();
+
   // Today's date
   const todaysDate = format(new Date(), "MMMM do, yyyy");
 
@@ -63,11 +65,11 @@ const Repairs = () => {
       setShowSnackbar(true);
     }
     setState({...state, showLoader: false});
+    setRepairsRetrieved(true);
   }
 
   const addItem = () => {
-    console.debug("add Item pressed");
-    navigation.navigate('AddEditRepair', {
+    navigation.navigate('Add/Edit Repair', {
       item: new Item()
     });
   }
@@ -77,7 +79,7 @@ const Repairs = () => {
     if (!authenticated) {
       return;
     }
-    navigation.navigate('AddEditRepair', {
+    navigation.navigate('Add/Edit Repair', {
       item: item
     });
   }
@@ -87,7 +89,7 @@ const Repairs = () => {
       // const abortController = new AbortController();
       // const signal = abortController.signal;
       // getItems(signal);
-      console.debug("get items");
+
       getItems();
       return () => {
         console.debug("Repairs unmounted");
@@ -99,15 +101,23 @@ const Repairs = () => {
 
   return (
     <View style={styles.container}>
-      <FAB
+      { authenticated ? <FAB
         icon="plus"
         style={styles.fab}
-        onPress={() => {addItem()}}
-      />
-      <Text style={{textAlign: "center", fontWeight: 'bold', fontSize: 22, marginLeft: 'auto', marginRight: 'auto'}}>Repair Queue</Text>
+        animated={false}
+        onPress={addItem}
+      /> : <></>}
+{/*      <View
+        style={{
+          marginBottom: 10,
+          maxWidth: 700,
+          minWidth: 300,
+          marginLeft: 'auto',
+          marginRight: 'auto'
+        }}>*/}
       <Text style={{textAlign: "center"}}>({todaysDate})</Text>
       <DataTable>
-        <DataTable.Header>
+        <DataTable.Header style={{minWidth: 500}}>
           <DataTable.Title>#</DataTable.Title>
           <DataTable.Title>Item</DataTable.Title>
           <DataTable.Title>Name</DataTable.Title>
@@ -126,6 +136,14 @@ const Repairs = () => {
           </DataTable.Row>
         ))}
       </DataTable>
+      { repairsRetrieved && items.length <= 0 ?
+        <Text
+          style={{
+            padding: 10,
+            alignSelf: 'center'
+          }}>No repairs yet today</Text>
+        : <></>
+      }
       <Portal>
         <Snackbar
           visible={showSnackbar}

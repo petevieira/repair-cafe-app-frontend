@@ -9,7 +9,9 @@ const SubmitButton = (props) => {
   return (
     <Button {...rest}
       mode="outlined"
-      style={[styles.submit_button, style]}>
+      style={styles.submitButton}
+      labelStyle={styles.submitButtonLabel}
+    >
       {text || "Submit"}
     </Button>
   )

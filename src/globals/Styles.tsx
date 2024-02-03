@@ -1,36 +1,40 @@
 import {StyleSheet} from "react-native";
 
 export default StyleSheet.create({
+  appBar: {
+    backgroundColor: 'white',
+    // maxWidth: 600,
+    // marginLeft: 'auto',
+    // marginRight: 'auto'
+  },
+  appBarTitle: {
+    fontFamily: 'Futura',
+    fontSize: 24,
+    fontWeight: 'bold',
+    alignText: "center"
+  },
   logo: {
+    // position: 'absolute',
+    // left: 2,
     height: 60,
     aspectRatio: 1,
-    resizeMode:'contain',
-    marginLeft: 20,
   },
   itemImage: {
     width: "25%",
-    aspectRatio: 1,
-    resizeMode:'contain',
+    aspectRatio: 1
   },
   container: {
-    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
     paddingTop: 15,
     paddingBottom: 15,
-    paddingLeft: 10,
-    paddingRight: 10,
+    paddingHorizontal: 10,
     minHeight: '80vh',
   },
   content: {
-    // flex: 6,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    width: "100%",
     maxWidth: 738,
-    alignItems: "center",
-    // justifyContent: "center",
-    alignSelf: "center",
-    // marginTop: 10,
-    //maxHeight: 400,
+    minWidth: 320,
   },
   home_buttons: {
   	height: 120,
@@ -44,13 +48,22 @@ export default StyleSheet.create({
     //width: ' 90%'
   },
   short_text_input: {
-    width: '90%',
-    maxWidth: 500,
-    marginTop: 15,
+    // minWidth: 320,
+    // maxWidth: 500,
   },
-  submit_button: {
+  submitButton: {
     marginTop: 20,
-    marginHorizontal: 20
+    marginHorizontal: 20,
+    backgroundColor: '#246fb0',
+    borderColor: '#1a5385',
+  },
+  submitButtonLabel: {
+    color: 'white',
+  },
+  snackbar: {
+    minWidth: 320,
+    maxWidth: 738,
+    alignSelf: 'center'
   },
   modalStyle: {
     backgroundColor: 'white',
@@ -126,7 +139,7 @@ export default StyleSheet.create({
     position: 'fixed',
     margin: 16,
     right: 0,
-    bottom: 0,
+    bottom: 60,
     backgroundColor: '#96db73',
   },
 });

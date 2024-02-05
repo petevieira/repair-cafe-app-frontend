@@ -27,7 +27,11 @@ const Login = ({navigation}) => {
   const [snackbarMsg, setSnackbarMsg] = React.useState("");
   const [emailsValid, setEmailsValid] = React.useState(false);
   const [emailsBlurred, setEmailsBlurred] = React.useState(false);
+  let authenticated: boolean = false;
+  const stateRef = React.useRef();
   let pwdInputRef = React.useRef();
+
+  authenticated = !!state && state.token !== '' && state.user !== null;
 
   /**
    * Validates the user's email they entered in the email field.
@@ -49,12 +53,12 @@ const Login = ({navigation}) => {
         emailIsAdmin(email).then((res) => {
           console.debug("res: ", res);
           setShowPasswordInput(res);
-          setState({...state, showLoader: false});
           // Checking here maybe b/c it's a race condition for it to load first?
           setTimeout(() => {
             if (!!pwdInputRef.current) {
               pwdInputRef.current.focus();
             }
+            setState({...state, showLoader: false});
           }, 500);
         }).catch((err) => {
           console.error(err);
@@ -96,7 +100,6 @@ const Login = ({navigation}) => {
   const signInAdmin = async () => {
     try {
       const response = await UserRequests.signInAdmin(email, password);
-      console.debug("[signInAdmin] response: ", response);
       if (!response.status) {
         console.error(response.msg);
         setSnackbarMsg(response.msg)
@@ -117,10 +120,15 @@ const Login = ({navigation}) => {
     }
   };
 
+  React.useEffect(() => {
+    if (authenticated) {
+      navigation.navigate('Repairs');
+    }
+  }, [authenticated]);
+
   useFocusEffect(
     React.useCallback(() => {
       return () => {
-        console.debug("Login unmounted");
         clearContent();
       }
     },[])
@@ -131,7 +139,6 @@ const Login = ({navigation}) => {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-
       <View
         style={styles.container}
         accessibilityRole="form"
@@ -170,7 +177,9 @@ const Login = ({navigation}) => {
                 style={styles.short_text_input}
                 value={password}
                 ref={pwdInputRef}
-                onChangeText={password => setPassword(password.trim().toLowerCase())}
+                onChangeText={
+                  password => setPassword(password.trim().toLowerCase())
+                }
               />
             </>
           }

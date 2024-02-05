@@ -324,14 +324,19 @@ const AddEditRepair = ({route, navigation}) => {
 
   // Component's view
   return (
-    <KeyboardAvoidingView behavior={
-      Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
+    <KeyboardAvoidingView
+    	behavior={Platform.OS === "ios" ? "padding" : "height"}
+    	style={styles.container}
+    >
       <ScrollView>
-      <View style = {{
-      	alignItems: 'center',
-      	justifyContent: 'center',
-      }}>
-	      	<Text style={{ fontWeight: 'bold', fontSize: 22 }}>{pageTitle}</Text>
+	      <View style={styles.content}>
+	      	<Text
+	      		style={{
+	      			fontWeight: 'bold',
+	      			fontSize: 22,
+	      			alignSelf: 'center'
+	      		}}>{pageTitle}
+	      	</Text>
 
 	        <CheckBox
 	          label={<Text>I agree to the <Text style={{color: "blue"}} onPress={() => {
@@ -345,47 +350,59 @@ const AddEditRepair = ({route, navigation}) => {
 	        />
 
 	        <TextInput
-	          label={<><Text style={{color: '#717171'}}>Owner's email</Text><Text style={{color: 'red'}}>*</Text></>}
+	          label={
+	          	<>
+	          		<Text style={{color: '#717171'}}>Owner's email</Text>
+	          		<Text style={{color: 'red'}}>*</Text>
+	          	</>
+	          }
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
 	          value={itemDetails.ownersEmail ?? ""}
-	          onChangeText={newEmail => setItemDetails({ ...itemDetails, ownersEmail: newEmail.trim()})}
-	          // onBlur={() => validateEmail()}
+	          onChangeText={newEmail => setItemDetails(
+	          	{ ...itemDetails, ownersEmail: newEmail.trim()}
+	          )}
 	        />
-	{/*        <HelperText type="error" visible={!emailValid}>
-	          Please enter a valid email address.
-	        </HelperText>*/}
 
 	        <TextInput
-	          label={<><Text style={{color: '#717171'}}>Owner's first name</Text><Text style={{color: 'red'}}>*</Text></>}
+	          label={
+	          	<>
+	          		<Text style={{color: '#717171'}}>Owner's first name</Text>
+	          		<Text style={{color: 'red'}}>*</Text>
+	          	</>
+	          }
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
 	          value={itemDetails.ownersFirstName ?? ""}
-	          onChangeText={newFirstName => setItemDetails({...itemDetails, ownersFirstName: newFirstName.trim()})}
-	          // onBlur={() => validateFirstName()}
+	          onChangeText={newFirstName => setItemDetails(
+	          	{...itemDetails, ownersFirstName: newFirstName.trim()}
+	          )}
 	        />
-	{/*        <HelperText type="error" visible={!firstNameValid}>
-	          Please enter a valid first name.
-	        </HelperText>*/}
 
 	        <TextInput
-	          label={<><Text style={{color: '#717171'}}>Owner's last name</Text><Text style={{color: 'red'}}>*</Text></>}
+	          label={
+	          	<>
+	          		<Text style={{color: '#717171'}}>Owner's last name</Text>
+	          		<Text style={{color: 'red'}}>*</Text>
+	          	</>
+	          }
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
 	          value={itemDetails.ownersLastName ?? ""}
-	          onChangeText={newLastName => setItemDetails({...itemDetails, ownersLastName: newLastName})}
-	          // onBlur={() => validateLastName()}
+	          onChangeText={newLastName => setItemDetails(
+	          	{...itemDetails, ownersLastName: newLastName}
+	          )}
 	        />
-	{/*        <HelperText type="error" visible={!lastNameValid}>
-	          Please enter a valid last name or initial.
-	        </HelperText>*/}
 
 	      	<View style={styles.dropdownContainer}>
 		      	<View style={[styles.label]}>
-	            <Text style={{color: '#717171'}}>Product Category<Text style={{color: 'red'}}>*</Text></Text>
+	            <Text style={{color: '#717171'}}>
+	            	Product Category
+	            	<Text style={{color: 'red'}}>*</Text>
+	            </Text>
           	</View>
             <Dropdown
               style={[styles.dropdown, productCategoryFocused && {borderWidth: 2}]}
@@ -411,12 +428,51 @@ const AddEditRepair = ({route, navigation}) => {
           </View>
 
 	        <TextInput
-	          label={<><Text style={{color: '#717171'}}>Symptoms</Text><Text style={{color: 'red'}}>*</Text></>}
+	          label={
+	          	<>
+	          		<Text style={{color: '#717171'}}>Symptoms</Text>
+	          		<Text style={{color: 'red'}}>*</Text>
+	          	</>
+	          }
 	          mode="outlined"
 	          autoCorrect={false}
 	          style={styles.short_text_input}
 	          value={itemDetails.symptoms ?? ""}
-	          onChangeText={newSymptoms => setItemDetails({...itemDetails, symptoms: newSymptoms})}
+	          onChangeText={newSymptoms => setItemDetails(
+	          	{...itemDetails, symptoms: newSymptoms}
+	          )}
+	        />
+
+	        <TextInput
+	          label={
+	          	<>
+	          		<Text style={{color: '#717171'}}>Weight</Text>
+	          		<Text style={{color: 'red'}}>*</Text>
+	          	</>
+	          }
+	          mode="outlined"
+	          autoCorrect={false}
+	          style={styles.short_text_input}
+	          value={itemDetails.weight ?? ""}
+	          onChangeText={newWeight => setItemDetails(
+	          	{...itemDetails, weight: newWeight}
+	          )}
+	        />
+
+	        <TextInput
+	          label={
+	          	<>
+	          		<Text style={{color: '#717171'}}>Cost</Text>
+	          		<Text style={{color: 'red'}}>*</Text>
+	          	</>
+	          }
+	          mode="outlined"
+	          autoCorrect={false}
+	          style={styles.short_text_input}
+	          value={itemDetails.cost ?? ""}
+	          onChangeText={newCost => setItemDetails(
+	          	{...itemDetails, cost: newCost}
+	          )}
 	        />
 
 	        <TextInput
@@ -425,8 +481,9 @@ const AddEditRepair = ({route, navigation}) => {
 	          autoCorrect={false}
 	          style={styles.short_text_input}
 	          value={itemDetails.brand ?? ""}
-	          onChangeText={newBrand => setItemDetails({...itemDetails, brand: newBrand})}
-	          // onBlur={() => validateItemBrand()}
+	          onChangeText={newBrand => setItemDetails(
+	          	{...itemDetails, brand: newBrand}
+	          )}
 	        />
 
 	        <TextInput
@@ -516,47 +573,46 @@ const AddEditRepair = ({route, navigation}) => {
 		        />
 	        </View>
 
-        <Portal>
-          <Modal style={styles.modalStyle} visible={termsModalVisible} onDismiss={() => {setTermsModalVisible(false)}}>
-            <HTMLView value={terms}/>
-          </Modal>
-        </Portal>
+	        <Portal>
+	          <Modal style={styles.modalStyle} visible={termsModalVisible} onDismiss={() => {setTermsModalVisible(false)}}>
+	            <HTMLView value={terms}/>
+	          </Modal>
+	        </Portal>
 
-	      <Portal>
-	        <Snackbar
-	          visible={showSnackbar}
-	          onDismiss={() => {
-	            setShowSnackbar(false);
-	            setSnackbarMsg("");
-	          }}
-	          action={{
-	            label: "close"
-	          }}
-	        >{snackbarMsg}
-	        </Snackbar>
-	      </Portal>
+		      <Portal>
+		        <Snackbar
+		          visible={showSnackbar}
+		          onDismiss={() => {
+		            setShowSnackbar(false);
+		            setSnackbarMsg("");
+		          }}
+		          action={{
+		            label: "close"
+		          }}
+		        >{snackbarMsg}
+		        </Snackbar>
+		      </Portal>
 
-	      <Portal>
-	      	<Dialog
-	      		visible={showDeleteConfirmationDialog}
-	      		onDismiss={() => { setShowDeleteConfirmationDialog(false) }}
-	      	>
-	      		<Dialog.Title>Alert</Dialog.Title>
-	      		<Dialog.Content>
-	      			<Text>Are you sure you want to delete {itemDetails.ownersFirstName} {itemDetails.ownersLastName}'s {itemDetails.type}</Text>
-	      		</Dialog.Content>
-	      		<Dialog.Actions>
-	      			<Button onPress={() => {setShowDeleteConfirmationDialog(false)}}>Cancel</Button>
-	      			<Button onPress={() => {
-	      				deleteCurrentItem(itemDetails);
-	      				setShowDeleteConfirmationDialog(false);
-	      			}}>Delete</Button>
-	      		</Dialog.Actions>
-	      	</Dialog>
-	      </Portal>
-      </View>
-      </ScrollView>
-
+		      <Portal>
+		      	<Dialog
+		      		visible={showDeleteConfirmationDialog}
+		      		onDismiss={() => { setShowDeleteConfirmationDialog(false) }}
+		      	>
+		      		<Dialog.Title>Alert</Dialog.Title>
+		      		<Dialog.Content>
+		      			<Text>Are you sure you want to delete {itemDetails.ownersFirstName} {itemDetails.ownersLastName}'s {itemDetails.type}</Text>
+		      		</Dialog.Content>
+		      		<Dialog.Actions>
+		      			<Button onPress={() => {setShowDeleteConfirmationDialog(false)}}>Cancel</Button>
+		      			<Button onPress={() => {
+		      				deleteCurrentItem(itemDetails);
+		      				setShowDeleteConfirmationDialog(false);
+		      			}}>Delete</Button>
+		      		</Dialog.Actions>
+		      	</Dialog>
+		      </Portal>
+      	</View>
+	    </ScrollView>
     </KeyboardAvoidingView>
   );
 

@@ -27,7 +27,7 @@ const ScreensNav = (props) => {
 
   return (
     <Stack.Navigator
-      initialRouteName={props?.initialRouteName ?? "Login"}
+      initialRouteName="Login"
       screenOptions={{
         header: (props) => <Nav {...props} />,
       }}

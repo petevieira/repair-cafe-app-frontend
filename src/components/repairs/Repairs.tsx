@@ -101,62 +101,58 @@ const Repairs = () => {
 
   return (
     <View style={styles.container}>
-      { authenticated ? <FAB
-        icon="plus"
-        style={styles.fab}
-        animated={false}
-        onPress={addItem}
-      /> : <></>}
-{/*      <View
-        style={{
-          marginBottom: 10,
-          maxWidth: 700,
-          minWidth: 300,
-          marginLeft: 'auto',
-          marginRight: 'auto'
-        }}>*/}
-      <Text style={{textAlign: "center"}}>({todaysDate})</Text>
-      <DataTable>
-        <DataTable.Header style={{minWidth: 500}}>
-          <DataTable.Title>#</DataTable.Title>
-          <DataTable.Title>Item</DataTable.Title>
-          <DataTable.Title>Name</DataTable.Title>
-          <DataTable.Title>Status</DataTable.Title>
-        </DataTable.Header>
+      { authenticated ?
+        <FAB
+          icon="plus"
+          style={styles.fab}
+          animated={false}
+          onPress={addItem}
+        />
+        : <></>}
+      <View style={styles.content}>
+        <Text style={{textAlign: "center"}}>({todaysDate})</Text>
+        <DataTable>
+          <DataTable.Header style={{minWidth: 500}}>
+            <DataTable.Title>#</DataTable.Title>
+            <DataTable.Title>Item</DataTable.Title>
+            <DataTable.Title>Name</DataTable.Title>
+            <DataTable.Title>Status</DataTable.Title>
+          </DataTable.Header>
 
-        {items.map((item, idx) => (
-          <DataTable.Row
-            key={item._id}
-            onPress={authenticated ? (() => itemTapped(item)) : undefined}
-          >
-            <DataTable.Cell>{idx+1}</DataTable.Cell>
-            <DataTable.Cell>{item.type}</DataTable.Cell>
-            <DataTable.Cell>{item.ownersFirstName} {item.ownersLastName}</DataTable.Cell>
-            <DataTable.Cell>{item.status}</DataTable.Cell>
-          </DataTable.Row>
-        ))}
-      </DataTable>
-      { repairsRetrieved && items.length <= 0 ?
-        <Text
-          style={{
-            padding: 10,
-            alignSelf: 'center'
-          }}>No repairs yet today</Text>
-        : <></>
-      }
-      <Portal>
-        <Snackbar
-          visible={showSnackbar}
-          onDismiss={() => {
-            setShowSnackbar(false);
-            setSnackbarMsg("");
-          }}
-          action={{
-            label: "close"
-          }}
-        >{snackbarMsg}
-        </Snackbar>
-      </Portal>
+          {items.map((item, idx) => (
+            <DataTable.Row
+              key={item._id}
+              onPress={authenticated ? (() => itemTapped(item)) : undefined}
+            >
+              <DataTable.Cell>{idx+1}</DataTable.Cell>
+              <DataTable.Cell>{item.type}</DataTable.Cell>
+              <DataTable.Cell>{item.ownersFirstName} {item.ownersLastName}</DataTable.Cell>
+              <DataTable.Cell>{item.status}</DataTable.Cell>
+            </DataTable.Row>
+          ))}
+        </DataTable>
+        { repairsRetrieved && items.length <= 0 ?
+          <Text
+            style={{
+              padding: 10,
+              alignSelf: 'center'
+            }}>No repairs yet today</Text>
+          : <></>
+        }
+        <Portal>
+          <Snackbar
+            visible={showSnackbar}
+            onDismiss={() => {
+              setShowSnackbar(false);
+              setSnackbarMsg("");
+            }}
+            action={{
+              label: "close"
+            }}
+          >{snackbarMsg}
+          </Snackbar>
+        </Portal>
+      </View>
     </View>
   )
 };

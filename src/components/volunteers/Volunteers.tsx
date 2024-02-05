@@ -65,7 +65,7 @@ const Volunteers = () => {
       setVolunteers(response.data.volunteers);
     } catch (error) {
       console.error(error);
-      setSnackbarMsg(error);
+      setSnackbarMsg("Failed to retrieve volunteers");
       setShowSnackbar(true);
     }
     setState({...state, showLoader: false});

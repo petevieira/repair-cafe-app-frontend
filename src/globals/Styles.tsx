@@ -1,11 +1,8 @@
-import {StyleSheet} from "react-native";
+import { StyleSheet, Dimensions } from "react-native";
 
 export default StyleSheet.create({
   appBar: {
     backgroundColor: 'white',
-    // maxWidth: 600,
-    // marginLeft: 'auto',
-    // marginRight: 'auto'
   },
   appBarTitle: {
     fontFamily: 'Futura',
@@ -14,8 +11,6 @@ export default StyleSheet.create({
     alignText: "center"
   },
   logo: {
-    // position: 'absolute',
-    // left: 2,
     height: 60,
     aspectRatio: 1,
   },
@@ -71,12 +66,11 @@ export default StyleSheet.create({
   },
   loader: {
     position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
+    left: '50%',
+    top: '50%',
+    margin: 'auto',
+    width: 100,
+    height: 100,
   },
   label: {
     position: 'absolute',
@@ -138,7 +132,7 @@ export default StyleSheet.create({
   fab: {
     position: 'fixed',
     margin: 16,
-    right: 0,
+    right: '5%',
     bottom: 60,
     backgroundColor: '#96db73',
   },

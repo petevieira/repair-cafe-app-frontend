@@ -12,6 +12,8 @@ class Item {
   repairerLastName: string;
   notes: string;
   repairStatus: string;
+  weight: string;
+  cost: string;
 
   constructor(
     id: string = "",
@@ -26,7 +28,9 @@ class Item {
     repairerFirstName: string = "",
     repairerLastName: string = "",
     notes: string = "",
-    repairStatus: string = "In Queue"
+    repairStatus: string = "In Queue",
+    weight: string = "",
+    cost: string = "",
   ) {
     this._id = id;
     this.acceptsWaiver = acceptsWaiver;
@@ -41,6 +45,8 @@ class Item {
     this.repairerLastName = repairerLastName;
     this.notes = notes;
     this.status = status;
+    this.weight = weight;
+    this.cost = cost;
   }
 };
 

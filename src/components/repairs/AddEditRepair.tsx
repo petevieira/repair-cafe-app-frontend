@@ -49,27 +49,27 @@ const terms =
 `;
 
 const statusesList = [
-	{ value: 0, label: 'In Queue'  },
-	{ value: 1, label: 'In Progress'  },
-	{ value: 2, label: 'Complete' },
+  { value: 0, label: 'In Queue'  },
+  { value: 1, label: 'In Progress'  },
+  { value: 2, label: 'Complete' },
 ];
 
 const ordsProductCategoryList = ProductCategoryValues.map((el, idx) => {
-	return { label: el.text, value: idx };
+  return { label: el.text, value: idx };
 });
 
 const ordsRepairStatusList = RepairStatusValues.map((el, idx) => {
-	return { label: el, value: idx };
+  return { label: el, value: idx };
 });
 
 const ordsRepairBarrierList = RepairBarrierValues.map((el, idx) => {
-	return { label: el, value: idx };
+  return { label: el, value: idx };
 });
 
 const volunteersList = [
-	{ label: 'John S.', value: 0 },
-	{ label: 'Steve Johnson', value: 1 },
-	{ label: 'Lauren Dahlin', value: 2 },
+  { label: 'John S.', value: 0 },
+  { label: 'Steve Johnson', value: 1 },
+  { label: 'Lauren Dahlin', value: 2 },
 ];
 
 const miscCategoryIdx = 17;
@@ -78,12 +78,12 @@ const AddEditRepair = ({route, navigation}) => {
   const [itemDetails, setItemDetails] = React.useState(new Item());
   const [waiverBoxChecked, setWaiverBoxChecked] = React.useState(false);
   const [pageTitle, setPageTitle] = React.useState("");
-	const [showRepairerDropdown, setShowRepairerDropdown] = React.useState(false);
-	const [showStatusDropdown, setShowStatusDropdown] = React.useState(false);
+  const [showRepairerDropdown, setShowRepairerDropdown] = React.useState(false);
+  const [showStatusDropdown, setShowStatusDropdown] = React.useState(false);
   const [termsModalVisible, setTermsModalVisible] = React.useState(false);
-	const [showAddItemBtn, setShowAddItemBtn] = React.useState(false);
-	const [repairerList, setRepairerList] = React.useState([]);
-	const [volunteers, setVolunteers] = React.useState([]);
+  const [showAddItemBtn, setShowAddItemBtn] = React.useState(false);
+  const [repairerList, setRepairerList] = React.useState([]);
+  const [volunteers, setVolunteers] = React.useState([]);
   const [snackbarMsg, setSnackbarMsg] = React.useState("");
   const [showSnackbar, setShowSnackbar] = React.useState(false);
   const [repairerIdx, setRepairerIdx] = React.useState(-1);
@@ -92,23 +92,23 @@ const AddEditRepair = ({route, navigation}) => {
   const [statusFocused, setStatusFocused] = React.useState(false);
   const [productCategoryIdx, setProductCategoryIdx] = React.useState(miscCategoryIdx)
   const [productCategoryFocused, setProductCategoryFocused] = React.useState(false);
-	const [showDeleteConfirmationDialog, setShowDeleteConfirmationDialog] = React.useState(false);
+  const [showDeleteConfirmationDialog, setShowDeleteConfirmationDialog] = React.useState(false);
 
   // Set whether the user is authenticated from the AuthContext state
   const authenticated = !!state && state.token !== '' && state.user !== null;
 
-	const paramItem = route.params.item;
+  const paramItem = route.params.item;
 
   const validateFirstName = (): boolean => {
-  	const valid = firstName !== "";
-		setFirstNameValid(valid);
-		return valid;
+    const valid = firstName !== "";
+    setFirstNameValid(valid);
+    return valid;
   }
 
   const validateLastName = (): boolean => {
-  	const valid = lastName !== "";
-  	setLastNameValid(valid);
-  	return valid;
+    const valid = lastName !== "";
+    setLastNameValid(valid);
+    return valid;
   }
 
   /**
@@ -124,69 +124,69 @@ const AddEditRepair = ({route, navigation}) => {
   };
 
   const validateForm = (): boolean => {
-  	return firstNameValid && lastNameValid && emailValid;
+    return firstNameValid && lastNameValid && emailValid;
   }
 
   const saveItem = async () => {
-  	try {
-  		let response = null;
-  		if (authenticated) {
-  			if (!!itemDetails._id) {
-  				response = await updateItem(itemDetails);
-  			} else {
-			  	response = await addFullItem(itemDetails);
-  			}
-		  } else {
-		  	response = await addBasicItem(itemDetails);
-		  }
-		  if (!response.status) {
-		  	console.error(response.msg);
-	      setSnackbarMsg(response.msg);
-	      setShowSnackbar(true);
-	      return;
-		  }
-	  	navigation.navigate('Repairs');
-	  } catch (error) {
-	  	console.error(error);
-	  }
+    try {
+      let response = null;
+      if (authenticated) {
+        if (!!itemDetails._id) {
+          response = await updateItem(itemDetails);
+        } else {
+          response = await addFullItem(itemDetails);
+        }
+      } else {
+        response = await addBasicItem(itemDetails);
+      }
+      if (!response.status) {
+        console.error(response.msg);
+        setSnackbarMsg(response.msg);
+        setShowSnackbar(true);
+        return;
+      }
+      navigation.navigate('Repairs');
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   const deleteCurrentItem = async () => {
-  	if (!itemDetails._id) {
-  		setSnackbarMsg("Item can't be deleted. It doesn't have an _id.");
-  		setShowSnackbar(true);
-  		return;
-  	}
-  	try {
-	  	const response = await deleteItem(itemDetails._id);
-		  if (!response.status) {
-		  	console.error(response.msg);
-	      setSnackbarMsg(response.msg);
-	      setShowSnackbar(true);
-	      return;
-		  }
-		  setSnackbarMsg("Item deleted");
-		  setShowSnackbar(true);
-		  setTimeout(() => {
-		  	setSnackbarMsg("");
-		  	setShowSnackbar(false);
-		  	navigation.navigate('Repairs');
-		  }, 1000);
-	  } catch (error) {
-	  	console.error(error);
-	  }
+    if (!itemDetails._id) {
+      setSnackbarMsg("Item can't be deleted. It doesn't have an _id.");
+      setShowSnackbar(true);
+      return;
+    }
+    try {
+      const response = await deleteItem(itemDetails._id);
+      if (!response.status) {
+        console.error(response.msg);
+        setSnackbarMsg(response.msg);
+        setShowSnackbar(true);
+        return;
+      }
+      setSnackbarMsg("Item deleted");
+      setShowSnackbar(true);
+      setTimeout(() => {
+        setSnackbarMsg("");
+        setShowSnackbar(false);
+        navigation.navigate('Repairs');
+      }, 1000);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   const setTitle = (item: Item) => {
-  	if (!!item?.ownersFirstName) {
-  		setPageTitle(`${item.ownersFirstName}'s ${item.type}`);
-  	} else {
-	  	setPageTitle("New Item");
-	  }
+    if (!!item?.ownersFirstName) {
+      setPageTitle(`${item.ownersFirstName}'s ${item.type}`);
+    } else {
+      setPageTitle("New Item");
+    }
   }
 
   const isNewItem = (item) => {
-  	return !item || !item._id;
+    return !item || !item._id;
   }
 
   const getVolunteers = async (signal) => {
@@ -194,7 +194,7 @@ const AddEditRepair = ({route, navigation}) => {
       const response = await getTodaysVolunteers(signal);
       let list = [];
       response.data.volunteers.forEach((v, idx) => {
-      	list.push({ label: `${v.firstName} ${v.lastName}`, value: idx});
+        list.push({ label: `${v.firstName} ${v.lastName}`, value: idx});
       });
       setRepairerList(list);
       setVolunteers(response.data.volunteers);
@@ -206,204 +206,208 @@ const AddEditRepair = ({route, navigation}) => {
   }
 
   const addMissingItemProperties = (item) => {
-  	item.acceptsWaiver = item.acceptsWaiver ?? false;
-  	return item;
+    item.acceptsWaiver = item.acceptsWaiver ?? false;
+    return item;
   }
 
   const initStatus = (item) => {
-		item.status = "In Queue";
-		setStatusIdx(0);
-		return item;
-	}
+    item.status = "In Queue";
+    setStatusIdx(0);
+    return item;
+  }
 
   const getFullItem = async (item, signal) => {
-  	setState({...state, showLoader: true});
-  	if (isNewItem(item)) {
-  		setPageTitle("New Item");
-  		item = initStatus(item);
-  		setItemDetails(item);
-  		setWaiverBoxChecked(item.acceptsWaiver);
-	  	setState({...state, showLoader: false});
-  		return;
-  	}
+    setState({...state, showLoader: true});
+    if (isNewItem(item)) {
+      setPageTitle("New Item");
+      item = initStatus(item);
+      setItemDetails(item);
+      setWaiverBoxChecked(item.acceptsWaiver);
+      setState({...state, showLoader: false});
+      return;
+    }
 
-  	try {
-  		const response = await getItem(item._id, signal);
-  		let fullItem = response.data.item;
-  		setTitle(fullItem);
-  		if (!fullItem.status) {
-				fullItem = initStatus(fullItem);
-  		}
-  		if (!fullItem.type) {
-  			fullItem.type = ordsProductCategoryList[miscCategoryIdx].label;
-  			setProductCategoryIdx(miscCategoryIdx);
-  		}
-  		setItemDetails(fullItem);
-  		setWaiverBoxChecked(response.data.item.acceptsWaiver);
-  	} catch (error) {
-  		console.error(error);
-  	}
-  	setState({...state, showLoader: false});
+    try {
+      const response = await getItem(item._id, signal);
+      let fullItem = response.data.item;
+      setTitle(fullItem);
+      if (!fullItem.status) {
+        fullItem = initStatus(fullItem);
+      }
+      if (!fullItem.type) {
+        fullItem.type = ordsProductCategoryList[miscCategoryIdx].label;
+        setProductCategoryIdx(miscCategoryIdx);
+      }
+      setItemDetails(fullItem);
+      setWaiverBoxChecked(response.data.item.acceptsWaiver);
+    } catch (error) {
+      console.error(error);
+    }
+    setState({...state, showLoader: false});
   };
 
   const okayToSave = () => {
-  	return (waiverBoxChecked
-  		&& !!itemDetails.ownersFirstName
-  		&& !!itemDetails.ownersLastName
-  		&& !!itemDetails.ownersEmail
-  		&& !!itemDetails.type)
+    return (waiverBoxChecked
+      && !!itemDetails.ownersFirstName
+      && !!itemDetails.ownersLastName
+      && !!itemDetails.ownersEmail
+      && !!itemDetails.type)
   }
 
   React.useEffect(() => {
-  	const abortController = new AbortController();
-  	const signal = abortController.signal;
-		getVolunteers(signal);
-  	return () => {
-  		abortController.abort();
-  	}
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+    getVolunteers(signal);
+    return () => {
+      abortController.abort();
+    }
   }, []);
 
   React.useEffect(() => {
-  	const abortController = new AbortController();
-  	const signal = abortController.signal;
-  	getFullItem(paramItem, signal);
-  	return () => {
-  		console.debug("AddEditRepair unmounted")
-  		abortController.abort();
-  	}
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+    getFullItem(paramItem, signal);
+    return () => {
+      console.debug("AddEditRepair unmounted")
+      abortController.abort();
+    }
   }, []);
 
   React.useEffect(() => {
-  	if (statusIdx >= 0) {
-	  	setItemDetails({...itemDetails, status: statusesList[statusIdx].label})
-	  }
+    if (statusIdx >= 0) {
+      setItemDetails({...itemDetails, status: statusesList[statusIdx].label})
+    }
   }, [statusIdx]);
 
   React.useEffect(() => {
-  	if (productCategoryIdx >= 0) {
-  		setItemDetails({...itemDetails, type: ordsProductCategoryList[productCategoryIdx].label});
-  	}
+    if (productCategoryIdx >= 0) {
+      setItemDetails({...itemDetails, type: ordsProductCategoryList[productCategoryIdx].label});
+    }
   }, [productCategoryIdx]);
 
   React.useEffect(() => {
-  	if (repairerIdx >= 0) {
-	  	setItemDetails({
-	  		...itemDetails,
-	  		repairerFirstName: volunteers[repairerIdx].firstName,
-	  		repairerLastName: volunteers[repairerIdx].lastName
-	  	});
-	  }
-	  return () => {
-	  	setItemDetails(new Item());
-	  }
+    if (repairerIdx >= 0) {
+      setItemDetails({
+        ...itemDetails,
+        repairerFirstName: volunteers[repairerIdx].firstName,
+        repairerLastName: volunteers[repairerIdx].lastName
+      });
+    }
+    return () => {
+      setItemDetails(new Item());
+    }
   }, [repairerIdx]);
 
   React.useEffect(() => {
-		statusesList.forEach((s, idx) => {
-			if (s.label === itemDetails.status) {
-				setStatusIdx(idx);
-			}
-			return () => {
-				setStatusIdx(-1);
-			}
-		});
+    statusesList.forEach((s, idx) => {
+      if (s.label === itemDetails.status) {
+        setStatusIdx(idx);
+      }
+      return () => {
+        setStatusIdx(-1);
+      }
+    });
   }, [itemDetails]);
 
   React.useEffect(() => {
-		volunteers.forEach((v, idx) => {
-			if (v.firstName === itemDetails.repairerFirstName
-				&& v.lastName === itemDetails.repairerLastName
-			) {
-				setRepairerIdx(idx);
-			}
-		});
-		return () => {
-			setRepairerIdx(-1);
-		}
+    volunteers.forEach((v, idx) => {
+      if (v.firstName === itemDetails.repairerFirstName
+        && v.lastName === itemDetails.repairerLastName
+      ) {
+        setRepairerIdx(idx);
+      }
+    });
+    return () => {
+      setRepairerIdx(-1);
+    }
   }, [volunteers, itemDetails]);
+
+
 
   // Component's view
   return (
     <KeyboardAvoidingView
-    	behavior={Platform.OS === "ios" ? "padding" : "height"}
-    	style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ScrollView>
-	      <View style={styles.content}>
-	      	<Text
-	      		style={{
-	      			fontWeight: 'bold',
-	      			fontSize: 22,
-	      			alignSelf: 'center'
-	      		}}>{pageTitle}
-	      	</Text>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.content}>
 
-	        <CheckBox
-	          label={<Text>I agree to the <Text style={{color: "blue"}} onPress={() => {
-	            setTermsModalVisible(true);
-	          }}>terms and conditions</Text><Text style={{color: 'red'}}>*</Text></Text>}
-	          status={waiverBoxChecked ? 'checked' : 'unchecked'}
-	          onPress={() => {
-	            setItemDetails({...itemDetails, acceptsWaiver: !waiverBoxChecked});
-	            setWaiverBoxChecked(!waiverBoxChecked);
-	          }}
-	        />
-
-	        <TextInput
-	          label={
-	          	<>
-	          		<Text style={{color: '#717171'}}>Owner's email</Text>
-	          		<Text style={{color: 'red'}}>*</Text>
-	          	</>
-	          }
-	          mode="outlined"
-	          autoCorrect={false}
-	          style={styles.short_text_input}
-	          value={itemDetails.ownersEmail ?? ""}
-	          onChangeText={newEmail => setItemDetails(
-	          	{ ...itemDetails, ownersEmail: newEmail.trim()}
-	          )}
-	        />
-
-	        <TextInput
-	          label={
-	          	<>
-	          		<Text style={{color: '#717171'}}>Owner's first name</Text>
-	          		<Text style={{color: 'red'}}>*</Text>
-	          	</>
-	          }
-	          mode="outlined"
-	          autoCorrect={false}
-	          style={styles.short_text_input}
-	          value={itemDetails.ownersFirstName ?? ""}
-	          onChangeText={newFirstName => setItemDetails(
-	          	{...itemDetails, ownersFirstName: newFirstName.trim()}
-	          )}
-	        />
-
-	        <TextInput
-	          label={
-	          	<>
-	          		<Text style={{color: '#717171'}}>Owner's last name</Text>
-	          		<Text style={{color: 'red'}}>*</Text>
-	          	</>
-	          }
-	          mode="outlined"
-	          autoCorrect={false}
-	          style={styles.short_text_input}
-	          value={itemDetails.ownersLastName ?? ""}
-	          onChangeText={newLastName => setItemDetails(
-	          	{...itemDetails, ownersLastName: newLastName}
-	          )}
-	        />
-
-	      	<View style={styles.dropdownContainer}>
-		      	<View style={[styles.label]}>
-	            <Text style={{color: '#717171'}}>
-	            	Product Category
-	            	<Text style={{color: 'red'}}>*</Text>
-	            </Text>
-          	</View>
+          <Text
+            style={{
+              fontWeight: 'bold',
+              fontSize: 22,
+              alignSelf: 'center'
+            }}>{pageTitle}
+          </Text>
+          <CheckBox
+            label={
+              <Text>{"I agree to the "}
+                <Text style={{color: "blue"}}
+                  onPress={() => {
+                    setTermsModalVisible(true);
+                  }}
+                >{"terms and conditions"}</Text>
+                <Text style={{color: 'red'}}>*</Text>
+              </Text>
+            }
+            status={waiverBoxChecked ? 'checked' : 'unchecked'}
+            onPress={() => {
+              setItemDetails({...itemDetails, acceptsWaiver: !waiverBoxChecked});
+              setWaiverBoxChecked(!waiverBoxChecked);
+            }}
+          />
+          <TextInput
+            label={
+              <>
+                <Text style={{color: '#717171'}}>Owner's email</Text>
+                <Text style={{color: 'red'}}>*</Text>
+              </>
+            }
+            mode="outlined"
+            autoCorrect={false}
+            style={styles.short_text_input}
+            value={itemDetails.ownersEmail ?? ""}
+            onChangeText={newEmail => setItemDetails(
+              { ...itemDetails, ownersEmail: newEmail.trim()}
+            )}
+          />
+          <TextInput
+            label={
+              <>
+                <Text style={{color: '#717171'}}>Owner's first name</Text>
+                <Text style={{color: 'red'}}>*</Text>
+              </>
+            }
+            mode="outlined"
+            autoCorrect={false}
+            style={styles.short_text_input}
+            value={itemDetails.ownersFirstName ?? ""}
+            onChangeText={newFirstName => setItemDetails(
+              {...itemDetails, ownersFirstName: newFirstName.trim()}
+            )}
+          />
+          <TextInput
+            label={
+              <>
+                <Text style={{color: '#717171'}}>Owner's last name</Text>
+                <Text style={{color: 'red'}}>*</Text>
+              </>
+            }
+            mode="outlined"
+            autoCorrect={false}
+            style={styles.short_text_input}
+            value={itemDetails.ownersLastName ?? ""}
+            onChangeText={newLastName => setItemDetails(
+              {...itemDetails, ownersLastName: newLastName}
+            )}
+          />
+        <View style={styles.dropdownContainer}>
+          <View style={[styles.label]}>
+            <Text style={{color: '#717171'}}>
+              Product Category
+              <Text style={{color: 'red'}}>*</Text>
+            </Text>
+          </View>
             <Dropdown
               style={[styles.dropdown, productCategoryFocused && {borderWidth: 2}]}
               placeholderStyle={styles.placeholderStyle}
@@ -425,197 +429,187 @@ const AddEditRepair = ({route, navigation}) => {
                 setProductCategoryIdx(v.value);
               }}
             />
-          </View>
+        </View>
+        <TextInput
+          label={
+            <>
+              <Text style={{color: '#717171'}}>Symptoms</Text>
+              <Text style={{color: 'red'}}>*</Text>
+            </>
+          }
+          mode="outlined"
+          autoCorrect={false}
+          style={styles.short_text_input}
+          value={itemDetails.symptoms ?? ""}
+          onChangeText={newSymptoms => setItemDetails(
+            {...itemDetails, symptoms: newSymptoms}
+          )}
+        />
+        <TextInput
+          label={
+            <>
+              <Text style={{color: '#717171'}}>Weight</Text>
+              <Text style={{color: 'red'}}>*</Text>
+            </>
+          }
+          mode="outlined"
+          autoCorrect={false}
+          style={styles.short_text_input}
+          value={itemDetails.weight ?? ""}
+          onChangeText={newWeight => setItemDetails(
+            {...itemDetails, weight: newWeight}
+          )}
+        />
+        <TextInput
+          label={
+            <>
+              <Text style={{color: '#717171'}}>Cost</Text>
+              <Text style={{color: 'red'}}>*</Text>
+            </>
+          }
+          mode="outlined"
+          autoCorrect={false}
+          style={styles.short_text_input}
+          value={itemDetails.cost ?? ""}
+          onChangeText={newCost => setItemDetails(
+            {...itemDetails, cost: newCost}
+          )}
+        />
+        <TextInput
+          label="Brand"
+          mode="outlined"
+          autoCorrect={false}
+          style={styles.short_text_input}
+          value={itemDetails.brand ?? ""}
+          onChangeText={newBrand => setItemDetails(
+            {...itemDetails, brand: newBrand}
+          )}
+        />
+        <TextInput
+          label="Model"
+          mode="outlined"
+          autoCorrect={false}
+          style={styles.short_text_input}
+          value={itemDetails.model ?? ""}
+          onChangeText={newModel => setItemDetails({...itemDetails, model: newModel})}
+        />
+        {authenticated && (
+          <>
+            <TextInput
+              label="Repair Notes"
+              mode="outlined"
+              autoCorrect={false}
+              style={styles.short_text_input}
+              value={itemDetails.notes ?? ""}
+              onChangeText={newNotes => setItemDetails({...itemDetails, notes: newNotes})}
+            />
+            {
+              repairerList.length > 0 && <>
+              <View
+                style={{marginTop: 15, width: '90%', maxWidth: 500}}
+              >
+                <DropDown
+                  label={"Repairer"}
+                  mode="outlined"
+                  visible={showRepairerDropdown}
+                  showDropDown={() => setShowRepairerDropdown(true)}
+                  onDismiss={() => setShowRepairerDropdown(false)}
+                  value={repairerIdx}
+                  setValue={setRepairerIdx}
+                  list={repairerList}
+                  dropdownPosition={"top"}
+                />
+              </View>
+              </>
+            }
+            <View
+              style={{marginTop: 10, width: '100%'}}
+            >
+              <DropDown
+                label={"Repair Status"}
+                mode="outlined"
+                visible={showStatusDropdown}
+                showDropDown={() => setShowStatusDropdown(true)}
+                onDismiss={() => setShowStatusDropdown(false)}
+                value={statusIdx}
+                setValue={setStatusIdx}
+                list={statusesList}
+                dropdownPosition={"top"}
+                renderRightIcon={false}
+              />
+            </View>
+          </>
+        )}
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: "space-evenly",
+            alignItems: "center",
+            marginBottom: 15
+          }}
+        >
+          { authenticated && !!itemDetails._id &&
+            <SubmitButton
+               buttonColor='red'
+               textColor="white"
+               rippleColor="rgba(168,37,33,0.4)"
+              text="Delete"
+              onPress={() => {
+                setShowDeleteConfirmationDialog(true);
+              }}
+            />
+          }
+          <SubmitButton
+            text="Save"
+            style={{marginHorizontal: 10}}
+            disabled={!okayToSave()}
+            onPress={() => {
+              saveItem(itemDetails)
+            }}
+          />
+        </View>
 
-	        <TextInput
-	          label={
-	          	<>
-	          		<Text style={{color: '#717171'}}>Symptoms</Text>
-	          		<Text style={{color: 'red'}}>*</Text>
-	          	</>
-	          }
-	          mode="outlined"
-	          autoCorrect={false}
-	          style={styles.short_text_input}
-	          value={itemDetails.symptoms ?? ""}
-	          onChangeText={newSymptoms => setItemDetails(
-	          	{...itemDetails, symptoms: newSymptoms}
-	          )}
-	        />
+        </View>
+      </ScrollView>
 
-	        <TextInput
-	          label={
-	          	<>
-	          		<Text style={{color: '#717171'}}>Weight</Text>
-	          		<Text style={{color: 'red'}}>*</Text>
-	          	</>
-	          }
-	          mode="outlined"
-	          autoCorrect={false}
-	          style={styles.short_text_input}
-	          value={itemDetails.weight ?? ""}
-	          onChangeText={newWeight => setItemDetails(
-	          	{...itemDetails, weight: newWeight}
-	          )}
-	        />
-
-	        <TextInput
-	          label={
-	          	<>
-	          		<Text style={{color: '#717171'}}>Cost</Text>
-	          		<Text style={{color: 'red'}}>*</Text>
-	          	</>
-	          }
-	          mode="outlined"
-	          autoCorrect={false}
-	          style={styles.short_text_input}
-	          value={itemDetails.cost ?? ""}
-	          onChangeText={newCost => setItemDetails(
-	          	{...itemDetails, cost: newCost}
-	          )}
-	        />
-
-	        <TextInput
-	          label="Brand"
-	          mode="outlined"
-	          autoCorrect={false}
-	          style={styles.short_text_input}
-	          value={itemDetails.brand ?? ""}
-	          onChangeText={newBrand => setItemDetails(
-	          	{...itemDetails, brand: newBrand}
-	          )}
-	        />
-
-	        <TextInput
-	          label="Model"
-	          mode="outlined"
-	          autoCorrect={false}
-	          style={styles.short_text_input}
-	          value={itemDetails.model ?? ""}
-	          onChangeText={newModel => setItemDetails({...itemDetails, model: newModel})}
-	        />
-
-	        {authenticated && (
-        		<>
-			        <TextInput
-			          label="Repair Notes"
-			          mode="outlined"
-			          autoCorrect={false}
-			          style={styles.short_text_input}
-			          value={itemDetails.notes ?? ""}
-			          onChangeText={newNotes => setItemDetails({...itemDetails, notes: newNotes})}
-			        />
-
-			        {
-			        	repairerList.length > 0 && <>
-			        	<View
-				      		style={{marginTop: 15, width: '90%', maxWidth: 500}}
-				      	>
-				        	<DropDown
-				          label={"Repairer"}
-				          mode="outlined"
-				          visible={showRepairerDropdown}
-				          showDropDown={() => setShowRepairerDropdown(true)}
-				          onDismiss={() => setShowRepairerDropdown(false)}
-				          value={repairerIdx}
-				          setValue={setRepairerIdx}
-				          list={repairerList}
-					        />
-				        </View>
-				        </>
-			      	}
-
-			      	<View
-			      		style={{marginTop: 15, width: '90%', maxWidth: 500}}
-			      	>
-			        <DropDown
-			          label={"Repair Status"}
-			          mode="outlined"
-			          visible={showStatusDropdown}
-			          showDropDown={() => setShowStatusDropdown(true)}
-			          onDismiss={() => setShowStatusDropdown(false)}
-			          value={statusIdx}
-			          setValue={setStatusIdx}
-			          list={statusesList}
-			        />
-			        </View>
-						</>
-					)}
-
-	        <View
-	        	style={{
-	        		flexDirection: 'row',
-	        		justifyContent: "space-evenly",
-	        		alignItems: "center",
-	        		marginBottom: 15
-	        	}}
-        	>
-
-		        { authenticated && !!itemDetails._id &&
-		        	<SubmitButton
-                buttonColor='red'
-                textColor="white"
-                rippleColor="rgba(168,37,33,0.4)"
-			          text="Delete"
-			          onPress={() => {
-			          	setShowDeleteConfirmationDialog(true);
-			          }}
-			        />
-			      }
-
-		        <SubmitButton
-		          text="Save"
-		          style={{marginHorizontal: 10}}
-		          disabled={!okayToSave()}
-		          onPress={() => {
-		          	saveItem(itemDetails)
-		          }}
-		        />
-	        </View>
-
-	        <Portal>
-	          <Modal style={styles.modalStyle} visible={termsModalVisible} onDismiss={() => {setTermsModalVisible(false)}}>
-	            <HTMLView value={terms}/>
-	          </Modal>
-	        </Portal>
-
-		      <Portal>
-		        <Snackbar
-		          visible={showSnackbar}
-		          onDismiss={() => {
-		            setShowSnackbar(false);
-		            setSnackbarMsg("");
-		          }}
-		          action={{
-		            label: "close"
-		          }}
-		        >{snackbarMsg}
-		        </Snackbar>
-		      </Portal>
-
-		      <Portal>
-		      	<Dialog
-		      		visible={showDeleteConfirmationDialog}
-		      		onDismiss={() => { setShowDeleteConfirmationDialog(false) }}
-		      	>
-		      		<Dialog.Title>Alert</Dialog.Title>
-		      		<Dialog.Content>
-		      			<Text>Are you sure you want to delete {itemDetails.ownersFirstName} {itemDetails.ownersLastName}'s {itemDetails.type}</Text>
-		      		</Dialog.Content>
-		      		<Dialog.Actions>
-		      			<Button onPress={() => {setShowDeleteConfirmationDialog(false)}}>Cancel</Button>
-		      			<Button onPress={() => {
-		      				deleteCurrentItem(itemDetails);
-		      				setShowDeleteConfirmationDialog(false);
-		      			}}>Delete</Button>
-		      		</Dialog.Actions>
-		      	</Dialog>
-		      </Portal>
-      	</View>
-	    </ScrollView>
+      <Portal>
+        <Modal style={styles.modalStyle} visible={termsModalVisible} onDismiss={() => {setTermsModalVisible(false)}}>
+          <HTMLView value={terms}/>
+        </Modal>
+      </Portal>
+      <Portal>
+        <Snackbar
+          visible={showSnackbar}
+          onDismiss={() => {
+            setShowSnackbar(false);
+            setSnackbarMsg("");
+          }}
+          action={{
+            label: "close"
+          }}
+        >{snackbarMsg}
+        </Snackbar>
+      </Portal>
+      <Portal>
+        <Dialog
+          visible={showDeleteConfirmationDialog}
+          onDismiss={() => { setShowDeleteConfirmationDialog(false) }}
+        >
+          <Dialog.Title>Alert</Dialog.Title>
+          <Dialog.Content>
+            <Text>Are you sure you want to delete {itemDetails.ownersFirstName} {itemDetails.ownersLastName}'s {itemDetails.type}</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => {setShowDeleteConfirmationDialog(false)}}>Cancel</Button>
+            <Button onPress={() => {
+              deleteCurrentItem(itemDetails);
+              setShowDeleteConfirmationDialog(false);
+            }}>Delete</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </KeyboardAvoidingView>
   );
-
 };
 
 export default AddEditRepair;

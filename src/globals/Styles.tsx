@@ -25,7 +25,7 @@ export default StyleSheet.create({
     paddingTop: 15,
     paddingBottom: 15,
     paddingHorizontal: 10,
-    minHeight: '80vh',
+    height: '80vh',
   },
   content: {
     maxWidth: 738,
@@ -43,6 +43,7 @@ export default StyleSheet.create({
     //width: ' 90%'
   },
   short_text_input: {
+    marginVertical: 5
     // minWidth: 320,
     // maxWidth: 500,
   },
@@ -85,14 +86,13 @@ export default StyleSheet.create({
     fontFamily: 'Futura',
   },
   dropdownContainer: {
-    backgroundColor: 'white',
-    padding: 16,
+    paddingTop: 16,
+    paddingBottom: 5,
     width: "100%",
     maxWidth: 500,
-    marginTop: 15
   },
   dropdown: {
-    backgroundColor: '#f6f6f6',
+    backgroundColor: 'white',
     color: '#717171',
     height: 50,
     borderColor: 'gray',

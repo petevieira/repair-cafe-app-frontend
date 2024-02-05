@@ -125,3 +125,27 @@ export const deleteVolunteer = async (id: string) => {
     return Promise.reject(error);
   }
 };
+
+export const getPastVolunteers = async () => {
+  try {
+    const authToken = await AsyncStorageHelpers.getAuth(authToken);
+    if (!authToken) {
+      throw new Error("[getPastVolunteer] failed to get auth token");
+    }
+    const response = await axios.get(
+      Api.Volunteers.GET_PAST_VOLUNTEERS,
+      {
+        headers: {
+          'Authorization': `Bearer ${authToken.token}`
+        }
+      }
+    );
+    if (!response) {
+      throw new Error("Error getting past volunteers");
+    }
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+

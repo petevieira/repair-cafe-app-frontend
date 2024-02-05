@@ -3,6 +3,7 @@ import { API_URL } from '@env';
 const USERS_PREFIX      = `${API_URL}/users`;
 const ITEMS_PREFIX      = `${API_URL}/items`;
 const VOLUNTEERS_PREFIX = `${API_URL}/volunteers`;
+const TEXT_PREFIX       = `${API_URL}/text`;
 
 const Users = {
   USER_IS_ADMIN:       `${USERS_PREFIX}/user-is-admin`,
@@ -24,6 +25,11 @@ const Volunteers = {
   DELETE_VOLUNTEER:    `${VOLUNTEERS_PREFIX}/delete-volunteer`,
   UPDATE_VOLUNTEER:    `${VOLUNTEERS_PREFIX}/update-volunteer`,
   GET_DAYS_VOLUNTEERS: `${VOLUNTEERS_PREFIX}/get-days-volunteers`,
+  GET_PAST_VOLUNTEERS: `${VOLUNTEERS_PREFIX}/get-past-volunteers`,
 };
 
-export default { Users, Items, Volunteers };
+const Text = {
+  GET_TEXT:            `${TEXT_PREFIX}/get-text`,
+};
+
+export default { Users, Items, Volunteers, Text };

@@ -40,12 +40,9 @@ export default StyleSheet.create({
   home_buttons_mobile: {
     height: 120,
     margin: 20,
-    //width: ' 90%'
   },
   short_text_input: {
     marginVertical: 5
-    // minWidth: 320,
-    // maxWidth: 500,
   },
   submitButton: {
     marginTop: 20,
@@ -63,7 +60,10 @@ export default StyleSheet.create({
   },
   modalStyle: {
     backgroundColor: 'white',
-    padding: 20,
+    margin: 20,
+    width: '50vw',
+    height: '80vh',
+    minWidth: 320,
   },
   loader: {
     position: 'absolute',
@@ -136,4 +136,7 @@ export default StyleSheet.create({
     bottom: 60,
     backgroundColor: '#96db73',
   },
+  terms: {
+    // padding: 10
+  }
 });

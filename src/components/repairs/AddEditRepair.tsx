@@ -2,7 +2,6 @@ import * as React from 'react';
 import { View, Platform, KeyboardAvoidingView, ScrollView } from 'react-native';
 import { Button, Dialog, Portal, TextInput, HelperText, Text, Modal, Snackbar } from 'react-native-paper';
 import DropDown from "react-native-paper-dropdown";
-import { format } from "date-fns";
 import { useNavigation } from '@react-navigation/native';
 import HTMLView from 'react-native-htmlview';
 import { Dropdown } from 'react-native-element-dropdown';
@@ -18,35 +17,8 @@ import { AuthContext } from '../../contexts/auth-context';
 import { getTodaysVolunteers } from '../../requests/volunteer-requests';
 import { addBasicItem, addFullItem, getItem, updateItem, deleteItem } from '../../requests/item-requests';
 import { ProductCategoryValues, RepairStatusValues, RepairBarrierValues} from '../../globals/ords';
-
-const terms =
-`
-<div>
-  <div role="heading" aria-level="3">
-    <h2><span>Tucson Repair Café/Library Liability Waiver</span></h2>
-    </h3<span>Acknowledgement of Risk or Injury Possibility</span</h3>
-    <p>
-      <span>As a participant or volunteer in the program, I recognize the risk and acknowledge that there are certain risks of physical injury – including death, damages, property damage, or loss – which I may sustain as a result of participating in any and all activities connected with the program, or the use of the facilities or equipment.</span>
-    </p>
-    <h3><span>Waiver of Claim for Injury Clause</span></h3>
-    <p>
-      <span>I agree to waive and relinquish all claims that I may have for injuries or damages as a result of participating in the program or using the facilities or equipment against nonprofit organization and its officers, agents, servants, employees, other volunteers, and affiliates.</span>
-    </p>
-    <h3><span>Release from Liability Clause</span></h3>
-    <p>
-      <span>I do hereby release and discharge nonprofit organization and its officers, agents, servants, employees, volunteers and affiliates from any and all claims for injuries, including death, damages, property damage, or loss which may have or may in future accrue to me in account of participating in or volunteering for the nonprofit organization.</span>
-    </p>
-    <h3><span>Indemnity and Defense Clause</span></h3>
-    <p>
-      <span>I further agree to indemnify and hold harmless and pay defense costs and defend the nonprofit organization and its agents, servants, employees, other volunteers, and affiliates, from any and all claims resulting from injuries – including death, damages, property damage, or loss – sustained by me and arising out of, connected with, or in any way associated with the activities of the program or the use of facilities or equipment.</span>
-    </p>
-    <p>
-      <i><span style="font-weight:normal;text-decoration:none">By checking the box below, you are agreeing to the terms of the waiver.</span></i>
-    </p>
-  </div>
-</div>
-</html>
-`;
+import Terms from '../../globals/Terms';
+import { WEIGHT_UNITS, COST_UNITS } from '@env';
 
 const statusesList = [
   { value: 0, label: 'In Queue'  },
@@ -358,10 +330,9 @@ const AddEditRepair = ({route, navigation}) => {
           />
           <TextInput
             label={
-              <>
-                <Text style={{color: '#717171'}}>Owner's email</Text>
-                <Text style={{color: 'red'}}>*</Text>
-              </>
+                <Text style={{color: '#717171'}}>{"Owner's email "}
+                  <Text style={{color: 'red'}}>*</Text>
+                </Text>
             }
             mode="outlined"
             autoCorrect={false}
@@ -373,10 +344,9 @@ const AddEditRepair = ({route, navigation}) => {
           />
           <TextInput
             label={
-              <>
-                <Text style={{color: '#717171'}}>Owner's first name</Text>
-                <Text style={{color: 'red'}}>*</Text>
-              </>
+                <Text style={{color: '#717171'}}>{"Owner's first name "}
+                  <Text style={{color: 'red'}}>*</Text>
+                </Text>
             }
             mode="outlined"
             autoCorrect={false}
@@ -388,10 +358,9 @@ const AddEditRepair = ({route, navigation}) => {
           />
           <TextInput
             label={
-              <>
-                <Text style={{color: '#717171'}}>Owner's last name</Text>
-                <Text style={{color: 'red'}}>*</Text>
-              </>
+                <Text style={{color: '#717171'}}>{"Owner's last name "}
+                  <Text style={{color: 'red'}}>*</Text>
+                </Text>
             }
             mode="outlined"
             autoCorrect={false}
@@ -401,13 +370,13 @@ const AddEditRepair = ({route, navigation}) => {
               {...itemDetails, ownersLastName: newLastName}
             )}
           />
-        <View style={styles.dropdownContainer}>
-          <View style={[styles.label]}>
-            <Text style={{color: '#717171'}}>
-              Product Category
-              <Text style={{color: 'red'}}>*</Text>
-            </Text>
-          </View>
+          <View style={styles.dropdownContainer}>
+            <View style={[styles.label]}>
+              <Text style={{color: '#717171'}}>
+                Product Category
+                <Text style={{color: 'red'}}>*</Text>
+              </Text>
+            </View>
             <Dropdown
               style={[styles.dropdown, productCategoryFocused && {borderWidth: 2}]}
               placeholderStyle={styles.placeholderStyle}
@@ -429,154 +398,173 @@ const AddEditRepair = ({route, navigation}) => {
                 setProductCategoryIdx(v.value);
               }}
             />
-        </View>
-        <TextInput
-          label={
+          </View>
+          <TextInput
+            label={
+                <Text style={{color: '#717171'}}>{"Symptoms "}
+                  <Text style={{color: 'red'}}>*</Text>
+                </Text>
+            }
+            mode="outlined"
+            autoCorrect={false}
+            style={styles.short_text_input}
+            value={itemDetails.symptoms ?? ""}
+            onChangeText={newSymptoms => setItemDetails(
+              {...itemDetails, symptoms: newSymptoms}
+            )}
+          />
+          <TextInput
+            label={
+                <Text style={{color: '#717171'}}>{`Weight (${WEIGHT_UNITS})`}
+                  <Text style={{color: 'red'}}>*</Text>
+                </Text>
+            }
+            mode="outlined"
+            autoCorrect={false}
+            style={styles.short_text_input}
+            value={itemDetails.weight ?? ""}
+            onChangeText={newWeight => setItemDetails(
+              {...itemDetails, weight: newWeight}
+            )}
+          />
+          <TextInput
+            label={
+                <Text style={{color: '#717171'}}>{`Cost (${COST_UNITS})`}
+                  <Text style={{color: 'red'}}>*</Text>
+                </Text>
+            }
+            mode="outlined"
+            autoCorrect={false}
+            style={styles.short_text_input}
+            value={itemDetails.cost ?? ""}
+            onChangeText={newCost => setItemDetails(
+              {...itemDetails, cost: newCost}
+            )}
+          />
+          <TextInput
+            label="Brand"
+            mode="outlined"
+            autoCorrect={false}
+            style={styles.short_text_input}
+            value={itemDetails.brand ?? ""}
+            onChangeText={newBrand => setItemDetails(
+              {...itemDetails, brand: newBrand}
+            )}
+          />
+          <TextInput
+            label="Model"
+            mode="outlined"
+            autoCorrect={false}
+            style={styles.short_text_input}
+            value={itemDetails.model ?? ""}
+            onChangeText={newModel => setItemDetails({...itemDetails, model: newModel})}
+          />
+          {authenticated && (
             <>
-              <Text style={{color: '#717171'}}>Symptoms</Text>
-              <Text style={{color: 'red'}}>*</Text>
-            </>
-          }
-          mode="outlined"
-          autoCorrect={false}
-          style={styles.short_text_input}
-          value={itemDetails.symptoms ?? ""}
-          onChangeText={newSymptoms => setItemDetails(
-            {...itemDetails, symptoms: newSymptoms}
-          )}
-        />
-        <TextInput
-          label={
-            <>
-              <Text style={{color: '#717171'}}>Weight</Text>
-              <Text style={{color: 'red'}}>*</Text>
-            </>
-          }
-          mode="outlined"
-          autoCorrect={false}
-          style={styles.short_text_input}
-          value={itemDetails.weight ?? ""}
-          onChangeText={newWeight => setItemDetails(
-            {...itemDetails, weight: newWeight}
-          )}
-        />
-        <TextInput
-          label={
-            <>
-              <Text style={{color: '#717171'}}>Cost</Text>
-              <Text style={{color: 'red'}}>*</Text>
-            </>
-          }
-          mode="outlined"
-          autoCorrect={false}
-          style={styles.short_text_input}
-          value={itemDetails.cost ?? ""}
-          onChangeText={newCost => setItemDetails(
-            {...itemDetails, cost: newCost}
-          )}
-        />
-        <TextInput
-          label="Brand"
-          mode="outlined"
-          autoCorrect={false}
-          style={styles.short_text_input}
-          value={itemDetails.brand ?? ""}
-          onChangeText={newBrand => setItemDetails(
-            {...itemDetails, brand: newBrand}
-          )}
-        />
-        <TextInput
-          label="Model"
-          mode="outlined"
-          autoCorrect={false}
-          style={styles.short_text_input}
-          value={itemDetails.model ?? ""}
-          onChangeText={newModel => setItemDetails({...itemDetails, model: newModel})}
-        />
-        {authenticated && (
-          <>
-            <TextInput
-              label="Repair Notes"
-              mode="outlined"
-              autoCorrect={false}
-              style={styles.short_text_input}
-              value={itemDetails.notes ?? ""}
-              onChangeText={newNotes => setItemDetails({...itemDetails, notes: newNotes})}
-            />
-            {
-              repairerList.length > 0 && <>
+              <TextInput
+                label="Repair Notes"
+                mode="outlined"
+                autoCorrect={false}
+                style={styles.short_text_input}
+                value={itemDetails.notes ?? ""}
+                onChangeText={newNotes => setItemDetails({...itemDetails, notes: newNotes})}
+              />
+              {
+                repairerList.length > 0 && <>
+                <View
+                  style={{marginTop: 15, width: '90%', maxWidth: 500}}
+                >
+                  <DropDown
+                    label={"Repairer"}
+                    mode="outlined"
+                    visible={showRepairerDropdown}
+                    showDropDown={() => setShowRepairerDropdown(true)}
+                    onDismiss={() => setShowRepairerDropdown(false)}
+                    value={repairerIdx}
+                    setValue={setRepairerIdx}
+                    list={repairerList}
+                    dropdownPosition={"top"}
+                  />
+                </View>
+                </>
+              }
               <View
-                style={{marginTop: 15, width: '90%', maxWidth: 500}}
+                style={{marginTop: 10, width: '100%'}}
               >
                 <DropDown
-                  label={"Repairer"}
+                  label={"Repair Status"}
                   mode="outlined"
-                  visible={showRepairerDropdown}
-                  showDropDown={() => setShowRepairerDropdown(true)}
-                  onDismiss={() => setShowRepairerDropdown(false)}
-                  value={repairerIdx}
-                  setValue={setRepairerIdx}
-                  list={repairerList}
+                  visible={showStatusDropdown}
+                  showDropDown={() => setShowStatusDropdown(true)}
+                  onDismiss={() => setShowStatusDropdown(false)}
+                  value={statusIdx}
+                  setValue={setStatusIdx}
+                  list={statusesList}
                   dropdownPosition={"top"}
+                  renderRightIcon={false}
                 />
               </View>
-              </>
-            }
-            <View
-              style={{marginTop: 10, width: '100%'}}
-            >
-              <DropDown
-                label={"Repair Status"}
-                mode="outlined"
-                visible={showStatusDropdown}
-                showDropDown={() => setShowStatusDropdown(true)}
-                onDismiss={() => setShowStatusDropdown(false)}
-                value={statusIdx}
-                setValue={setStatusIdx}
-                list={statusesList}
-                dropdownPosition={"top"}
-                renderRightIcon={false}
+            </>
+          )}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: "space-evenly",
+              alignItems: "center",
+              marginBottom: 15
+            }}
+          >
+            { authenticated && !!itemDetails._id &&
+              <SubmitButton
+                 buttonColor='red'
+                 textColor="white"
+                 rippleColor="rgba(168,37,33,0.4)"
+                text="Delete"
+                onPress={() => {
+                  setShowDeleteConfirmationDialog(true);
+                }}
               />
-            </View>
-          </>
-        )}
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: "space-evenly",
-            alignItems: "center",
-            marginBottom: 15
-          }}
-        >
-          { authenticated && !!itemDetails._id &&
+            }
             <SubmitButton
-               buttonColor='red'
-               textColor="white"
-               rippleColor="rgba(168,37,33,0.4)"
-              text="Delete"
+              text="Save"
+              style={{marginHorizontal: 10}}
+              disabled={!okayToSave()}
               onPress={() => {
-                setShowDeleteConfirmationDialog(true);
+                saveItem(itemDetails)
               }}
             />
-          }
-          <SubmitButton
-            text="Save"
-            style={{marginHorizontal: 10}}
-            disabled={!okayToSave()}
-            onPress={() => {
-              saveItem(itemDetails)
-            }}
-          />
-        </View>
+          </View>
 
         </View>
       </ScrollView>
 
-      <Portal>
-        <Modal style={styles.modalStyle} visible={termsModalVisible} onDismiss={() => {setTermsModalVisible(false)}}>
-          <HTMLView value={terms}/>
-        </Modal>
-      </Portal>
+      { termsModalVisible &&
+        <View
+          style={{
+            position: 'absolute',
+            top: 5,
+            left: '50%',
+            transform: [{translateX: '-50%'}],
+            height: '70vh',
+            maxWidth: '80vw',
+            minWidth: 320,
+            backgroundColor: '#f2f2f2'
+          }}
+        >
+          <Text
+            onPress={() => { setTermsModalVisible(false) }}
+            style={{
+              fontSize: 22,
+              marginLeft: 'auto',
+              paddingRight: 5,
+            }}
+          >
+            {"Close"}
+          </Text>
+          <Terms />
+        </View>
+      }
+
       <Portal>
         <Snackbar
           visible={showSnackbar}
@@ -590,6 +578,7 @@ const AddEditRepair = ({route, navigation}) => {
         >{snackbarMsg}
         </Snackbar>
       </Portal>
+
       <Portal>
         <Dialog
           visible={showDeleteConfirmationDialog}
@@ -608,6 +597,7 @@ const AddEditRepair = ({route, navigation}) => {
           </Dialog.Actions>
         </Dialog>
       </Portal>
+
     </KeyboardAvoidingView>
   );
 };

@@ -94,7 +94,6 @@ export const updateItem = async (item: Item) => {
     if (!authToken) {
       throw new Error("[updateItem] failed to get auth token");
     }
-    console.debug("[updateItem: ", item);
     const response = await axios.put(
       Api.Items.UPDATE_ITEM,
       createItem(item),
@@ -102,7 +101,6 @@ export const updateItem = async (item: Item) => {
         headers: {'Authorization': `Bearer ${authToken.token}`}
       }
     );
-    console.debug("update item response: ", response);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -117,7 +115,7 @@ export const deleteItem = async (id: string) => {
   try {
     const authToken = await AsyncStorageHelpers.getAuth(authToken);
     if (!authToken) {
-      throw new Error("[getVolunteer] failed to get auth token");
+      throw new Error("[deleteItem] failed to get auth token");
     }
     const response = await axios.delete(
       Api.Items.DELETE_ITEM + `/${id}`,
@@ -129,6 +127,33 @@ export const deleteItem = async (id: string) => {
     );
     if (!response) {
       throw new Error("Error deleting item");
+    }
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const findOwnerByEmail = async (email: string) => {
+  if (!email) {
+    console.error("Can't find owner by email. 'email' not defined");
+    return { status: false };
+  }
+  try {
+    const authToken = await AsyncStorageHelpers.getAuth(authToken);
+    if (!authToken) {
+      throw new Error("[findOwnerByEmail] failed to get auth token");
+    }
+    const response = await axios.get(
+      Api.Items.FIND_OWNER_BY_EMAIL + `/${email}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${authToken.token}`
+        }
+      }
+    );
+    if (!response) {
+      throw new Error("Error finding owner by email");
     }
     return response.data;
   } catch (error) {

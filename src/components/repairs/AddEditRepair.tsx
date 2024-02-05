@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { View, Platform, KeyboardAvoidingView, ScrollView } from 'react-native';
 import { Button, Dialog, Portal, TextInput, HelperText, Text, Modal, Snackbar } from 'react-native-paper';
 import DropDown from "react-native-paper-dropdown";
@@ -15,16 +15,11 @@ import Item from '../../models/Item';
 import CheckBox from "../../globals/CheckBox"
 import { AuthContext } from '../../contexts/auth-context';
 import { getTodaysVolunteers } from '../../requests/volunteer-requests';
-import { addBasicItem, addFullItem, getItem, updateItem, deleteItem } from '../../requests/item-requests';
+import { addBasicItem, addFullItem, getItem, updateItem, deleteItem, findOwnerByEmail } from '../../requests/item-requests';
 import { ProductCategoryValues, RepairStatusValues, RepairBarrierValues} from '../../globals/ords';
 import Terms from '../../globals/Terms';
 import { WEIGHT_UNITS, COST_UNITS } from '@env';
-
-const statusesList = [
-  { value: 0, label: 'In Queue'  },
-  { value: 1, label: 'In Progress'  },
-  { value: 2, label: 'Complete' },
-];
+import { emailIsValid } from '../../lib/helpers';
 
 const ordsProductCategoryList = ProductCategoryValues.map((el, idx) => {
   return { label: el.text, value: idx };
@@ -47,24 +42,25 @@ const volunteersList = [
 const miscCategoryIdx = 17;
 
 const AddEditRepair = ({route, navigation}) => {
-  const [itemDetails, setItemDetails] = React.useState(new Item());
-  const [waiverBoxChecked, setWaiverBoxChecked] = React.useState(false);
-  const [pageTitle, setPageTitle] = React.useState("");
-  const [showRepairerDropdown, setShowRepairerDropdown] = React.useState(false);
-  const [showStatusDropdown, setShowStatusDropdown] = React.useState(false);
-  const [termsModalVisible, setTermsModalVisible] = React.useState(false);
-  const [showAddItemBtn, setShowAddItemBtn] = React.useState(false);
-  const [repairerList, setRepairerList] = React.useState([]);
-  const [volunteers, setVolunteers] = React.useState([]);
-  const [snackbarMsg, setSnackbarMsg] = React.useState("");
-  const [showSnackbar, setShowSnackbar] = React.useState(false);
-  const [repairerIdx, setRepairerIdx] = React.useState(-1);
-  const [statusIdx, setStatusIdx] = React.useState(-1);
-  const [state, setState] = React.useContext(AuthContext);
-  const [statusFocused, setStatusFocused] = React.useState(false);
-  const [productCategoryIdx, setProductCategoryIdx] = React.useState(miscCategoryIdx)
-  const [productCategoryFocused, setProductCategoryFocused] = React.useState(false);
-  const [showDeleteConfirmationDialog, setShowDeleteConfirmationDialog] = React.useState(false);
+  const [itemDetails, setItemDetails] = useState(new Item());
+  const [waiverBoxChecked, setWaiverBoxChecked] = useState(false);
+  const [pageTitle, setPageTitle] = useState("");
+  const [termsModalVisible, setTermsModalVisible] = useState(false);
+  const [showAddItemBtn, setShowAddItemBtn] = useState(false);
+  const [repairerList, setRepairerList] = useState([]);
+  const [volunteers, setVolunteers] = useState([]);
+  const [snackbarMsg, setSnackbarMsg] = useState("");
+  const [showSnackbar, setShowSnackbar] = useState(false);
+  const [repairerIdx, setRepairerIdx] = useState(-1);
+  const [showRepairerDropdown, setShowRepairerDropdown] = useState(false);
+  const [statusIdx, setStatusIdx] = useState(-1);
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+  const [barrierIdx, setBarrierIdx] = useState(-1);
+  const [showBarrierDropdown, setShowBarrierDropdown] = useState(false);
+  const [productCategoryIdx, setProductCategoryIdx] = useState(miscCategoryIdx)
+  const [productCategoryFocused, setProductCategoryFocused] = useState(false);
+  const [showDeleteConfirmationDialog, setShowDeleteConfirmationDialog] = useState(false);
+  const [state, setState] = useContext(AuthContext);
 
   // Set whether the user is authenticated from the AuthContext state
   const authenticated = !!state && state.token !== '' && state.user !== null;
@@ -183,8 +179,14 @@ const AddEditRepair = ({route, navigation}) => {
   }
 
   const initStatus = (item) => {
-    item.status = "In Queue";
+    item.status = RepairStatusValues[0];
     setStatusIdx(0);
+    return item;
+  }
+
+  const initBarrier = (item) => {
+    item.barrier = RepairBarrierValues[0];
+    setBarrierIdx(0);
     return item;
   }
 
@@ -226,7 +228,32 @@ const AddEditRepair = ({route, navigation}) => {
       && !!itemDetails.type)
   }
 
-  React.useEffect(() => {
+  const onEmailBlur = async () => {
+    if (!!itemDetails._id || !emailIsValid(itemDetails.ownersEmail)) {
+      return;
+    }
+    setState({...state, showLoader: true});
+    try {
+      const response = await findOwnerByEmail(itemDetails.ownersEmail);
+      if (!response.data) {
+        setState({...state, showLoader: false});
+        return;
+      }
+      const owner = response.data.owner;
+      if (!!owner) {
+        setItemDetails({
+          ...itemDetails,
+          ownersFirstName: owner.firstName,
+          ownersLastName: owner.lastName
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    setState({...state, showLoader: false});
+  }
+
+  useEffect(() => {
     const abortController = new AbortController();
     const signal = abortController.signal;
     getVolunteers(signal);
@@ -235,29 +262,34 @@ const AddEditRepair = ({route, navigation}) => {
     }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const abortController = new AbortController();
     const signal = abortController.signal;
     getFullItem(paramItem, signal);
     return () => {
-      console.debug("AddEditRepair unmounted")
       abortController.abort();
     }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (statusIdx >= 0) {
-      setItemDetails({...itemDetails, status: statusesList[statusIdx].label})
+      setItemDetails({...itemDetails, status: ordsRepairStatusList[statusIdx].label})
     }
   }, [statusIdx]);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    if (barrierIdx >= 0) {
+      setItemDetails({...itemDetails, repairBarrier: ordsRepairBarrierList[barrierIdx].label})
+    }
+  }, [barrierIdx]);
+
+  useEffect(() => {
     if (productCategoryIdx >= 0) {
       setItemDetails({...itemDetails, type: ordsProductCategoryList[productCategoryIdx].label});
     }
   }, [productCategoryIdx]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (repairerIdx >= 0) {
       setItemDetails({
         ...itemDetails,
@@ -270,8 +302,8 @@ const AddEditRepair = ({route, navigation}) => {
     }
   }, [repairerIdx]);
 
-  React.useEffect(() => {
-    statusesList.forEach((s, idx) => {
+  useEffect(() => {
+    ordsRepairStatusList.forEach((s, idx) => {
       if (s.label === itemDetails.status) {
         setStatusIdx(idx);
       }
@@ -281,7 +313,18 @@ const AddEditRepair = ({route, navigation}) => {
     });
   }, [itemDetails]);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    ordsRepairBarrierList.forEach((s, idx) => {
+      if (s.label === itemDetails.repairBarrier) {
+        setBarrierIdx(idx);
+      }
+      return () => {
+        setBarrierIdx(-1);
+      }
+    });
+  }, [itemDetails]);
+
+  useEffect(() => {
     volunteers.forEach((v, idx) => {
       if (v.firstName === itemDetails.repairerFirstName
         && v.lastName === itemDetails.repairerLastName
@@ -338,8 +381,9 @@ const AddEditRepair = ({route, navigation}) => {
             autoCorrect={false}
             style={styles.short_text_input}
             value={itemDetails.ownersEmail ?? ""}
+            onBlur={onEmailBlur}
             onChangeText={newEmail => setItemDetails(
-              { ...itemDetails, ownersEmail: newEmail.trim()}
+              { ...itemDetails, ownersEmail: newEmail.trim() }
             )}
           />
           <TextInput
@@ -459,53 +503,66 @@ const AddEditRepair = ({route, navigation}) => {
             value={itemDetails.model ?? ""}
             onChangeText={newModel => setItemDetails({...itemDetails, model: newModel})}
           />
-          {authenticated && (
-            <>
-              <TextInput
-                label="Repair Notes"
+          <TextInput
+            label="Repair Notes"
+            mode="outlined"
+            autoCorrect={false}
+            style={styles.short_text_input}
+            value={itemDetails.notes ?? ""}
+            onChangeText={newNotes => setItemDetails({...itemDetails, notes: newNotes})}
+          />
+          {
+            repairerList.length > 0 &&
+            <View
+              style={{marginTop: 5, width: '100%', maxWidth: 500}}
+            >
+              <DropDown
+                label={"Repairer"}
                 mode="outlined"
-                autoCorrect={false}
-                style={styles.short_text_input}
-                value={itemDetails.notes ?? ""}
-                onChangeText={newNotes => setItemDetails({...itemDetails, notes: newNotes})}
+                visible={showRepairerDropdown}
+                showDropDown={() => setShowRepairerDropdown(true)}
+                onDismiss={() => setShowRepairerDropdown(false)}
+                value={repairerIdx}
+                setValue={setRepairerIdx}
+                list={repairerList}
+                dropdownPosition={"top"}
               />
-              {
-                repairerList.length > 0 && <>
-                <View
-                  style={{marginTop: 15, width: '90%', maxWidth: 500}}
-                >
-                  <DropDown
-                    label={"Repairer"}
-                    mode="outlined"
-                    visible={showRepairerDropdown}
-                    showDropDown={() => setShowRepairerDropdown(true)}
-                    onDismiss={() => setShowRepairerDropdown(false)}
-                    value={repairerIdx}
-                    setValue={setRepairerIdx}
-                    list={repairerList}
-                    dropdownPosition={"top"}
-                  />
-                </View>
-                </>
-              }
-              <View
-                style={{marginTop: 10, width: '100%'}}
-              >
-                <DropDown
-                  label={"Repair Status"}
-                  mode="outlined"
-                  visible={showStatusDropdown}
-                  showDropDown={() => setShowStatusDropdown(true)}
-                  onDismiss={() => setShowStatusDropdown(false)}
-                  value={statusIdx}
-                  setValue={setStatusIdx}
-                  list={statusesList}
-                  dropdownPosition={"top"}
-                  renderRightIcon={false}
-                />
-              </View>
-            </>
-          )}
+            </View>
+          }
+          <View
+            style={{marginTop: 10, width: '100%'}}
+          >
+            <DropDown
+              label={"Repair Status"}
+              mode="outlined"
+              visible={showStatusDropdown}
+              showDropDown={() => setShowStatusDropdown(true)}
+              onDismiss={() => setShowStatusDropdown(false)}
+              value={statusIdx}
+              setValue={setStatusIdx}
+              list={ordsRepairStatusList}
+              dropdownPosition={"top"}
+              renderRightIcon={false}
+            />
+          </View>
+          { statusIdx >= 0 && ordsRepairStatusList[statusIdx].label === 'End of life' &&
+            <View
+              style={{marginTop: 10, width: '100%'}}
+            >
+              <DropDown
+                label={"Repair Barrier"}
+                mode="outlined"
+                visible={showBarrierDropdown}
+                showDropDown={() => setShowBarrierDropdown(true)}
+                onDismiss={() => setShowBarrierDropdown(false)}
+                value={barrierIdx}
+                setValue={setBarrierIdx}
+                list={ordsRepairBarrierList}
+                dropdownPosition={"top"}
+                renderRightIcon={false}
+              />
+            </View>
+          }
           <View
             style={{
               flexDirection: 'row',
@@ -514,11 +571,10 @@ const AddEditRepair = ({route, navigation}) => {
               marginBottom: 15
             }}
           >
-            { authenticated && !!itemDetails._id &&
+            { !!itemDetails._id &&
               <SubmitButton
-                 buttonColor='red'
-                 textColor="white"
-                 rippleColor="rgba(168,37,33,0.4)"
+                style={styles.deleteButton}
+                rippleColor="rgba(168,37,33,0.4)"
                 text="Delete"
                 onPress={() => {
                   setShowDeleteConfirmationDialog(true);
@@ -568,6 +624,7 @@ const AddEditRepair = ({route, navigation}) => {
       <Portal>
         <Snackbar
           visible={showSnackbar}
+          style={styles.snackbar}
           onDismiss={() => {
             setShowSnackbar(false);
             setSnackbarMsg("");

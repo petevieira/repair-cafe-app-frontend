@@ -45,19 +45,12 @@ const Repairs = () => {
 
   // const getItems = async (signal) => {
   const getItems = async (signal) => {
-    console.debug("[getItems]");
     setState({...state, showLoader: true});
-    // if (Config.OFFLINE) {
-    //   setItems(fakeItems);
-    //   return;
-    // }
-
     try {
       const response = await getTodaysItems();
       if (!response.status) {
         throw new Error(response.msg);
       }
-      console.debug("setting items");
       setItems(response.data.items);
     } catch (error) {
       console.error(error);
@@ -75,7 +68,6 @@ const Repairs = () => {
   }
 
   const itemTapped = (item) => {
-    console.debug("[Repairs::itemTapped]");
     if (!authenticated) {
       return;
     }
@@ -92,7 +84,6 @@ const Repairs = () => {
 
       getItems();
       return () => {
-        console.debug("Repairs unmounted");
         // abortController.abort();
         // setItems(new Item());
       }
@@ -142,6 +133,7 @@ const Repairs = () => {
         <Portal>
           <Snackbar
             visible={showSnackbar}
+            style={styles.snackbar}
             onDismiss={() => {
               setShowSnackbar(false);
               setSnackbarMsg("");

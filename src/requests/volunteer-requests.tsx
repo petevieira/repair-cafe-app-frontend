@@ -32,7 +32,6 @@ export const getTodaysVolunteers = async (signal) => {
 }
 
 export const addVolunteer = async (volunteer) => {
-  console.debug("Adding volunteer: ", volunteer);
   try {
     const authToken = await AsyncStorageHelpers.getAuth(authToken);
     if (!authToken) {
@@ -52,7 +51,6 @@ export const addVolunteer = async (volunteer) => {
 }
 
 export const updateVolunteer = async (volunteer) => {
-  console.debug("Updating volunteer: ", volunteer);
   try {
     const authToken = await AsyncStorageHelpers.getAuth(authToken);
     if (!authToken) {
@@ -79,7 +77,6 @@ export const updateVolunteer = async (volunteer) => {
 }
 
 export const getVolunteer = async (id: string) => {
-  console.debug("Getting volunteer: ", id);
   try {
     const authToken = await AsyncStorageHelpers.getAuth(authToken);
     if (!authToken) {
@@ -142,6 +139,29 @@ export const getPastVolunteers = async () => {
     );
     if (!response) {
       throw new Error("Error getting past volunteers");
+    }
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+export const findVolunteerByEmail = async (email: string) => {
+  try {
+    const authToken = await AsyncStorageHelpers.getAuth(authToken);
+    if (!authToken) {
+      throw new Error("findVolunteersByEmail() failed to get auth token");
+    }
+    const response = await axios.get(
+      Api.Volunteers.FIND_VOLUNTEER_BY_EMAIL + `/${email}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${authToken.token}`
+        }
+      }
+    );
+    if (!response || !response.status) {
+      throw new Error("Error getting finding volunteer based on email");
     }
     return response.data;
   } catch (error) {

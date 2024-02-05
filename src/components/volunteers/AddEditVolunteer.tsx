@@ -16,11 +16,12 @@ import HTMLView from 'react-native-htmlview';
 import Volunteer from '../../models/Volunteer';
 import {
   addVolunteer, getVolunteer,
-  updateVolunteer, deleteVolunteer, getPastVolunteers
+  updateVolunteer, deleteVolunteer, findVolunteerByEmail
 } from '../../requests/volunteer-requests';
 import { AuthContext } from '../../contexts/auth-context';
 import Terms from '../../globals/Terms';
 import { Dropdown } from 'react-native-element-dropdown';
+import { emailIsValid } from '../../lib/helpers';
 
 const AddEditVolunteer = ({route, navigation}) => {
   const paramVolunteer = route.params.volunteer;
@@ -40,38 +41,7 @@ const AddEditVolunteer = ({route, navigation}) => {
   const [pastVolunteersFocused, setPastVolunteersFocused] = useState(false);
   const [pastVolunteers, setPastVolunteers] = useState([]);
 
-  /**
-   * Validates the user's email they entered in the email field.
-   * @returns {boolean} - true if valid, false in not
-   */
-  // const validateEmail = (): boolean => {
-  //   // Email regular expression that must find a match
-  //   const reg = /^[a-zA-Z0-9.!#$%&'’*+\/=?^_`{|}~-]{1,64}@([a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{1,63}$/;
-  //   const valid = reg.test(email) && email !== '';
-  //   setEmailValid(valid);
-  //   return valid;
-  // };
-
-  // const validateForm = (): boolean => {
-  // 	return firstNameValid && lastNameValid && emailValid;
-  // }
-
-  const getPriorVolunteers = async () => {
-    console.debug("[getPriorVolunteers]");
-    try {
-      const response = await getPastVolunteers();
-      if (!response.status) {
-        throw new Error(response.msg);
-      }
-      console.debug("response: ", response);
-      setPastVolunteers(response.data.pastVolunteers);
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
   const addSaveVolunteer = async (volunteer: Volunteer) => {
-    console.debug("[AddEditVolunteer::addVolunteer]");
     if (!authenticated) {
       setSnackbarMsg("You need to be signed in as an admin to add volunteers");
       setShowSnackbar(true);
@@ -104,7 +74,6 @@ const AddEditVolunteer = ({route, navigation}) => {
     }
     try {
       const response = await deleteVolunteer(volunteer._id);
-      console.debug("dv response: ", response);
       if (!response) {
         console.error("Unknown error");
         setSnackbarMsg("Unknown error");
@@ -129,16 +98,13 @@ const AddEditVolunteer = ({route, navigation}) => {
   }
 
   const getExistingVolunteer = async (id: string) => {
-    console.debug("[getExistingVolunteer]");
     try {
       const response = await getVolunteer(id);
       if (!response.status) {
         throw new Error(response.msg);
       }
-      console.debug("Got volunteer details: ", response.data.volunteer);
       setVolunteer(response.data.volunteer);
       setId(response.data.volunteer.id);
-      console.debug("Setting waive box to ", response.data.volunteer.acceptsWaiver);
       setWaiverBoxChecked(response.data.volunteer.acceptsWaiver);
     } catch (error) {
       console.error(error);
@@ -147,20 +113,34 @@ const AddEditVolunteer = ({route, navigation}) => {
     }
   }
 
+  const onEmailBlur = async () => {
+    if (!!volunteer._id || !emailIsValid(volunteer.email)) {
+      return;
+    }
+    setState({...state, showLoader: true});
+    try {
+      const response = await findVolunteerByEmail(volunteer.email);
+
+      if (!!response.data.volunteer) {
+        setVolunteer({
+          ...volunteer,
+          firstName: response.data.volunteer.firstName,
+          lastName: response.data.volunteer.lastName
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    setState({...state, showLoader: false});
+  }
+
   useEffect(() => {
-    console.debug("efft vol: ", paramVolunteer);
     if (!!paramVolunteer._id) {
       getExistingVolunteer(paramVolunteer._id);
     } else {
-      console.debug("set volunteer to param volunteer");
       setVolunteer(paramVolunteer);
-      console.debug("Setting waive box to param ", paramVolunteer.acceptsWaiver ?? false);
       setWaiverBoxChecked(paramVolunteer.acceptsWaiver ?? false);
     }
-  }, []);
-
-  useEffect(() => {
-    getPriorVolunteers();
   }, []);
 
   // Today's date
@@ -177,42 +157,16 @@ const AddEditVolunteer = ({route, navigation}) => {
             {"Volunteer"}
           </Text>
 
-          <View style={styles.dropdownContainer}>
-            <View style={[styles.label]}>
-              <Text style={{color: '#717171'}}>
-                Search past volunteers
-              </Text>
-            </View>
-            <Dropdown
-              style={[styles.dropdown, pastVolunteersFocused && {borderWidth: 2}]}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              inputSearchStyle={styles.inputSearchStyle}
-              itemTextStyle={styles.itemTextStyle}
-              iconStyle={styles.iconStyle}
-              data={pastVolunteers}
-              search
-              maxHeight={300}
-              labelField="label"
-              valueField="value"
-              placeholder="Search Past Volunteers"
-              searchPlaceholder="Search..."
-              value={pastVolunteerIdx}
-              onFocus={() => setPastVolunteersFocused(true)}
-              onBlur={() => setPastVolunteersFocused(false)}
-              onChange={v => {
-                setPastVolunteerIdx(v.value);
-              }}
-            />
-          </View>
-
           <TextInput
             label={<><Text style={{color: '#717171'}}>Email</Text><Text style={{color: 'red'}}>*</Text></>}
             mode="outlined"
             autoCorrect={false}
             style={styles.short_text_input}
             value={volunteer.email}
-            onChangeText={newEmail => setVolunteer({...volunteer, email: newEmail.trim()})}
+            onBlur={onEmailBlur}
+            onChangeText={newEmail => setVolunteer(
+              {...volunteer, email: newEmail.trim()}
+            )}
           />
 
           <TextInput
@@ -255,8 +209,7 @@ const AddEditVolunteer = ({route, navigation}) => {
           >
               { authenticated && !!volunteer._id &&
                 <SubmitButton
-                  buttonColor='red'
-                  textColor="white"
+                  style={styles.deleteButton}
                   rippleColor="rgba(168,37,33,0.4)"
                   text="Delete"
                   onPress={() => {
@@ -307,6 +260,7 @@ const AddEditVolunteer = ({route, navigation}) => {
       <Portal>
         <Snackbar
           visible={showSnackbar}
+          style={styles.snackbar}
           onDismiss={() => {
             setShowSnackbar(false);
             setSnackbarMsg("");

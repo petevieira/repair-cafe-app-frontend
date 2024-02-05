@@ -47,7 +47,6 @@ const Volunteers = () => {
   }
 
   const volunteerTapped = (volunteer: Volunteer) => {
-    console.debug("[volunteerTapped] volunteer: ", volunteer)
     navigation.navigate('Add/Edit Volunteer', {
       volunteer: volunteer
     });
@@ -61,7 +60,6 @@ const Volunteers = () => {
       if (!response.status) {
         throw new Error(response.msg);
       }
-      console.debug("setting volunteers");
       setVolunteers(response.data.volunteers);
     } catch (error) {
       console.error(error);
@@ -75,9 +73,6 @@ const Volunteers = () => {
   useFocusEffect(
     React.useCallback(() => {
       getVolunteers();
-      return () => {
-        console.debug("Volunteers unmounted");
-      }
     }, [])
   );
 
@@ -119,6 +114,7 @@ const Volunteers = () => {
       <Portal>
         <Snackbar
           visible={showSnackbar}
+          style={styles.snackbar}
           onDismiss={() => {
             setShowSnackbar(false);
             setSnackbarMsg("");

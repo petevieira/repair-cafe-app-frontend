@@ -30,6 +30,7 @@ export default StyleSheet.create({
   content: {
     maxWidth: 738,
     minWidth: 320,
+    paddingBottom: 15,
   },
   home_buttons: {
   	height: 120,
@@ -49,6 +50,12 @@ export default StyleSheet.create({
     marginHorizontal: 20,
     backgroundColor: '#246fb0',
     borderColor: '#1a5385',
+  },
+  deleteButton: {
+    marginTop: 20,
+    marginHorizontal: 20,
+    backgroundColor: '#c20008',
+    borderColor: '#7b0005',
   },
   submitButtonLabel: {
     color: 'white',

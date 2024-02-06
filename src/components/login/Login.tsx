@@ -90,8 +90,7 @@ const Login = ({navigation}) => {
 
   useEffect(() => {
     if (authenticated) {
-      // navigation.navigate('Repairs');
-      navigation.navigate('About');
+      navigation.navigate('Repairs');
     }
   }, [authenticated]);
 

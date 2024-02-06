@@ -162,13 +162,15 @@ export const ProductCategoryValues = [
 ];
 
 export const RepairStatusValues = [
-  "Unknown",
+  "In Queue",
   "Fixed",
   "Repairable",
-  "End of life"
+  "End of life",
+  "Unknown",
 ];
 
 export const RepairBarrierValues = [
+  "Not applicable",
   "Spare parts not available",
   "Spare parts too expensive",
   "No way to open product",

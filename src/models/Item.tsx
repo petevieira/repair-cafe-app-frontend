@@ -10,8 +10,11 @@ class Item {
   symptoms: string;
   repairerFirstName: string;
   repairerLastName: string;
-  notes: string;
+  repairNotes: string;
   repairStatus: string;
+  repairBarrier: string;
+  weight: string;
+  cost: string;
 
   constructor(
     id: string = "",
@@ -25,8 +28,11 @@ class Item {
     symptoms: string = "",
     repairerFirstName: string = "",
     repairerLastName: string = "",
-    notes: string = "",
-    repairStatus: string = "In Queue"
+    repairNotes: string = "",
+    repairStatus: string = "In Queue",
+    repairBarrier: string = "TBD",
+    weight: string = "",
+    cost: string = "",
   ) {
     this._id = id;
     this.acceptsWaiver = acceptsWaiver;
@@ -39,8 +45,11 @@ class Item {
     this.symptoms = symptoms;
     this.repairerFirstName = repairerFirstName;
     this.repairerLastName = repairerLastName;
-    this.notes = notes;
-    this.status = status;
+    this.repairNotes = repairNotes;
+    this.repairStatue = repairStatus;
+    this.repairBarrier = repairBarrier;
+    this.weight = weight;
+    this.cost = cost;
   }
 };
 

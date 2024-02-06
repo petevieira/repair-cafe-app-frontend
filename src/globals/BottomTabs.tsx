@@ -1,18 +1,19 @@
 import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, Pressable } from 'react-native';
 import { Text } from 'react-native-paper';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import { useNavigation, useRoute } from '@react-navigation/native';
-// import { Divider } from "react-native-elements";
+import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../contexts/auth-context';
 import AsyncStorageHelpers from '../globals/async-storage-helpers';
 import ScreensNav from './ScreensNav';
+import { NavigationState } from 'react-navigation';
+
 
 export const Tab = ({ name, text, handlePress, screenName, routeName }) => {
   const activeScreenColor = screenName === routeName && "black";
 
   return (
-    <TouchableOpacity onPress={handlePress}>
+    <Pressable onPress={handlePress}>
       <FontAwesome5
         name={name}
         size={25}
@@ -24,7 +25,7 @@ export const Tab = ({ name, text, handlePress, screenName, routeName }) => {
         color={activeScreenColor}
       />
       <Text>{text}</Text>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 
@@ -34,7 +35,6 @@ export default function BottomTabs() {
   // Set whether the user is authenticated from the AuthContext state
   let authenticated = !!state && state.token !== '' && state.user !== null;
   const navigation = useNavigation();
-  // const route = useRoute();
   let authTab;
 
   const logOut = async () => {
@@ -57,7 +57,6 @@ export default function BottomTabs() {
 
   return (
     <>
-      {/*<Divider width={1} />*/}
       <View
         style={{
           backgroundColor: "#96db73",
@@ -68,38 +67,30 @@ export default function BottomTabs() {
           alignItems: "center"
         }}
       >
-
+        { !authenticated ?
           <Tab
-            text={authenticated ? "Log Out" : "Home" }
-            name={authenticated ? "sign-out-alt" : "home" }
+            text={"Login"}
+            name={"sign-in-alt"}
             style={{color: "black"}}
             handlePress={async () => {
-              if (authenticated) {
-                const success = await logOut();
-                if (success) {
-                  navigation.navigate("Home");
-                }
-              } else {
-                navigation.navigate("Home")}
-              }
+              navigation.navigate("Volunteer Login")}
             }
-            screenName={authenticated ? undefined : "Home" }
-            // routeName={route.name}
+            screenName={"Volunteer Login"}
           />
+          : <></>
+        }
 
         <Tab
           text="Queue"
           name="tools"
           handlePress={() => navigation.navigate("Repairs")}
           screenName="Repairs"
-          // routeName={route.name}
         />
         <Tab
           text="Volunteers"
           name="users"
           handlePress={() => navigation.navigate("Volunteers")}
           screenName="Volunteers"
-          // routeName={route.name}
         />
       </View>
     </>

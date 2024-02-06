@@ -6,7 +6,7 @@ const About = () => {
 
   return (
     <View style={{margin: 15}}>
-      <Text style={{ fontWeight: 'bold', fontSize: 22, marginBottom: 15, alignSelf: 'center'}}>About TRC</Text>
+      <Text style={{ fontWeight: 'bold', fontSize: 22, marginBottom: 15, alignSelf: 'center'}}>Tucson Repair Cafe</Text>
 
       <Text style={{fontSize: 18}}>
         {"The Tucson Repair Cafe began when Sustainable Tucson Zero Waste Committee members Rocky Baier and Stephen Menke teamed up to make positive change in Tucson. Our first event was November 13th, 2021, and we are continuing to grow. \n\nOur mission is to:\n\n"}

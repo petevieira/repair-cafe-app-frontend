@@ -1,14 +1,11 @@
 import { NavigationContainer } from '@react-navigation/native';
-import { StatusBar, ScrollView } from 'react-native';
-import { Portal, ActivityIndicator } from 'react-native-paper';
+import { ScrollView } from 'react-native';
 
 import { AuthProvider } from '../contexts/auth-context';
 import ScreensNav from './ScreensNav';
 import BottomTabs from './BottomTabs';
 import Loader from './Loader';
-import Nav from "./Nav"
-import styles from './Styles'
-
+import styles from './Styles';
 
 /**
  * A component that wraps the ScreensNav stack navigator in an
@@ -20,12 +17,7 @@ const RootNavigation = () => {
   return (
     <NavigationContainer>
       <AuthProvider>
-        <StatusBar style = "auto" />
-        <Nav/>
-        <ScrollView
-          contentContainerStyle={styles.content}>
-          <ScreensNav/>
-        </ScrollView>
+        <ScreensNav/>
         <BottomTabs/>
         <Loader/>
       </AuthProvider>

@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "RepairCafeMobile",
-    "slug": "RepairCafeMobile",
+    "name": "TRC App",
+    "slug": "TRC App",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/RCM-favicon.png",
+    "icon": "favicon.ico",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/RepairCafeMobile-large.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -18,17 +18,24 @@
       "**/*"
     ],
     "ios": {
+      "icon": "./assets/ios-icon.png",
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.RepairCafeMobile"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/RCM-favicon.png",
+        "foregroundImage": "./assets/trc-logo-transparent.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "org.trc.app"
     },
     "web": {
-      "favicon": "./assets/RCM-favicon.png"
+      "favicon": "favicon.ico"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "0238b59e-a034-4777-88e8-769b0635713f"
+      }
     }
   }
 }

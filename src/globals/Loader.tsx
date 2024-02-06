@@ -7,17 +7,14 @@ import styles from '../globals/Styles'
 const Loader = () => {
   const [state, setState] = React.useContext(AuthContext);
 
-  if (state.showLoader) {
-    return (
-        <ActivityIndicator
-          animating={state.showLoader}
-          size="large"
-          style={styles.loader}
-        />
-    );
-  } else {
-    return null;
-  }
+  return (state.showLoader ?
+    <ActivityIndicator
+      animating={state.showLoader}
+      size="large"
+      style={styles.loader}
+    />
+    : <></>
+  );
 };
 
 export default Loader;

@@ -1,36 +1,36 @@
-import {StyleSheet} from "react-native";
+import { StyleSheet, Dimensions } from "react-native";
 
 export default StyleSheet.create({
+  appBar: {
+    backgroundColor: 'white',
+  },
+  appBarTitle: {
+    fontFamily: 'Futura',
+    fontSize: 24,
+    fontWeight: 'bold',
+    alignText: "center"
+  },
   logo: {
     height: 60,
     aspectRatio: 1,
-    resizeMode:'contain',
-    marginLeft: 20,
   },
   itemImage: {
     width: "25%",
-    aspectRatio: 1,
-    resizeMode:'contain',
+    aspectRatio: 1
   },
   container: {
-    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
     paddingTop: 15,
     paddingBottom: 15,
-    paddingLeft: 10,
-    paddingRight: 10,
-    minHeight: '80vh',
+    paddingHorizontal: 10,
+    height: '80vh',
   },
   content: {
-    // flex: 6,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    width: "100%",
     maxWidth: 738,
-    alignItems: "center",
-    // justifyContent: "center",
-    alignSelf: "center",
-    // marginTop: 10,
-    //maxHeight: 400,
+    minWidth: 320,
+    paddingBottom: 15,
   },
   home_buttons: {
   	height: 120,
@@ -41,29 +41,44 @@ export default StyleSheet.create({
   home_buttons_mobile: {
     height: 120,
     margin: 20,
-    //width: ' 90%'
   },
   short_text_input: {
-    width: '90%',
-    maxWidth: 500,
-    marginTop: 15,
+    marginVertical: 5
   },
-  submit_button: {
+  submitButton: {
     marginTop: 20,
-    marginHorizontal: 20
+    marginHorizontal: 20,
+    backgroundColor: '#246fb0',
+    borderColor: '#1a5385',
+  },
+  deleteButton: {
+    marginTop: 20,
+    marginHorizontal: 20,
+    backgroundColor: '#c34a51',
+    borderColor: '#7b0005',
+  },
+  submitButtonLabel: {
+    color: 'white',
+  },
+  snackbar: {
+    minWidth: 320,
+    maxWidth: 738,
+    alignSelf: 'center'
   },
   modalStyle: {
     backgroundColor: 'white',
-    padding: 20,
+    margin: 20,
+    width: '50vw',
+    height: '80vh',
+    minWidth: 320,
   },
   loader: {
     position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
+    left: '50%',
+    top: '50%',
+    margin: 'auto',
+    width: 100,
+    height: 100,
   },
   label: {
     position: 'absolute',
@@ -78,14 +93,13 @@ export default StyleSheet.create({
     fontFamily: 'Futura',
   },
   dropdownContainer: {
-    backgroundColor: 'white',
-    padding: 16,
+    paddingTop: 16,
+    paddingBottom: 5,
     width: "100%",
     maxWidth: 500,
-    marginTop: 15
   },
   dropdown: {
-    backgroundColor: '#f6f6f6',
+    backgroundColor: 'white',
     color: '#717171',
     height: 50,
     borderColor: 'gray',
@@ -125,8 +139,11 @@ export default StyleSheet.create({
   fab: {
     position: 'fixed',
     margin: 16,
-    right: 0,
-    bottom: 0,
+    right: '5%',
+    bottom: 60,
     backgroundColor: '#96db73',
   },
+  terms: {
+    // padding: 10
+  }
 });

@@ -24,11 +24,6 @@ const Nav = ({ navigation, route, options }) => {
     navigation.navigate('About');
   }
 
-  const donatePressed = () => {
-    closeMenu();
-    console.debug("About tapped");
-  }
-
   const logoutPressed = async () => {
     closeMenu();
     console.debug("Logging out...");
@@ -76,10 +71,6 @@ const Nav = ({ navigation, route, options }) => {
         <Menu.Item
           title="About"
           onPress={aboutPressed}
-        />
-        <Menu.Item
-          title="Donate"
-          onPress={donatePressed}
         />
         {authenticated ?
           <Menu.Item

@@ -19,7 +19,7 @@ import { addBasicItem, addFullItem, getItem, updateItem, deleteItem, findOwnerBy
 import { ProductCategoryValues, RepairStatusValues, RepairBarrierValues} from '../../globals/ords';
 import Terms from '../../globals/Terms';
 import { WEIGHT_UNITS, COST_UNITS } from '@env';
-import { emailIsValid, objectIsValid } from '../../lib/helpers';
+import { emailIsValid } from '../../lib/helpers';
 
 const ordsProductCategoryList = ProductCategoryValues.map((el, idx) => {
   return { label: el.text, value: idx };
@@ -67,25 +67,34 @@ const AddEditRepair = ({route, navigation}) => {
 
   const paramItem = route.params.item;
 
+  const isNumeric = (str: string): boolean => {
+    return !isNaN(parseFloat(str)) && (parseFloat(str) > 0);
+  }
+
   const itemOkToSave = (item): boolean => {
+    let msg = "";
     if (!waiverBoxChecked) {
-      setSnackbarMsg("You must agree to the terms at the top");
-      setShowSnackbar(true);
-      return false;
+      msg = "Please agree to the terms at the top";
+    } else if (!item.ownersEmail) {
+      msg = "Please enter the owner's email";
+    } else if (!emailIsValid(item.ownersEmail)) {
+      msg = "Please enter a valid email";
+    } else if (!item.ownersFirstName) {
+      msg = "Please enter the owner's first name";
+    } else if (!item.ownersLastName) {
+      msg = "Please enter the owner's last name";
+    } else if (!item.type) {
+      msg = "Please select a product category";
+    } else if (!item.symptoms) {
+      msg = "Please enter symptoms";
+    } else if (!isNumeric(item.weight)) {
+      msg = "Please enter a valid weight";
+    } else if (!isNumeric(item.cost)) {
+      console.debug("cost: ", item.cost);
+      msg = "Please enter a valid cost";
     }
-    const result = objectIsValid(
-      item,
-      [
-        'ownersEmail', 'ownersFirstName', 'ownersLastName',
-        'type', 'symptoms', 'weight', 'cost'
-      ],
-      [
-        "Owner's Email", "Owner's First Name", "Owner's Last Name",
-        "Type", "Symptoms", "Weight", "Cost"
-      ]
-    );
-    if (result !== true) {
-      setSnackbarMsg(result);
+    if (msg !== '') {
+      setSnackbarMsg(msg);
       setShowSnackbar(true);
       return false;
     }

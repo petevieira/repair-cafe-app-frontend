@@ -52,7 +52,7 @@ const AddEditVolunteer = ({route, navigation}) => {
     } else if (!volunteer.lastName) {
       msg = "Please enter in your last name.";
     } else if (!waiverBoxChecked) {
-      msg = "You must agree to the terms.";
+      msg = "Please agree to the terms.";
     }
     if (msg !== '') {
       setSnackbarMsg(msg);

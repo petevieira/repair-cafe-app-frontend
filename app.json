@@ -28,7 +28,8 @@
       }
     },
     "web": {
-      "favicon": "./assets/RCM-favicon.png"
+      "favicon": "./favicon.png",
+      "bundler": "metro"
     }
   }
 }

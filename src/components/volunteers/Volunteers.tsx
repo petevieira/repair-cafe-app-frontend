@@ -27,8 +27,11 @@ const Volunteers = () => {
   const [snackbarMsg, setSnackbarMsg] = React.useState("");
   const [showSnackbar, setShowSnackbar] = React.useState(false);
   const [state, setState] = React.useContext(AuthContext);
+  const [volunteersRetrieved, setVolunteersRetrieved] = React.useState(false);
+
   // Set whether the user is authenticated from the AuthContext state
-  const authenticated = !!state && state.token !== '' && state.user !== null;
+  let authenticated = !!state && state.token !== '' && state.user !== null;
+
 
   const addVolunteer = () => {
     const volunteer: Volunteer = {
@@ -38,14 +41,13 @@ const Volunteers = () => {
       email: "",
       acceptsWaiver: false
     };
-    navigation.navigate('AddEditVolunteer', {
+    navigation.navigate('Add/Edit Volunteer', {
       volunteer: volunteer
     });
   }
 
   const volunteerTapped = (volunteer: Volunteer) => {
-    console.debug("[volunteerTapped] volunteer: ", volunteer)
-    navigation.navigate('AddEditVolunteer', {
+    navigation.navigate('Add/Edit Volunteer', {
       volunteer: volunteer
     });
   };
@@ -58,22 +60,19 @@ const Volunteers = () => {
       if (!response.status) {
         throw new Error(response.msg);
       }
-      console.debug("setting volunteers");
       setVolunteers(response.data.volunteers);
     } catch (error) {
       console.error(error);
-      setSnackbarMsg(error);
+      setSnackbarMsg("Failed to retrieve volunteers");
       setShowSnackbar(true);
     }
     setState({...state, showLoader: false});
+    setVolunteersRetrieved(true);
   };
 
   useFocusEffect(
     React.useCallback(() => {
       getVolunteers();
-      return () => {
-        console.debug("Volunteers unmounted");
-      }
     }, [])
   );
 
@@ -82,29 +81,40 @@ const Volunteers = () => {
       {authenticated && <FAB
         icon="plus"
         style={styles.fab}
-        onPress={() => addVolunteer()}
+        animated={false}
+        onPress={addVolunteer}
       />}
-      <View style = {{marginBottom: 10}}>
-        <Text style = {{ fontWeight: 'bold', fontSize: 22, marginLeft: 'auto', marginRight: 'auto'}}>Volunteers{"\n"}</Text>
-          <DataTable>
-            <DataTable.Header>
-              <DataTable.Title>First</DataTable.Title>
-              <DataTable.Title>Last</DataTable.Title>
-            </DataTable.Header>
+      <View
+        style={{ marginBottom: 10 }}>
 
-            {volunteers.map((volunteer) => (
-              <DataTable.Row key={volunteer._id}
-                onPress={(!authenticated ? undefined : () => {volunteerTapped(volunteer)})}
-              >
-                <DataTable.Cell>{volunteer.firstName}</DataTable.Cell>
-                <DataTable.Cell>{volunteer.lastName}</DataTable.Cell>
-              </DataTable.Row>
-            ))}
-          </DataTable>
+        {/*<Text style = {{ fontWeight: 'bold', fontSize: 22, marginLeft: 'auto', marginRight: 'auto'}}>Volunteers{"\n"}</Text>*/}
+        <DataTable>
+          <DataTable.Header style={{minWidth: 500}}>
+            <DataTable.Title style={{marginHorizontal: 10}}>First</DataTable.Title>
+            <DataTable.Title style={{marginHorizontal: 10}}>Last</DataTable.Title>
+          </DataTable.Header>
+
+          {volunteers.map((volunteer) => (
+            <DataTable.Row key={volunteer._id}
+              onPress={(!authenticated ? undefined : () => {volunteerTapped(volunteer)})}
+            >
+              <DataTable.Cell style={{marginHorizontal: 10}}>{volunteer.firstName}</DataTable.Cell>
+              <DataTable.Cell style={{marginHorizontal: 10}}>{volunteer.lastName}</DataTable.Cell>
+            </DataTable.Row>
+          ))}
+        </DataTable>
       </View>
+      { volunteersRetrieved && volunteers.length <= 0 &&
+        <Text
+          style={{
+            padding: 10,
+            alignSelf: 'center'
+          }}>No volunteers yet today</Text>
+      }
       <Portal>
         <Snackbar
           visible={showSnackbar}
+          style={styles.snackbar}
           onDismiss={() => {
             setShowSnackbar(false);
             setSnackbarMsg("");

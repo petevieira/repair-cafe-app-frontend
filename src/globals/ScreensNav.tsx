@@ -5,9 +5,9 @@ import AddEditRepair from '../components/repairs/AddEditRepair';
 import Repairs from '../components/repairs/Repairs';
 import AddEditVolunteer from '../components/volunteers/AddEditVolunteer';
 import Volunteers from '../components/volunteers/Volunteers';
-import Home from '../components/Home';
-import EmailEntry from '../components/login/01_Email';
+import Login from '../components/login/Login';
 import About from '../components/About';
+import Nav from '../globals/Nav';
 
 // Instantiate a stack navigator
 const Stack = createNativeStackNavigator();
@@ -27,8 +27,10 @@ const ScreensNav = (props) => {
 
   return (
     <Stack.Navigator
-      initialRouteName={props?.initialRouteName ?? "Email"}
-      screenOptions={{ headerShown: false, unmountOnBlur: true }}
+      initialRouteName="Login"
+      screenOptions={{
+        header: (props) => <Nav {...props} />,
+      }}
     >
       {authenticated ? (
         </* Screens that require authentication */>
@@ -43,31 +45,27 @@ const ScreensNav = (props) => {
           />
           <Stack.Screen
             style={{marginBottom: 20}}
-            name="AddEditRepair"
+            name="Add/Edit Repair"
             component={AddEditRepair}
           />
           <Stack.Screen
-            name="AddEditVolunteer"
+            name="Add/Edit Volunteer"
             component={AddEditVolunteer}
-          />
-          <Stack.Screen
-            name="Home"
-            component={Home}
           />
           <Stack.Screen
             name="About"
             component={About}
           />
+          <Stack.Screen
+            name="Volunteer Login"
+            component={Login}
+          />
         </>
       ) : (
         </* Screens that don't require authentication */>
           <Stack.Screen
-            name="Home"
-            component={Home}
-          />
-          <Stack.Screen
-            name="EmailEntry"
-            component={EmailEntry}
+            name="Volunteer Login"
+            component={Login}
           />
           <Stack.Screen
             name="Repairs"
@@ -76,10 +74,6 @@ const ScreensNav = (props) => {
           <Stack.Screen
             name="Volunteers"
             component={Volunteers}
-          />
-          <Stack.Screen
-            name="AddEditRepair"
-            component={AddEditRepair}
           />
           <Stack.Screen
             name="About"

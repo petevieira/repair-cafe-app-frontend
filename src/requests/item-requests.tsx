@@ -7,6 +7,7 @@ import Api from './request-consts';
 // import axiosInterceptor from './axios-interceptor';
 import AsyncStorageHelpers from '../globals/async-storage-helpers';
 import Item from '../models/Item';
+import { WEIGHT_UNITS, COST_UNITS } from '@env';
 
 export const getItem = async (id: string, signal) => {
   if (!id) {
@@ -54,16 +55,7 @@ export const addBasicItem = async (item: Item) => {
   try {
     const response = await axios.post(
       Api.Items.ADD_BASIC_ITEM,
-      {
-        acceptsWaiver: item.acceptsWaiver ?? true,
-        ownersEmail: item.ownersEmail ?? "",
-        ownersFirstName: item.ownersFirstName ?? "",
-        ownersLastName: item.ownersLastName ?? "",
-        type: item.type ?? "",
-        brand: item.brand ?? "",
-        model: item.model ?? "",
-        symptoms: item.symptoms ?? ""
-      }
+      createItem(item),
     );
     if (!response) {
       throw new Error("Error saving item");
@@ -82,21 +74,7 @@ export const addFullItem = async (item: Item) => {
     }
     const response = await axios.post(
       Api.Items.ADD_FULL_ITEM,
-      {
-        _id: item._id,
-        acceptsWaiver: item.acceptsWaiver ?? true,
-        ownersEmail: item.ownersEmail ?? "",
-        ownersFirstName: item.ownersFirstName ?? "",
-        ownersLastName: item.ownersLastName ?? "",
-        type: item.type ?? "",
-        brand: item.brand ?? "",
-        model: item.model ?? "",
-        symptoms: item.symptoms ?? "",
-        notes: item.notes ?? "",
-        repairerFirstName: item.repairerFirstName ?? "",
-        repairerLastName: item.repairerLastName ?? "",
-        status: item.status ?? ""
-      },
+      createItem(item),
       {
         headers: {'Authorization': `Bearer ${authToken.token}`}
       }
@@ -116,29 +94,13 @@ export const updateItem = async (item: Item) => {
     if (!authToken) {
       throw new Error("[updateItem] failed to get auth token");
     }
-    console.debug("[updateItem: ", item);
     const response = await axios.put(
       Api.Items.UPDATE_ITEM,
-      {
-        _id: item._id,
-        acceptsWaiver: item.acceptsWaiver ?? true,
-        ownersEmail: item.ownersEmail ?? "",
-        ownersFirstName: item.ownersFirstName ?? "",
-        ownersLastName: item.ownersLastName ?? "",
-        type: item.type ?? "",
-        brand: item.brand ?? "",
-        model: item.model ?? "",
-        symptoms: item.symptoms ?? "",
-        notes: item.notes ?? "",
-        repairerFirstName: item.repairerFirstName ?? "",
-        repairerLastName: item.repairerLastName ?? "",
-        status: item.status ?? ""
-      },
+      createItem(item),
       {
         headers: {'Authorization': `Bearer ${authToken.token}`}
       }
     );
-    console.debug("update item response: ", response);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -153,7 +115,7 @@ export const deleteItem = async (id: string) => {
   try {
     const authToken = await AsyncStorageHelpers.getAuth(authToken);
     if (!authToken) {
-      throw new Error("[getVolunteer] failed to get auth token");
+      throw new Error("[deleteItem] failed to get auth token");
     }
     const response = await axios.delete(
       Api.Items.DELETE_ITEM + `/${id}`,
@@ -170,4 +132,52 @@ export const deleteItem = async (id: string) => {
   } catch (error) {
     return Promise.reject(error);
   }
+};
+
+export const findOwnerByEmail = async (email: string) => {
+  if (!email) {
+    console.error("Can't find owner by email. 'email' not defined");
+    return { status: false };
+  }
+  try {
+    const authToken = await AsyncStorageHelpers.getAuth(authToken);
+    if (!authToken) {
+      throw new Error("[findOwnerByEmail] failed to get auth token");
+    }
+    const response = await axios.get(
+      Api.Items.FIND_OWNER_BY_EMAIL + `/${email}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${authToken.token}`
+        }
+      }
+    );
+    if (!response) {
+      throw new Error("Error finding owner by email");
+    }
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+const createItem = (item: Item) => {
+  return {
+    _id: item._id,
+    acceptsWaiver: item.acceptsWaiver ?? true,
+    ownersEmail: item.ownersEmail ?? "",
+    ownersFirstName: item.ownersFirstName ?? "",
+    ownersLastName: item.ownersLastName ?? "",
+    type: item.type ?? "",
+    brand: item.brand ?? "",
+    model: item.model ?? "",
+    symptoms: item.symptoms ?? "",
+    repairNotes: item.repairNotes ?? "",
+    repairerFirstName: item.repairerFirstName ?? "",
+    repairerLastName: item.repairerLastName ?? "",
+    repairStatus: item.repairStatus ?? "",
+    repairBarrier: item.repairBarrier ?? "",
+    weight: item.weight ?? WEIGHT_UNITS,
+    cost: item.cost ?? COST_UNITS
+  };
 };

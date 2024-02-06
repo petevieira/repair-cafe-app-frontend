@@ -30,32 +30,27 @@ let fakeItems: [Item] = [
 ];
 
 const Repairs = () => {
-  console.debug("[Repairs]");
-  const navigation = useNavigation();
   const [items, setItems] = React.useState([]);
   const [snackbarMsg, setSnackbarMsg] = React.useState("");
   const [showSnackbar, setShowSnackbar] = React.useState(false);
   const [state, setState] = React.useContext(AuthContext);
+  const [repairsRetrieved, setRepairsRetrieved] = React.useState(false);
+
   // Set whether the user is authenticated from the AuthContext state
-  const authenticated = !!state && state.token !== '' && state.user !== null;
+  let authenticated = !!state && state.token !== '' && state.user !== null;
+  const navigation = useNavigation();
+
   // Today's date
   const todaysDate = format(new Date(), "MMMM do, yyyy");
 
   // const getItems = async (signal) => {
   const getItems = async (signal) => {
-    console.debug("[getItems]");
     setState({...state, showLoader: true});
-    // if (Config.OFFLINE) {
-    //   setItems(fakeItems);
-    //   return;
-    // }
-
     try {
       const response = await getTodaysItems();
       if (!response.status) {
         throw new Error(response.msg);
       }
-      console.debug("setting items");
       setItems(response.data.items);
     } catch (error) {
       console.error(error);
@@ -63,21 +58,20 @@ const Repairs = () => {
       setShowSnackbar(true);
     }
     setState({...state, showLoader: false});
+    setRepairsRetrieved(true);
   }
 
   const addItem = () => {
-    console.debug("add Item pressed");
-    navigation.navigate('AddEditRepair', {
+    navigation.navigate('Add/Edit Repair', {
       item: new Item()
     });
   }
 
   const itemTapped = (item) => {
-    console.debug("[Repairs::itemTapped]");
     if (!authenticated) {
       return;
     }
-    navigation.navigate('AddEditRepair', {
+    navigation.navigate('Add/Edit Repair', {
       item: item
     });
   }
@@ -87,10 +81,9 @@ const Repairs = () => {
       // const abortController = new AbortController();
       // const signal = abortController.signal;
       // getItems(signal);
-      console.debug("get items");
+
       getItems();
       return () => {
-        console.debug("Repairs unmounted");
         // abortController.abort();
         // setItems(new Item());
       }
@@ -99,46 +92,61 @@ const Repairs = () => {
 
   return (
     <View style={styles.container}>
-      <FAB
-        icon="plus"
-        style={styles.fab}
-        onPress={() => {addItem()}}
-      />
-      <Text style={{textAlign: "center", fontWeight: 'bold', fontSize: 22, marginLeft: 'auto', marginRight: 'auto'}}>Repair Queue</Text>
-      <Text style={{textAlign: "center"}}>({todaysDate})</Text>
-      <DataTable>
-        <DataTable.Header>
-          <DataTable.Title>#</DataTable.Title>
-          <DataTable.Title>Item</DataTable.Title>
-          <DataTable.Title>Name</DataTable.Title>
-          <DataTable.Title>Status</DataTable.Title>
-        </DataTable.Header>
+      { authenticated ?
+        <FAB
+          icon="plus"
+          style={styles.fab}
+          animated={false}
+          onPress={addItem}
+        />
+        : <></>}
+      <View style={styles.content}>
+        <Text style={{textAlign: "center"}}>({todaysDate})</Text>
+        <DataTable>
+          <DataTable.Header style={{minWidth: 500}}>
+            <DataTable.Title>#</DataTable.Title>
+            <DataTable.Title>Item</DataTable.Title>
+            <DataTable.Title>Name</DataTable.Title>
+            <DataTable.Title>Repairer</DataTable.Title>
+            <DataTable.Title>Status</DataTable.Title>
+          </DataTable.Header>
 
-        {items.map((item, idx) => (
-          <DataTable.Row
-            key={item._id}
-            onPress={authenticated ? (() => itemTapped(item)) : undefined}
-          >
-            <DataTable.Cell>{idx+1}</DataTable.Cell>
-            <DataTable.Cell>{item.type}</DataTable.Cell>
-            <DataTable.Cell>{item.ownersFirstName} {item.ownersLastName}</DataTable.Cell>
-            <DataTable.Cell>{item.status}</DataTable.Cell>
-          </DataTable.Row>
-        ))}
-      </DataTable>
-      <Portal>
-        <Snackbar
-          visible={showSnackbar}
-          onDismiss={() => {
-            setShowSnackbar(false);
-            setSnackbarMsg("");
-          }}
-          action={{
-            label: "close"
-          }}
-        >{snackbarMsg}
-        </Snackbar>
-      </Portal>
+          {items.map((item, idx) => (
+            <DataTable.Row
+              key={item._id}
+              onPress={authenticated ? (() => itemTapped(item)) : undefined}
+            >
+              <DataTable.Cell>{idx+1}</DataTable.Cell>
+              <DataTable.Cell>{item.type}</DataTable.Cell>
+              <DataTable.Cell>{item.ownersFirstName} {item.ownersLastName}</DataTable.Cell>
+              <DataTable.Cell>{item.repairerFirstName} {item.repairerLastName}</DataTable.Cell>
+              <DataTable.Cell>{item.repairStatus}</DataTable.Cell>
+            </DataTable.Row>
+          ))}
+        </DataTable>
+        { repairsRetrieved && items.length <= 0 ?
+          <Text
+            style={{
+              padding: 10,
+              alignSelf: 'center'
+            }}>No repairs yet today</Text>
+          : <></>
+        }
+        <Portal>
+          <Snackbar
+            visible={showSnackbar}
+            style={styles.snackbar}
+            onDismiss={() => {
+              setShowSnackbar(false);
+              setSnackbarMsg("");
+            }}
+            action={{
+              label: "close"
+            }}
+          >{snackbarMsg}
+          </Snackbar>
+        </Portal>
+      </View>
     </View>
   )
 };

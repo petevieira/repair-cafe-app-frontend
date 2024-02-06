@@ -11,26 +11,16 @@ import { useNavigation } from '@react-navigation/native';
 const Home = () => {
   const navigation = useNavigation();
 
-  const redirectOwner = () => {
-    navigation.navigate('AddEditRepair', {
-      item: new Item()
-    })
-  };
-
   const redirectVolunteer = () => {
-    navigation.navigate('EmailEntry');
+    navigation.navigate('Login');
   };
 
 	return (
     <View style={styles.container}>
-      <SubmitButton
-        text={"I have broken items"}
-        onPress={() => {redirectOwner()}}
-      />
-      <SubmitButton
-        text={"I am a volunteer"}
-        onPress={() => {redirectVolunteer()}}
-      />
+        <SubmitButton
+          text={"I am a volunteer"}
+          onPress={() => {redirectVolunteer()}}
+        />
     </View>
 	);
 

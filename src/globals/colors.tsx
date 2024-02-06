@@ -1,7 +1,7 @@
-import { MD2LightTheme } from 'react-native-paper';
+import { MD3LightTheme } from 'react-native-paper';
 
 const appColors = {
-  ...MD2LightTheme.colors,
+  ...MD3LightTheme.colors,
   primary: '#565656',
 };
 

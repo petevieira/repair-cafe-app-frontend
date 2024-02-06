@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigation } from "@react-navigation/native";
+// import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 
 import AsyncStorage from "../globals/async-storage-helpers";
@@ -22,7 +22,7 @@ const AuthProvider = ({ children }) => {
 
   // Get the navigation property  of the screen this provider is inside,
   // so that the AuthProvider can navigate to other screens.
-  const navigation = useNavigation();
+  // const navigation = useNavigation();
 
   // Configure axios
   const token = state?.token ? state.token : '';
@@ -47,7 +47,7 @@ const AuthProvider = ({ children }) => {
         if (res.status === 401 && res.config && !res.config.__isRetryRequest) {
           await AsyncStorage.storeAuth('');
           setState({ ...state, user: null, token: '' });
-          navigation.navigate('Email');
+          // navigation.navigate('Email');
         }
       }
     }

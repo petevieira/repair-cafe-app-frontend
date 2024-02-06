@@ -17,7 +17,6 @@ function objectHasRequiredProperties(obj, requiredProps, propNames) {
   let errorMsg = '';
 
   requiredProps.forEach((prop, idx) => {
-    console.debug(`obj[${prop}]: ${obj[prop]}`);
     if (obj[prop] === undefined || obj[prop] === '') {
       if (errorMsg !== '') {
         errorMsg += ', ';

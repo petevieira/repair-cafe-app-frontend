@@ -67,36 +67,12 @@ const AddEditRepair = ({route, navigation}) => {
 
   const paramItem = route.params.item;
 
-  const validateFirstName = (): boolean => {
-    const valid = firstName !== "";
-    setFirstNameValid(valid);
-    return valid;
-  }
-
-  const validateLastName = (): boolean => {
-    const valid = lastName !== "";
-    setLastNameValid(valid);
-    return valid;
-  }
-
-  /**
-   * Validates the user's email they entered in the email field.
-   * @returns {boolean} - true if valid, false in not
-   */
-  const validateEmail = (): boolean => {
-    // Email regular expression that must find a match
-    const reg = /^[a-zA-Z0-9.!#$%&'’*+\/=?^_`{|}~-]{1,64}@([a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{1,63}$/;
-    const valid = reg.test(email) && email !== '';
-    setEmailValid(valid);
-    return valid;
-  };
-
-  const validateForm = (): boolean => {
-    return firstNameValid && lastNameValid && emailValid;
-  }
-
   const itemOkToSave = (item): boolean => {
-    console.debug("item: ", item);
+    if (!waiverBoxChecked) {
+      setSnackbarMsg("You must agree to the terms at the top");
+      setShowSnackbar(true);
+      return false;
+    }
     const result = objectIsValid(
       item,
       [
@@ -244,14 +220,6 @@ const AddEditRepair = ({route, navigation}) => {
     }
     setState({...state, showLoader: false});
   };
-
-  const okayToSave = () => {
-    return (waiverBoxChecked
-      && !!itemDetails.ownersFirstName
-      && !!itemDetails.ownersLastName
-      && !!itemDetails.ownersEmail
-      && !!itemDetails.type)
-  }
 
   const onEmailBlur = async () => {
     if (!!itemDetails._id || !emailIsValid(itemDetails.ownersEmail)) {

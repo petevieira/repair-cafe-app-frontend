@@ -41,11 +41,30 @@ const AddEditVolunteer = ({route, navigation}) => {
   const [pastVolunteersFocused, setPastVolunteersFocused] = useState(false);
   const [pastVolunteers, setPastVolunteers] = useState([]);
 
-  const addSaveVolunteer = async (volunteer: Volunteer) => {
-    if (!authenticated) {
-      setSnackbarMsg("You need to be signed in as an admin to add volunteers");
+  const volunteerOkToSave = (volunteer): boolean => {
+    let msg = "";
+    if (!volunteer.email) {
+      msg = "Please enter in your email.";
+    } else if (!emailIsValid(volunteer.email)) {
+      msg = "Please enter a valid email."
+    } else if (!volunteer.firstName) {
+      msg = "Please enter your first name.";
+    } else if (!volunteer.lastName) {
+      msg = "Please enter in your last name.";
+    } else if (!waiverBoxChecked) {
+      msg = "You must agree to the terms.";
+    }
+    if (msg !== '') {
+      setSnackbarMsg(msg);
       setShowSnackbar(true);
-      return;
+      return false;
+    }
+    return true;
+  }
+
+  const addSaveVolunteer = async (volunteer: Volunteer) => {
+    if (!volunteerOkToSave(volunteer)) {
+      return ;
     }
     try {
       let response = null;
@@ -175,7 +194,7 @@ const AddEditVolunteer = ({route, navigation}) => {
             autoCorrect={false}
             style={styles.short_text_input}
             value={volunteer.firstName}
-            onChangeText={newFirstName => setVolunteer({...volunteer, firstName: newFirstName})}
+            onChangeText={newFirstName => setVolunteer({...volunteer, firstName: newFirstName.trim()})}
           />
 
           <TextInput
@@ -184,7 +203,7 @@ const AddEditVolunteer = ({route, navigation}) => {
             autoCorrect={false}
             style={styles.short_text_input}
             value={volunteer.lastName}
-            onChangeText={newLastName => setVolunteer({...volunteer, lastName: newLastName})}
+            onChangeText={newLastName => setVolunteer({...volunteer, lastName: newLastName.trim()})}
           />
 
           <CheckBox
@@ -207,19 +226,18 @@ const AddEditVolunteer = ({route, navigation}) => {
               alignSelf: 'center'
             }}
           >
-              { authenticated && !!volunteer._id &&
-                <SubmitButton
-                  style={styles.deleteButton}
-                  rippleColor="rgba(168,37,33,0.4)"
-                  text="Delete"
-                  onPress={() => {
-                    setShowDeleteConfirmationDialog(true);
-                  }}
-                />
-              }
+            { !!volunteer._id &&
+              <SubmitButton
+                style={styles.deleteButton}
+                rippleColor="rgba(168,37,33,0.4)"
+                text="Delete"
+                onPress={() => {
+                  setShowDeleteConfirmationDialog(true);
+                }}
+              />
+            }
 
             <SubmitButton
-              disabled={!waiverBoxChecked}
               text="Save"
               onPress={() => {
                 addSaveVolunteer(volunteer);
@@ -274,6 +292,9 @@ const AddEditVolunteer = ({route, navigation}) => {
 
       <Portal>
         <Dialog
+          style={{
+            minWidth: 320, maxWidth: 738, alignSelf: 'center'
+          }}
           visible={showDeleteConfirmationDialog}
           onDismiss={() => { setShowDeleteConfirmationDialog(false) }}
         >
@@ -283,10 +304,13 @@ const AddEditVolunteer = ({route, navigation}) => {
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => {setShowDeleteConfirmationDialog(false)}}>Cancel</Button>
-            <Button onPress={() => {
-              deleteCurrentVolunteer(volunteer);
-              setShowDeleteConfirmationDialog(false);
-            }}>Delete</Button>
+            <Button
+              onPress={() => {
+                deleteCurrentVolunteer(volunteer);
+                setShowDeleteConfirmationDialog(false);
+              }}
+              labelStyle={{color: 'red'}}
+            >Delete</Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>

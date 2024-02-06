@@ -143,7 +143,13 @@ export default StyleSheet.create({
     bottom: 60,
     backgroundColor: '#96db73',
   },
-  terms: {
-    // padding: 10
+  html: {
+    p: {
+      fontSize: 18
+    },
+    h2: {
+      fontSize: 24,
+      fontWeight: 'bold',
+    }
   }
 });

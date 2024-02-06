@@ -1,35 +1,27 @@
-import * as React from 'react';
-import {
-  View, SafeAreaView, Platform, ScrollView, StatusBar, KeyboardAvoidingView
-} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Button, Paragraph, Dialog, HelperText, Portal, Provider, TextInput, Text, BottomNavigation, Snackbar} from 'react-native-paper';
-// Custom Components
-import Nav from "../../globals/Nav"
+import { useCallback, useState, useEffect, useContext, useRef } from 'react';
+import { View, Platform, KeyboardAvoidingView } from 'react-native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { HelperText, TextInput } from 'react-native-paper';
+
 import SubmitButton from "../../globals/SubmitButton"
-// Styles
 import styles from '../../globals/Styles'
-// For sending requests to the User API
 import UserRequests from '../../requests/user-requests';
 import { AuthContext } from '../../contexts/auth-context';
 import AsyncStorageHelpers from '../../globals/async-storage-helpers';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const Login = ({navigation}) => {
   // State variables
-  const [state, setState] = React.useContext(AuthContext);
-  const [email, setEmail] = React.useState("");
-  const [emailIsInvalid, setEmailIsInvalid] = React.useState(false);
-  const [password, setPassword] = React.useState("");
-  const [enableEmail, setEnableEmail] = React.useState(true);
-  const [showPasswordInput, setShowPasswordInput] = React.useState(false);
-  const [showSnackbar, setShowSnackbar] = React.useState(false);
-  const [snackbarMsg, setSnackbarMsg] = React.useState("");
-  const [emailsValid, setEmailsValid] = React.useState(false);
-  const [emailsBlurred, setEmailsBlurred] = React.useState(false);
+  const [state, setState] = useContext(AuthContext);
+  const [email, setEmail] = useState("");
+  const [emailIsInvalid, setEmailIsInvalid] = useState(false);
+  const [password, setPassword] = useState("");
+  const [enableEmail, setEnableEmail] = useState(true);
+  const [showPasswordInput, setShowPasswordInput] = useState(false);
+  const [emailsValid, setEmailsValid] = useState(false);
+  const [emailsBlurred, setEmailsBlurred] = useState(false);
   let authenticated: boolean = false;
-  const stateRef = React.useRef();
-  let pwdInputRef = React.useRef();
+  const stateRef = useRef();
+  let pwdInputRef = useRef();
 
   authenticated = !!state && state.token !== '' && state.user !== null;
 
@@ -43,51 +35,32 @@ const Login = ({navigation}) => {
     return (reg.test(email) || email === '');
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!showPasswordInput) {
       if (email === '') {
         setEmailsValid(false);
+        return;
       }
-      if (email !== "" && emailIsValid()) {
+
+      if (email !== '' && emailIsValid()) {
         setState({...state, showLoader: true});
-        emailIsAdmin(email).then((res) => {
-          console.debug("res: ", res);
-          setShowPasswordInput(res);
+        try {
+          const response = await UserRequests.userIsAdmin(email);
+          setShowPasswordInput(true);
+          setState({...state, showLoader: false});
           // Checking here maybe b/c it's a race condition for it to load first?
           setTimeout(() => {
             if (!!pwdInputRef.current) {
               pwdInputRef.current.focus();
             }
-            setState({...state, showLoader: false});
           }, 500);
-        }).catch((err) => {
-          console.error(err);
-          setState({...state, showLoader: false});
-        });
+        } catch (error) {
+          console.error(error);
+          setState({...state, snackbarMsg: error.message, showLoader: false});
+        }
       }
     } else {
       signInAdmin();
-    }
-  };
-
-  const emailIsAdmin = async () => {
-    setState({...state, showLoader: true});
-    try {
-      // Ask backend if email is registered
-      const response = await UserRequests.userIsAdmin(email);
-      setState({...state, showLoader: false});
-      if (!response.status) {
-        setSnackbarMsg(response.msg);
-        setShowSnackbar(true);
-        return false;
-      }
-      return true;
-    } catch (error) {
-      console.error(error);
-      setSnackbarMsg(error);
-      setShowSnackbar(true);
-      setState({...state, showLoader: false});
-      return false;
     }
   };
 
@@ -100,12 +73,6 @@ const Login = ({navigation}) => {
   const signInAdmin = async () => {
     try {
       const response = await UserRequests.signInAdmin(email, password);
-      if (!response.status) {
-        console.error(response.msg);
-        setSnackbarMsg(response.msg)
-        setShowSnackbar(true)
-        return false;
-      }
       // Add auth token to state
       setState({
         ...state, user: response.data.user, token: response.data.token
@@ -117,17 +84,19 @@ const Login = ({navigation}) => {
       navigation.navigate("Repairs");
     } catch (error) {
       console.error(error);
+      setState({...state, snackbarMsg: error.message});
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (authenticated) {
-      navigation.navigate('Repairs');
+      // navigation.navigate('Repairs');
+      navigation.navigate('About');
     }
   }, [authenticated]);
 
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       return () => {
         clearContent();
       }
@@ -165,7 +134,7 @@ const Login = ({navigation}) => {
             onChangeText={email => setEmail(email.trim().toLowerCase())}
           />
           <HelperText type="error" visible={emailsBlurred && !emailsValid}>
-            Woops! Please enter a valid email.
+            Please enter a valid email.
           </HelperText>
           {showPasswordInput &&
             <>
@@ -188,21 +157,7 @@ const Login = ({navigation}) => {
           />
         </View>
       </View>
-      <Portal>
-        <Snackbar
-          duration={2000}
-          style={styles.snackbar}
-          visible={showSnackbar}
-          onDismiss={() => {
-            setShowSnackbar(false);
-            setSnackbarMsg("");
-          }}
-          action={{
-            label: "close"
-          }}
-        >{snackbarMsg}
-        </Snackbar>
-      </Portal>
+
     </KeyboardAvoidingView>
 
   );

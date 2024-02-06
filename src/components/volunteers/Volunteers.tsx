@@ -1,37 +1,22 @@
-import * as React from 'react';
-import { View, SafeAreaView, Platform, ScrollView, StatusBar, KeyboardAvoidingView, Image} from 'react-native';
-import { Button, Portal, TextInput, Text, DataTable, Snackbar, FAB } from 'react-native-paper';
+import { useContext, useState, useCallback } from 'react';
+import { View, ScrollView } from 'react-native';
+import { TextInput, Text, DataTable, FAB } from 'react-native-paper';
 import { format } from "date-fns";
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-// Custom Components
-import Nav from "../../globals/Nav"
-import SubmitButton from "../../globals/SubmitButton"
-// Styles
+
 import styles from '../../globals/Styles'
 import { getTodaysVolunteers } from '../../requests/volunteer-requests';
 import Volunteer from '../../models/Volunteer';
 import { AuthContext } from '../../contexts/auth-context';
 
-let fakeVolunteers: [Volunteer] = [
-  {id: 0, firstName: "John1", lastName: "Smith"},
-  {id: 1, firstName: "John2", lastName: "Smith"},
-  {id: 2, firstName: "John3", lastName: "Smith"},
-  {id: 3, firstName: "John4", lastName: "Smith"},
-  {id: 4, firstName: "John5", lastName: "Smith"},
-  {id: 5, firstName: "John6", lastName: "Smith"},
-];
-
 const Volunteers = () => {
   const navigation = useNavigation();
-  const [volunteers, setVolunteers] = React.useState([]);
-  const [snackbarMsg, setSnackbarMsg] = React.useState("");
-  const [showSnackbar, setShowSnackbar] = React.useState(false);
-  const [state, setState] = React.useContext(AuthContext);
-  const [volunteersRetrieved, setVolunteersRetrieved] = React.useState(false);
+  const [volunteers, setVolunteers] = useState([]);
+  const [state, setState] = useContext(AuthContext);
+  const [volunteersRetrieved, setVolunteersRetrieved] = useState(false);
 
   // Set whether the user is authenticated from the AuthContext state
   let authenticated = !!state && state.token !== '' && state.user !== null;
-
 
   const addVolunteer = () => {
     const volunteer: Volunteer = {
@@ -46,7 +31,7 @@ const Volunteers = () => {
     });
   }
 
-  const volunteerTapped = (volunteer: Volunteer) => {
+  const volunteerPressed = (volunteer: Volunteer) => {
     navigation.navigate('Add/Edit Volunteer', {
       volunteer: volunteer
     });
@@ -54,24 +39,19 @@ const Volunteers = () => {
 
   const getVolunteers = async () => {
     setState({...state, showLoader: true});
-
     try {
       const response = await getTodaysVolunteers();
-      if (!response.status) {
-        throw new Error(response.msg);
-      }
       setVolunteers(response.data.volunteers);
+      setState({...state, showLoader: false});
     } catch (error) {
-      console.error(error);
-      setSnackbarMsg("Failed to retrieve volunteers");
-      setShowSnackbar(true);
+      console.error(error.message);
+      setState({...state, snackbarMsg: error.message});
     }
-    setState({...state, showLoader: false});
     setVolunteersRetrieved(true);
   };
 
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       getVolunteers();
     }, [])
   );
@@ -89,7 +69,7 @@ const Volunteers = () => {
 
             {volunteers.map((volunteer) => (
               <DataTable.Row key={volunteer._id}
-                onPress={(!authenticated ? undefined : () => {volunteerTapped(volunteer)})}
+                onPress={(!authenticated ? undefined : () => {volunteerPressed(volunteer)})}
               >
                 <DataTable.Cell style={{marginHorizontal: 10}}>{volunteer.firstName}</DataTable.Cell>
                 <DataTable.Cell style={{marginHorizontal: 10}}>{volunteer.lastName}</DataTable.Cell>
@@ -105,21 +85,6 @@ const Volunteers = () => {
             }}>{"No volunteers yet today"}
           </Text>
         }
-
-        <Portal>
-          <Snackbar
-            visible={showSnackbar}
-            style={styles.snackbar}
-            onDismiss={() => {
-              setShowSnackbar(false);
-              setSnackbarMsg("");
-            }}
-            action={{
-              label: "close"
-            }}
-          >{snackbarMsg}
-          </Snackbar>
-        </Portal>
 
         </View>
       </ScrollView>

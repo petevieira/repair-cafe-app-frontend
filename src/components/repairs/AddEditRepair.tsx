@@ -1,21 +1,19 @@
 import { useState, useEffect, useContext } from 'react';
-import { View, Platform, KeyboardAvoidingView, ScrollView } from 'react-native';
-import { Button, Dialog, Portal, TextInput, HelperText, Text, Modal, Snackbar } from 'react-native-paper';
-import DropDown from "react-native-paper-dropdown";
 import { useNavigation } from '@react-navigation/native';
+import { View, Platform, KeyboardAvoidingView, ScrollView } from 'react-native';
+import { Button, Dialog, Portal, TextInput, HelperText, Text } from 'react-native-paper';
+import DropDown from "react-native-paper-dropdown";
 import HTMLView from 'react-native-htmlview';
 import { Dropdown } from 'react-native-element-dropdown';
-// Custom Components
+
 import Nav from "../../globals/Nav"
 import SubmitButton from "../../globals/SubmitButton"
-// Styles
 import styles from '../../globals/Styles'
-// Fake data
 import Item from '../../models/Item';
 import CheckBox from "../../globals/CheckBox"
 import { AuthContext } from '../../contexts/auth-context';
 import { getTodaysVolunteers } from '../../requests/volunteer-requests';
-import { addBasicItem, addFullItem, getItem, updateItem, deleteItem, findOwnerByEmail } from '../../requests/item-requests';
+import { addFullItem, getItem, updateItem, deleteItem, findOwnerByEmail } from '../../requests/item-requests';
 import { ProductCategoryValues, RepairStatusValues, RepairBarrierValues} from '../../globals/ords';
 import Terms from '../../globals/Terms';
 import { WEIGHT_UNITS, COST_UNITS } from '@env';
@@ -33,13 +31,7 @@ const ordsRepairBarrierList = RepairBarrierValues.map((el, idx) => {
   return { label: el, value: idx };
 });
 
-const volunteersList = [
-  { label: 'John S.', value: 0 },
-  { label: 'Steve Johnson', value: 1 },
-  { label: 'Lauren Dahlin', value: 2 },
-];
-
-const miscCategoryIdx = 17;
+const MiscCategoryIdx = 17;
 
 const AddEditRepair = ({route, navigation}) => {
   const [itemDetails, setItemDetails] = useState(new Item());
@@ -49,15 +41,13 @@ const AddEditRepair = ({route, navigation}) => {
   const [showAddItemBtn, setShowAddItemBtn] = useState(false);
   const [repairerList, setRepairerList] = useState([]);
   const [volunteers, setVolunteers] = useState([]);
-  const [snackbarMsg, setSnackbarMsg] = useState("");
-  const [showSnackbar, setShowSnackbar] = useState(false);
   const [repairerIdx, setRepairerIdx] = useState(-1);
   const [showRepairerDropdown, setShowRepairerDropdown] = useState(false);
   const [statusIdx, setStatusIdx] = useState(-1);
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [barrierIdx, setBarrierIdx] = useState(-1);
   const [showBarrierDropdown, setShowBarrierDropdown] = useState(false);
-  const [productCategoryIdx, setProductCategoryIdx] = useState(miscCategoryIdx)
+  const [productCategoryIdx, setProductCategoryIdx] = useState(MiscCategoryIdx)
   const [productCategoryFocused, setProductCategoryFocused] = useState(false);
   const [showDeleteConfirmationDialog, setShowDeleteConfirmationDialog] = useState(false);
   const [state, setState] = useContext(AuthContext);
@@ -94,8 +84,7 @@ const AddEditRepair = ({route, navigation}) => {
       msg = "Please enter a valid cost";
     }
     if (msg !== '') {
-      setSnackbarMsg(msg);
-      setShowSnackbar(true);
+      setState({...state, snackbarMsg: msg});
       return false;
     }
     return true;
@@ -108,50 +97,34 @@ const AddEditRepair = ({route, navigation}) => {
 
     try {
       let response = null;
-      if (authenticated) {
-        if (!!itemDetails._id) {
-          response = await updateItem(itemDetails);
-        } else {
-          response = await addFullItem(itemDetails);
-        }
+      if (!!itemDetails._id) {
+        response = await updateItem(itemDetails);
       } else {
-        response = await addBasicItem(itemDetails);
+        response = await addFullItem(itemDetails);
       }
-      if (!response.status) {
-        console.error(response.msg);
-        setSnackbarMsg(response.msg);
-        setShowSnackbar(true);
-        return;
-      }
+      setState({...state, snackbarMsg: response.msg, showLoader: false});
       navigation.navigate('Repairs');
     } catch (error) {
       console.error(error);
+      setState({...state, snackbarMsg: error.message, showLoader: false});
     }
   }
 
   const deleteCurrentItem = async () => {
     if (!itemDetails._id) {
-      setSnackbarMsg("Item can't be deleted. It doesn't have an _id.");
-      setShowSnackbar(true);
+      setState({...state, snackbarMsg: "Item can't be deleted. It doesn't have an _id."});
       return;
     }
+    setState({...state, showLoader: true});
     try {
       const response = await deleteItem(itemDetails._id);
-      if (!response.status) {
-        console.error(response.msg);
-        setSnackbarMsg(response.msg);
-        setShowSnackbar(true);
-        return;
-      }
-      setSnackbarMsg("Item deleted");
-      setShowSnackbar(true);
+      setState({...state, snackbarMsg: "Item deleted", showLoader: false});
       setTimeout(() => {
-        setSnackbarMsg("");
-        setShowSnackbar(false);
         navigation.navigate('Repairs');
       }, 1000);
     } catch (error) {
       console.error(error);
+      setState({...state, showLoader: false, snackbarMsg: error.message});
     }
   }
 
@@ -167,9 +140,9 @@ const AddEditRepair = ({route, navigation}) => {
     return !item || !item._id;
   }
 
-  const getVolunteers = async (signal) => {
+  const getVolunteers = async () => {
     try {
-      const response = await getTodaysVolunteers(signal);
+      const response = await getTodaysVolunteers();
       let list = [];
       response.data.volunteers.forEach((v, idx) => {
         list.push({ label: `${v.firstName} ${v.lastName}`, value: idx});
@@ -178,8 +151,7 @@ const AddEditRepair = ({route, navigation}) => {
       setVolunteers(response.data.volunteers);
     } catch (error) {
       console.error(error);
-      setSnackbarMsg(error);
-      setShowSnackbar(true);
+      setState({...state, snackbarMsg: error.message});
     }
   }
 
@@ -200,7 +172,7 @@ const AddEditRepair = ({route, navigation}) => {
     return item;
   }
 
-  const getFullItem = async (item, signal) => {
+  const getFullItem = async (item) => {
     setState({...state, showLoader: true});
     if (isNewItem(item)) {
       setPageTitle("New Item");
@@ -212,22 +184,23 @@ const AddEditRepair = ({route, navigation}) => {
     }
 
     try {
-      const response = await getItem(item._id, signal);
+      const response = await getItem(item._id);
       let fullItem = response.data.item;
       setTitle(fullItem);
       if (!fullItem.repairStatus) {
         fullItem = initStatus(fullItem);
       }
       if (!fullItem.type) {
-        fullItem.type = ordsProductCategoryList[miscCategoryIdx].label;
-        setProductCategoryIdx(miscCategoryIdx);
+        fullItem.type = ordsProductCategoryList[MiscCategoryIdx].label;
+        setProductCategoryIdx(MiscCategoryIdx);
       }
       setItemDetails(fullItem);
       setWaiverBoxChecked(response.data.item.acceptsWaiver);
+      setState({...state, showLoader: false});
     } catch (error) {
       console.error(error);
+      setState({...state, showLoader: false, snackbarMsg: error.message});
     }
-    setState({...state, showLoader: false});
   };
 
   const onEmailBlur = async () => {
@@ -237,10 +210,6 @@ const AddEditRepair = ({route, navigation}) => {
     setState({...state, showLoader: true});
     try {
       const response = await findOwnerByEmail(itemDetails.ownersEmail);
-      if (!response.data) {
-        setState({...state, showLoader: false});
-        return;
-      }
       const owner = response.data.owner;
       if (!!owner) {
         setItemDetails({
@@ -249,28 +218,19 @@ const AddEditRepair = ({route, navigation}) => {
           ownersLastName: owner.lastName
         });
       }
-    } catch (err) {
-      console.error(err);
+      setState({...state, showLoader: false});
+    } catch (error) {
+      console.error(error);
+      setState({...state, showLoader: false, snackbarMsg: error.message});
     }
-    setState({...state, showLoader: false});
   }
 
   useEffect(() => {
-    const abortController = new AbortController();
-    const signal = abortController.signal;
-    getVolunteers(signal);
-    return () => {
-      abortController.abort();
-    }
+    getVolunteers();
   }, []);
 
   useEffect(() => {
-    const abortController = new AbortController();
-    const signal = abortController.signal;
-    getFullItem(paramItem, signal);
-    return () => {
-      abortController.abort();
-    }
+    getFullItem(paramItem);
   }, []);
 
   useEffect(() => {
@@ -510,8 +470,8 @@ const AddEditRepair = ({route, navigation}) => {
             mode="outlined"
             autoCorrect={false}
             style={styles.short_text_input}
-            value={itemDetails.notes ?? ""}
-            onChangeText={newNotes => setItemDetails({...itemDetails, notes: newNotes})}
+            value={itemDetails.repairNotes ?? ""}
+            onChangeText={newNotes => setItemDetails({...itemDetails, repairNotes: newNotes})}
           />
           {
             repairerList.length > 0 &&
@@ -621,21 +581,6 @@ const AddEditRepair = ({route, navigation}) => {
           <Terms />
         </View>
       }
-
-      <Portal>
-        <Snackbar
-          visible={showSnackbar}
-          style={styles.snackbar}
-          onDismiss={() => {
-            setShowSnackbar(false);
-            setSnackbarMsg("");
-          }}
-          action={{
-            label: "close"
-          }}
-        >{snackbarMsg}
-        </Snackbar>
-      </Portal>
 
       <Portal>
         <Dialog

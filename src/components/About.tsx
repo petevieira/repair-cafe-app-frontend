@@ -1,12 +1,12 @@
 import { useState, useEffect, useContext } from 'react';
-import { Text, View, ScrollView } from 'react-native';
-import styles from '../globals/Styles'
+import { View, ScrollView } from 'react-native';
 import HTMLView from 'react-native-htmlview';
+
+import styles from '../globals/Styles'
 import { getText } from '../requests/text-requests';
 import { AuthContext } from '../contexts/auth-context';
 
 const About = () => {
-
   const [aboutText, setAboutText] = useState('');
   const [state, setState] = useContext(AuthContext);
 
@@ -14,14 +14,12 @@ const About = () => {
     setState({...state, showLoader: true});
     try {
       const response = await getText('about');
-      if (!response.status) {
-        throw new Error(response.msg);
-      }
       setAboutText(response.data.text.content)
-    } catch (err) {
-      console.error(err);
+      setState({...state, showLoader: false});
+    } catch (error) {
+      console.error(error);
+      setState({...state, snackbarMsg: error.message, showLoader: false});
     }
-    setState({...state, showLoader: false});
   }
 
   useEffect(() => {
@@ -32,6 +30,7 @@ const About = () => {
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.content}>
         <HTMLView
+          stylesheet={styles.html}
           value={aboutText}
         />
       </View>

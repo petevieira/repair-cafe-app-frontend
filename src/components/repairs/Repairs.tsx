@@ -1,40 +1,21 @@
-import * as React from 'react';
-import { View, SafeAreaView, Platform, ScrollView, StatusBar, KeyboardAvoidingView, Image} from 'react-native';
-import { Button, Portal, TextInput, Text, DataTable, Snackbar, FAB } from 'react-native-paper';
+import { useState, useContext, useCallback } from 'react';
+import { View, ScrollView } from 'react-native';
+import { Button, TextInput, Text, DataTable, FAB } from 'react-native-paper';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { format } from "date-fns";
 
-// Custom Components
 import Nav from "../../globals/Nav"
 import SubmitButton from "../../globals/SubmitButton"
-// Styles
 import styles from '../../globals/Styles'
 import { getTodaysItems } from '../../requests/item-requests';
 import Item from '../../models/Item';
 import { AuthContext } from '../../contexts/auth-context';
 import { Config } from '../../consts/app.consts';
 
-let fakeItems: [Item] = [
-  {id: 0, ownerAcceptsWaiver: true, ownersFirstName: "John1", ownersLastName: "Smith", ownersEmail: "john.smith1@gmail.com", type: "Toaster", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Joe", repairerLastName: "Smith", notes: "", status: "In Progress", repaired: false},
-  {id: 1, ownerAcceptsWaiver: false, ownersFirstName: "John2", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Microwave", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Scott", repairerLastName: "Smith", notes: "", status: "Repaired", repaired: false},
-  {id: 2, ownerAcceptsWaiver: true, ownersFirstName: "John3", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Hair Dryer", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Mark", repairerLastName: "Smith", notes: "", status: "Not Repaired", repaired: true},
-  {id: 3, ownerAcceptsWaiver: true, ownersFirstName: "John4", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Laptop", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Pete", repairerLastName: "Smith", notes: "", status: "", repaired: false},
-  {id: 4, ownerAcceptsWaiver: false, ownersFirstName: "John5", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Fan", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Mark", repairerLastName: "Smith", notes: "", status: "", repaired: false},
-  {id: 5, ownerAcceptsWaiver: true, ownersFirstName: "John6", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Teddy Bear", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Joe", repairerLastName: "Smith", notes: "", status: "", repaired: true},
-  {id: 6, ownerAcceptsWaiver: true, ownersFirstName: "John1", ownersLastName: "Smith", ownersEmail: "john.smith1@gmail.com", type: "Toaster", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Joe", repairerLastName: "Smith", notes: "", status: "In Progress", repaired: false},
-  {id: 7, ownerAcceptsWaiver: false, ownersFirstName: "John2", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Microwave", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Scott", repairerLastName: "Smith", notes: "", status: "Repaired", repaired: false},
-  {id: 8, ownerAcceptsWaiver: true, ownersFirstName: "John3", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Hair Dryer", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Mark", repairerLastName: "Smith", notes: "", status: "Not Repaired", repaired: true},
-  {id: 9, ownerAcceptsWaiver: true, ownersFirstName: "John4", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Laptop", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Pete", repairerLastName: "Smith", notes: "", status: "", repaired: false},
-  {id: 10, ownerAcceptsWaiver: false, ownersFirstName: "John5", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Fan", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Mark", repairerLastName: "Smith", notes: "", status: "", repaired: false},
-  {id: 11, ownerAcceptsWaiver: true, ownersFirstName: "John6", ownersLastName: "Smith", ownersEmail: "john.smith@gmail.com", type: "Teddy Bear", brand: "Sony", model: "Unknown", symptoms: "Doesn't turn on at all", repairerFirstName: "Joe", repairerLastName: "Smith", notes: "", status: "", repaired: true},
-];
-
 const Repairs = () => {
-  const [items, setItems] = React.useState([]);
-  const [snackbarMsg, setSnackbarMsg] = React.useState("");
-  const [showSnackbar, setShowSnackbar] = React.useState(false);
-  const [state, setState] = React.useContext(AuthContext);
-  const [repairsRetrieved, setRepairsRetrieved] = React.useState(false);
+  const [items, setItems] = useState([]);
+  const [state, setState] = useContext(AuthContext);
+  const [repairsRetrieved, setRepairsRetrieved] = useState(false);
 
   // Set whether the user is authenticated from the AuthContext state
   let authenticated = !!state && state.token !== '' && state.user !== null;
@@ -43,31 +24,26 @@ const Repairs = () => {
   // Today's date
   const todaysDate = format(new Date(), "MMMM do, yyyy");
 
-  // const getItems = async (signal) => {
-  const getItems = async (signal) => {
+  const getItems = async () => {
     setState({...state, showLoader: true});
     try {
       const response = await getTodaysItems();
-      if (!response.status) {
-        throw new Error(response.msg);
-      }
       setItems(response.data.items);
+      setState({...state, showLoader: false});
     } catch (error) {
       console.error(error);
-      setSnackbarMsg(error);
-      setShowSnackbar(true);
+      setState({...state, snackbarMsg: error.message, showLoader: false});
     }
-    setState({...state, showLoader: false});
     setRepairsRetrieved(true);
   }
 
-  const addItem = () => {
+  const addItemPressed = () => {
     navigation.navigate('Add/Edit Repair', {
       item: new Item()
     });
   }
 
-  const itemTapped = (item) => {
+  const itemPressed = (item) => {
     if (!authenticated) {
       return;
     }
@@ -77,16 +53,8 @@ const Repairs = () => {
   }
 
   useFocusEffect(
-    React.useCallback(() => {
-      // const abortController = new AbortController();
-      // const signal = abortController.signal;
-      // getItems(signal);
-
+    useCallback(() => {
       getItems();
-      return () => {
-        // abortController.abort();
-        // setItems(new Item());
-      }
     },[])
   );
 
@@ -100,7 +68,7 @@ const Repairs = () => {
             <DataTable.Header style={{minWidth: 500}}>
               <DataTable.Title>#</DataTable.Title>
               <DataTable.Title>Item</DataTable.Title>
-              <DataTable.Title>Name</DataTable.Title>
+              <DataTable.Title>Owner</DataTable.Title>
               <DataTable.Title>Repairer</DataTable.Title>
               <DataTable.Title>Status</DataTable.Title>
             </DataTable.Header>
@@ -108,7 +76,7 @@ const Repairs = () => {
             {items.map((item, idx) => (
               <DataTable.Row
                 key={item._id}
-                onPress={authenticated ? (() => itemTapped(item)) : undefined}
+                onPress={authenticated ? (() => itemPressed(item)) : undefined}
               >
                 <DataTable.Cell>{idx+1}</DataTable.Cell>
                 <DataTable.Cell>{item.type}</DataTable.Cell>
@@ -126,21 +94,6 @@ const Repairs = () => {
               }}>No repairs yet today</Text>
             : <></>
           }
-          <Portal>
-            <Snackbar
-              visible={showSnackbar}
-              style={styles.snackbar}
-              onDismiss={() => {
-                setShowSnackbar(false);
-                setSnackbarMsg("");
-              }}
-              action={{
-                label: "close"
-              }}
-            >{snackbarMsg}
-            </Snackbar>
-          </Portal>
-
         </View>
       </ScrollView>
       { authenticated &&
@@ -148,7 +101,7 @@ const Repairs = () => {
           icon="plus"
           style={styles.fab}
           animated={false}
-          onPress={addItem}
+          onPress={addItemPressed}
         />
       }
     </>

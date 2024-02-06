@@ -8,6 +8,8 @@ import Volunteers from '../components/volunteers/Volunteers';
 import Login from '../components/login/Login';
 import About from '../components/About';
 import Nav from '../globals/Nav';
+import { Portal, Snackbar} from 'react-native-paper';
+import styles from './Styles'
 
 // Instantiate a stack navigator
 const Stack = createNativeStackNavigator();

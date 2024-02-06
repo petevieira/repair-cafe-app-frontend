@@ -1,6 +1,6 @@
-import { Provider, configureFonts, MD3LightTheme } from 'react-native-paper';
+import { configureFonts, MD3LightTheme, PaperProvider } from 'react-native-paper';
 import { View } from 'react-native';
-import { PaperProvider } from 'react-native-paper';
+import { AuthProvider } from './src/contexts/auth-context';
 
 // Custom Components
 import appFontConfig from './src/globals/fonts';
@@ -11,7 +11,7 @@ import RootNavigation from './src/globals/RootNavigation';
  * Main application
  */
 const App = () => {
-  console.debug("Loading App...");
+
   return (
     <PaperProvider theme ={{
       ...MD3LightTheme,
@@ -19,7 +19,9 @@ const App = () => {
       colors: appColors,
       fonts: configureFonts({config: appFontConfig})
     }}>
-      <RootNavigation/>
+      <AuthProvider>
+        <RootNavigation/>
+      </AuthProvider>
     </PaperProvider>
   );
 };

@@ -1,7 +1,10 @@
+import { useContext, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { ScrollView } from 'react-native';
+import { AuthContext } from '../contexts/auth-context';
+import { Portal, Snackbar} from 'react-native-paper';
 
-import { AuthProvider } from '../contexts/auth-context';
+// import { AuthProvider } from '../contexts/auth-context';
 import ScreensNav from './ScreensNav';
 import BottomTabs from './BottomTabs';
 import Loader from './Loader';
@@ -14,13 +17,27 @@ import styles from './Styles';
  * which is wrapped in a NavigationContainer
  */
 const RootNavigation = () => {
+  const [state, setState] = useContext(AuthContext);
+
   return (
     <NavigationContainer>
-      <AuthProvider>
-        <ScreensNav/>
-        <BottomTabs/>
-        <Loader/>
-      </AuthProvider>
+      <ScreensNav/>
+      <BottomTabs/>
+      <Loader/>
+      <Portal>
+        <Snackbar
+          duration={2000}
+          style={styles.snackbar}
+          visible={!!state.snackbarMsg}
+          onDismiss={() => {
+            setState({...state, snackbarMsg: ''});
+          }}
+          action={{
+            label: "close me"
+          }}
+        >{state.snackbarMsg}
+        </Snackbar>
+      </Portal>
     </NavigationContainer>
   );
 }

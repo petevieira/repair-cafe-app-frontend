@@ -4,7 +4,6 @@
 
 import axios from 'axios';
 import Api from './request-consts';
-// import axiosInterceptor from './axios-interceptor';
 import AsyncStorageHelpers from '../globals/async-storage-helpers';
 
 /**
@@ -12,160 +11,111 @@ import AsyncStorageHelpers from '../globals/async-storage-helpers';
  * @param {string} date - Date to get repairs from
  * @returns Promise which resolves to the array of items, or rejects
  */
-export const getTodaysVolunteers = async (signal) => {
+export const getTodaysVolunteers = async () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const todayIso = today.toISOString();
-  try {
-    const response = await axios.get(
-      Api.Volunteers.GET_DAYS_VOLUNTEERS + `/${todayIso}`,
-      { signal }
-    );
-    if (!response) {
-      console.error("error: ", response);
-      throw new Error("Error fetching volunteers");
-    }
-    return response.data;
-  } catch (error) {
-    return Promise.reject(error);
-  }
+
+  return await axios.get(
+    Api.Volunteers.GET_DAYS_VOLUNTEERS + `/${todayIso}`
+  );
 }
 
 export const addVolunteer = async (volunteer) => {
-  try {
-    const authToken = await AsyncStorageHelpers.getAuth(authToken);
-    if (!authToken) {
-      throw new Error("[addVolunteer] failed to get auth token");
-    }
-
-    const response = await axios.post(
-      Api.Volunteers.ADD_VOLUNTEER, volunteer,
-      {
-        headers: {'Authorization': `Bearer ${authToken.token}`}
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error(error);
+  const authToken = await AsyncStorageHelpers.getAuth(authToken);
+  if (!authToken) {
+    throw new Error("[addVolunteer] failed to get auth token");
   }
+
+  return await axios.post(
+    Api.Volunteers.ADD_VOLUNTEER, volunteer,
+    {
+      headers: {'Authorization': `Bearer ${authToken.token}`}
+    }
+  );
 }
 
 export const updateVolunteer = async (volunteer) => {
-  try {
-    const authToken = await AsyncStorageHelpers.getAuth(authToken);
-    if (!authToken) {
-      throw new Error("[updateVolunteer] failed to get auth token");
-    }
-
-    const response = await axios.put(
-      Api.Volunteers.UPDATE_VOLUNTEER,
-      {
-        id: volunteer._id,
-        acceptsWaiver: volunteer.acceptsWaiver ?? false,
-        firstName: volunteer.firstName ?? "",
-        lastName: volunteer.lastName ?? "",
-        email: volunteer.email ?? ""
-      },
-      {
-        headers: {'Authorization': `Bearer ${authToken.token}`}
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error(error);
+  const authToken = await AsyncStorageHelpers.getAuth(authToken);
+  if (!authToken) {
+    throw new Error("[updateVolunteer] failed to get auth token");
   }
+
+  return await axios.put(
+    Api.Volunteers.UPDATE_VOLUNTEER,
+    {
+      id: volunteer._id,
+      acceptsWaiver: volunteer.acceptsWaiver ?? false,
+      firstName: volunteer.firstName ?? "",
+      lastName: volunteer.lastName ?? "",
+      email: volunteer.email ?? ""
+    },
+    {
+      headers: {'Authorization': `Bearer ${authToken.token}`}
+    }
+  );
 }
 
 export const getVolunteer = async (id: string) => {
-  try {
-    const authToken = await AsyncStorageHelpers.getAuth(authToken);
-    if (!authToken) {
-      throw new Error("[getVolunteer] failed to get auth token");
-    }
-
-    const response = await axios.get(Api.Volunteers.GET_VOLUNTEER + `/${id}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${authToken.token}`
-        }
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error(error);
+  const authToken = await AsyncStorageHelpers.getAuth(authToken);
+  if (!authToken) {
+    throw new Error("[getVolunteer] failed to get auth token");
   }
+
+  return await axios.get(Api.Volunteers.GET_VOLUNTEER + `/${id}`,
+    {
+      headers: {
+        'Authorization': `Bearer ${authToken.token}`
+      }
+    }
+  );
 }
 
 export const deleteVolunteer = async (id: string) => {
   if (!id) {
-    console.error("Can't delete volunteer. 'id' not defined");
-    return { status: false };
+    throw new Error("Can't delete volunteer. 'id' not defined");
   }
-  try {
-    const authToken = await AsyncStorageHelpers.getAuth(authToken);
-    if (!authToken) {
-      throw new Error("[getVolunteer] failed to get auth token");
-    }
-    const response = await axios.delete(
-      Api.Volunteers.DELETE_VOLUNTEER + `/${id}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${authToken.token}`
-        }
+  const authToken = await AsyncStorageHelpers.getAuth(authToken);
+  if (!authToken) {
+    throw new Error("[getVolunteer] failed to get auth token");
+  }
+  const response = await axios.delete(
+    Api.Volunteers.DELETE_VOLUNTEER + `/${id}`,
+    {
+      headers: {
+        'Authorization': `Bearer ${authToken.token}`
       }
-    );
-    if (!response) {
-      throw new Error("Error deleting volunteer");
     }
-    return response.data;
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  );
 };
 
 export const getPastVolunteers = async () => {
-  try {
-    const authToken = await AsyncStorageHelpers.getAuth(authToken);
-    if (!authToken) {
-      throw new Error("[getPastVolunteer] failed to get auth token");
-    }
-    const response = await axios.get(
-      Api.Volunteers.GET_PAST_VOLUNTEERS,
-      {
-        headers: {
-          'Authorization': `Bearer ${authToken.token}`
-        }
-      }
-    );
-    if (!response) {
-      throw new Error("Error getting past volunteers");
-    }
-    return response.data;
-  } catch (error) {
-    return Promise.reject(error);
+  const authToken = await AsyncStorageHelpers.getAuth(authToken);
+  if (!authToken) {
+    throw new Error("[getPastVolunteer] failed to get auth token");
   }
+  return await axios.get(
+    Api.Volunteers.GET_PAST_VOLUNTEERS,
+    {
+      headers: {
+        'Authorization': `Bearer ${authToken.token}`
+      }
+    }
+  );
 }
 
 export const findVolunteerByEmail = async (email: string) => {
-  try {
-    const authToken = await AsyncStorageHelpers.getAuth(authToken);
-    if (!authToken) {
-      throw new Error("findVolunteersByEmail() failed to get auth token");
-    }
-    const response = await axios.get(
-      Api.Volunteers.FIND_VOLUNTEER_BY_EMAIL + `/${email}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${authToken.token}`
-        }
-      }
-    );
-    if (!response || !response.status) {
-      throw new Error("Error getting finding volunteer based on email");
-    }
-    return response.data;
-  } catch (error) {
-    return Promise.reject(error);
+  const authToken = await AsyncStorageHelpers.getAuth(authToken);
+  if (!authToken) {
+    throw new Error("findVolunteersByEmail() failed to get auth token");
   }
+  return await axios.get(
+    Api.Volunteers.FIND_VOLUNTEER_BY_EMAIL + `/${email}`,
+    {
+      headers: {
+        'Authorization': `Bearer ${authToken.token}`
+      }
+    }
+  );
 }
 

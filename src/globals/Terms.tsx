@@ -36,8 +36,8 @@ const Terms = () => {
       <View
         style={{paddingHorizontal: 10}}>
         <HTMLView
+          stylesheet={styles.html}
           value={terms}
-          style={styles.terms}
         />
       </View>
     </ScrollView>

@@ -172,10 +172,11 @@ const createItem = (item: Item) => {
     brand: item.brand ?? "",
     model: item.model ?? "",
     symptoms: item.symptoms ?? "",
-    notes: item.notes ?? "",
+    repairNotes: item.repairNotes ?? "",
     repairerFirstName: item.repairerFirstName ?? "",
     repairerLastName: item.repairerLastName ?? "",
-    status: item.status ?? "",
+    repairStatus: item.repairStatus ?? "",
+    repairBarrier: item.repairBarrier ?? "",
     weight: item.weight ?? WEIGHT_UNITS,
     cost: item.cost ?? COST_UNITS
   };

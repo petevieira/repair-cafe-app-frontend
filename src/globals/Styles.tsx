@@ -54,7 +54,7 @@ export default StyleSheet.create({
   deleteButton: {
     marginTop: 20,
     marginHorizontal: 20,
-    backgroundColor: '#c20008',
+    backgroundColor: '#c34a51',
     borderColor: '#7b0005',
   },
   submitButtonLabel: {

@@ -107,6 +107,7 @@ const Repairs = () => {
             <DataTable.Title>#</DataTable.Title>
             <DataTable.Title>Item</DataTable.Title>
             <DataTable.Title>Name</DataTable.Title>
+            <DataTable.Title>Repairer</DataTable.Title>
             <DataTable.Title>Status</DataTable.Title>
           </DataTable.Header>
 
@@ -118,7 +119,8 @@ const Repairs = () => {
               <DataTable.Cell>{idx+1}</DataTable.Cell>
               <DataTable.Cell>{item.type}</DataTable.Cell>
               <DataTable.Cell>{item.ownersFirstName} {item.ownersLastName}</DataTable.Cell>
-              <DataTable.Cell>{item.status}</DataTable.Cell>
+              <DataTable.Cell>{item.repairerFirstName} {item.repairerLastName}</DataTable.Cell>
+              <DataTable.Cell>{item.repairStatus}</DataTable.Cell>
             </DataTable.Row>
           ))}
         </DataTable>

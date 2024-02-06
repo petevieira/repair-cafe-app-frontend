@@ -19,7 +19,7 @@ import { addBasicItem, addFullItem, getItem, updateItem, deleteItem, findOwnerBy
 import { ProductCategoryValues, RepairStatusValues, RepairBarrierValues} from '../../globals/ords';
 import Terms from '../../globals/Terms';
 import { WEIGHT_UNITS, COST_UNITS } from '@env';
-import { emailIsValid } from '../../lib/helpers';
+import { emailIsValid, objectIsValid } from '../../lib/helpers';
 
 const ordsProductCategoryList = ProductCategoryValues.map((el, idx) => {
   return { label: el.text, value: idx };
@@ -95,7 +95,32 @@ const AddEditRepair = ({route, navigation}) => {
     return firstNameValid && lastNameValid && emailValid;
   }
 
+  const itemOkToSave = (item): boolean => {
+    console.debug("item: ", item);
+    const result = objectIsValid(
+      item,
+      [
+        'ownersEmail', 'ownersFirstName', 'ownersLastName',
+        'type', 'symptoms', 'weight', 'cost'
+      ],
+      [
+        "Owner's Email", "Owner's First Name", "Owner's Last Name",
+        "Type", "Symptoms", "Weight", "Cost"
+      ]
+    );
+    if (result !== true) {
+      setSnackbarMsg(result);
+      setShowSnackbar(true);
+      return false;
+    }
+    return true;
+  }
+
   const saveItem = async () => {
+    if (!itemOkToSave(itemDetails)) {
+      return
+    }
+
     try {
       let response = null;
       if (authenticated) {
@@ -179,7 +204,7 @@ const AddEditRepair = ({route, navigation}) => {
   }
 
   const initStatus = (item) => {
-    item.status = RepairStatusValues[0];
+    item.repairStatus = RepairStatusValues[0];
     setStatusIdx(0);
     return item;
   }
@@ -205,7 +230,7 @@ const AddEditRepair = ({route, navigation}) => {
       const response = await getItem(item._id, signal);
       let fullItem = response.data.item;
       setTitle(fullItem);
-      if (!fullItem.status) {
+      if (!fullItem.repairStatus) {
         fullItem = initStatus(fullItem);
       }
       if (!fullItem.type) {
@@ -273,7 +298,7 @@ const AddEditRepair = ({route, navigation}) => {
 
   useEffect(() => {
     if (statusIdx >= 0) {
-      setItemDetails({...itemDetails, status: ordsRepairStatusList[statusIdx].label})
+      setItemDetails({...itemDetails, repairStatus: ordsRepairStatusList[statusIdx].label})
     }
   }, [statusIdx]);
 
@@ -304,7 +329,7 @@ const AddEditRepair = ({route, navigation}) => {
 
   useEffect(() => {
     ordsRepairStatusList.forEach((s, idx) => {
-      if (s.label === itemDetails.status) {
+      if (s.label === itemDetails.repairStatus) {
         setStatusIdx(idx);
       }
       return () => {
@@ -584,7 +609,6 @@ const AddEditRepair = ({route, navigation}) => {
             <SubmitButton
               text="Save"
               style={{marginHorizontal: 10}}
-              disabled={!okayToSave()}
               onPress={() => {
                 saveItem(itemDetails)
               }}
@@ -638,6 +662,9 @@ const AddEditRepair = ({route, navigation}) => {
 
       <Portal>
         <Dialog
+          style={{
+            minWidth: 320, maxWidth: 738, alignSelf: 'center'
+          }}
           visible={showDeleteConfirmationDialog}
           onDismiss={() => { setShowDeleteConfirmationDialog(false) }}
         >
@@ -650,7 +677,9 @@ const AddEditRepair = ({route, navigation}) => {
             <Button onPress={() => {
               deleteCurrentItem(itemDetails);
               setShowDeleteConfirmationDialog(false);
-            }}>Delete</Button>
+            }}
+              labelStyle={{color: 'red'}}
+            >Delete</Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>

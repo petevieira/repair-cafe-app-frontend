@@ -123,12 +123,14 @@ const Volunteers = () => {
 
         </View>
       </ScrollView>
-      <FAB
-        icon="plus"
-        style={styles.fab}
-        animated={false}
-        onPress={addVolunteer}
-      />
+      { authenticated &&
+        <FAB
+          icon="plus"
+          style={styles.fab}
+          animated={false}
+          onPress={addVolunteer}
+        />
+      }
     </>
   )
 };

@@ -143,12 +143,14 @@ const Repairs = () => {
 
         </View>
       </ScrollView>
-      <FAB
-        icon="plus"
-        style={styles.fab}
-        animated={false}
-        onPress={addItem}
-      />
+      { authenticated &&
+        <FAB
+          icon="plus"
+          style={styles.fab}
+          animated={false}
+          onPress={addItem}
+        />
+      }
     </>
   )
 };

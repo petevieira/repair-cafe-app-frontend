@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Pressable } from 'react-native';
+import { View, Pressable, SafeAreaView } from 'react-native';
 import { Text } from 'react-native-paper';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { useNavigation } from '@react-navigation/native';
@@ -56,7 +56,7 @@ export default function BottomTabs() {
   };
 
   return (
-    <>
+    <SafeAreaView>
       <View
         style={{
           backgroundColor: "#96db73",
@@ -93,6 +93,6 @@ export default function BottomTabs() {
           screenName="Volunteers"
         />
       </View>
-    </>
+    </SafeAreaView>
   );
 }

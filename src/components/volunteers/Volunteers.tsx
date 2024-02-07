@@ -10,13 +10,16 @@ import Volunteer from '../../models/Volunteer';
 import { AuthContext } from '../../contexts/auth-context';
 
 const Volunteers = () => {
-  const navigation = useNavigation();
   const [volunteers, setVolunteers] = useState([]);
   const [state, setState] = useContext(AuthContext);
   const [volunteersRetrieved, setVolunteersRetrieved] = useState(false);
+  const navigation = useNavigation();
 
   // Set whether the user is authenticated from the AuthContext state
   let authenticated = !!state && state.token !== '' && state.user !== null;
+
+  // Today's date
+  const todaysDate = format(new Date(), "MMMM do, yyyy");
 
   const addVolunteer = () => {
     const volunteer: Volunteer = {
@@ -61,6 +64,7 @@ const Volunteers = () => {
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.content}>
 
+          <Text style={{textAlign: "center"}}>({todaysDate})</Text>
           <DataTable>
             <DataTable.Header style={{minWidth: 320}}>
               <DataTable.Title>First</DataTable.Title>

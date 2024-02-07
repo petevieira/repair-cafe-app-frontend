@@ -30,7 +30,7 @@ export default StyleSheet.create({
   content: {
     maxWidth: 738,
     minWidth: 320,
-    paddingBottom: 15,
+    paddingBottom: '10vh',
   },
   home_buttons: {
   	height: 120,
@@ -74,11 +74,12 @@ export default StyleSheet.create({
   },
   loader: {
     position: 'absolute',
-    left: '50%',
-    top: '50%',
-    margin: 'auto',
-    width: 100,
-    height: 100,
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   label: {
     position: 'absolute',

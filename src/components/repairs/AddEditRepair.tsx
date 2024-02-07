@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { View, Platform, KeyboardAvoidingView, ScrollView } from 'react-native';
 import { Button, Dialog, Portal, TextInput, HelperText, Text } from 'react-native-paper';
@@ -51,6 +51,8 @@ const AddEditRepair = ({route, navigation}) => {
   const [productCategoryFocused, setProductCategoryFocused] = useState(false);
   const [showDeleteConfirmationDialog, setShowDeleteConfirmationDialog] = useState(false);
   const [state, setState] = useContext(AuthContext);
+
+  let emailInputRef = useRef()
 
   // Set whether the user is authenticated from the AuthContext state
   const authenticated = !!state && state.token !== '' && state.user !== null;
@@ -226,6 +228,7 @@ const AddEditRepair = ({route, navigation}) => {
   }
 
   useEffect(() => {
+    emailInputRef.current.focus();
     getVolunteers();
   }, []);
 
@@ -344,6 +347,7 @@ const AddEditRepair = ({route, navigation}) => {
             style={styles.short_text_input}
             value={itemDetails.ownersEmail ?? ""}
             onBlur={onEmailBlur}
+            ref={emailInputRef}
             onChangeText={newEmail => setItemDetails(
               { ...itemDetails, ownersEmail: newEmail.trim() }
             )}

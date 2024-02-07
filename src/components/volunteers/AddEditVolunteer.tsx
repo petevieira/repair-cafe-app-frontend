@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useRef } from 'react';
 import {
   View, ScrollView, KeyboardAvoidingView, Platform, Pressable
 } from 'react-native';
@@ -38,6 +38,7 @@ const AddEditVolunteer = ({route, navigation}) => {
   const [pastVolunteerIdx, setPastVolunteerIdx] = useState(0)
   const [pastVolunteersFocused, setPastVolunteersFocused] = useState(false);
   const [pastVolunteers, setPastVolunteers] = useState([]);
+  let emailInputRef = useRef();
 
   const volunteerOkToSave = (volunteer): boolean => {
     let msg = "";
@@ -141,6 +142,7 @@ const AddEditVolunteer = ({route, navigation}) => {
     } else {
       setVolunteer(paramVolunteer);
       setWaiverBoxChecked(paramVolunteer.acceptsWaiver ?? false);
+      emailInputRef.current.focus();
     }
   }, []);
 
@@ -165,6 +167,7 @@ const AddEditVolunteer = ({route, navigation}) => {
             style={styles.short_text_input}
             value={volunteer.email}
             onBlur={onEmailBlur}
+            ref={emailInputRef}
             onChangeText={newEmail => setVolunteer(
               {...volunteer, email: newEmail.trim()}
             )}

@@ -62,29 +62,29 @@ const Volunteers = () => {
         <View style={styles.content}>
 
           <DataTable>
-            <DataTable.Header style={{minWidth: 500}}>
-              <DataTable.Title style={{marginHorizontal: 10}}>First</DataTable.Title>
-              <DataTable.Title style={{marginHorizontal: 10}}>Last</DataTable.Title>
+            <DataTable.Header style={{minWidth: 320}}>
+              <DataTable.Title>First</DataTable.Title>
+              <DataTable.Title>Last</DataTable.Title>
             </DataTable.Header>
 
             {volunteers.map((volunteer) => (
               <DataTable.Row key={volunteer._id}
                 onPress={(!authenticated ? undefined : () => {volunteerPressed(volunteer)})}
               >
-                <DataTable.Cell style={{marginHorizontal: 10}}>{volunteer.firstName}</DataTable.Cell>
-                <DataTable.Cell style={{marginHorizontal: 10}}>{volunteer.lastName}</DataTable.Cell>
+                <DataTable.Cell>{volunteer.firstName}</DataTable.Cell>
+                <DataTable.Cell>{volunteer.lastName}</DataTable.Cell>
               </DataTable.Row>
             ))}
           </DataTable>
 
-        { volunteersRetrieved && volunteers.length <= 0 &&
-          <Text
-            style={{
-              padding: 10,
-              alignSelf: 'center'
-            }}>{"No volunteers yet today"}
-          </Text>
-        }
+          { volunteersRetrieved && volunteers.length <= 0 &&
+            <Text
+              style={{
+                padding: 10,
+                alignSelf: 'center'
+              }}>{"No volunteers yet today"}
+            </Text>
+          }
 
         </View>
       </ScrollView>

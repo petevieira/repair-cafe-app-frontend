@@ -1,15 +1,14 @@
-import React from "react";
+import { useState, useContext } from "react";
 import { View, Text, Image, Platform } from "react-native";
 import { Appbar, Menu } from 'react-native-paper';
 import { getHeaderTitle } from '@react-navigation/elements';
 import styles from './Styles';
-import img_data from '../../images/rc_images.json';
 import AsyncStorageHelpers from '../globals/async-storage-helpers';
 import { AuthContext } from '../contexts/auth-context';
 
 const Nav = ({ navigation, route, options }) => {
-  const [menuVisible, setMenuVisible] = React.useState(false);
-  const [state, setState] = React.useContext(AuthContext);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [state, setState] = useContext(AuthContext);
   // Set whether the user is authenticated from the AuthContext state
   let authenticated = !!state && state.token !== '' && state.user !== null;
   const title = getHeaderTitle(options, route.name);
@@ -26,7 +25,6 @@ const Nav = ({ navigation, route, options }) => {
 
   const logoutPressed = async () => {
     closeMenu();
-    console.debug("Logging out...");
     setState({...state, showLoader: true});
     try {
       const result = await AsyncStorageHelpers.removeAuth();
@@ -50,7 +48,7 @@ const Nav = ({ navigation, route, options }) => {
       elevated={true}
     >
       <Appbar.Action
-        icon="../../assets/trc-logo-transparent.png"
+        icon={"/trc-logo-transparent.png"}
         isLeading={true}
         size={60}
       />
@@ -85,7 +83,3 @@ const Nav = ({ navigation, route, options }) => {
 };
 
 export default Nav;
-
-/*
-<Image source={{ uri: img_data["logo_sm"].img_url }} style={styles.logo} />
-*/

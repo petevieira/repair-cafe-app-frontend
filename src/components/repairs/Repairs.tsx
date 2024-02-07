@@ -65,7 +65,7 @@ const Repairs = () => {
 
           <Text style={{textAlign: "center"}}>({todaysDate})</Text>
           <DataTable>
-            <DataTable.Header style={{minWidth: 500}}>
+            <DataTable.Header style={{minWidth: 320}}>
               <DataTable.Title>#</DataTable.Title>
               <DataTable.Title>Item</DataTable.Title>
               <DataTable.Title>Owner</DataTable.Title>
@@ -86,13 +86,13 @@ const Repairs = () => {
               </DataTable.Row>
             ))}
           </DataTable>
-          { repairsRetrieved && items.length <= 0 ?
+          { repairsRetrieved && items.length <= 0 &&
             <Text
               style={{
                 padding: 10,
                 alignSelf: 'center'
-              }}>No repairs yet today</Text>
-            : <></>
+              }}>{"No repairs yet today"}
+            </Text>
           }
         </View>
       </ScrollView>

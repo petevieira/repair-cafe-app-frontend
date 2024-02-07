@@ -33,7 +33,7 @@ const RootNavigation = () => {
             setState({...state, snackbarMsg: ''});
           }}
           action={{
-            label: "close me"
+            label: "close"
           }}
         >{state.snackbarMsg}
         </Snackbar>

@@ -9,6 +9,9 @@
     "build:web": "npx expo export:web",
     "ts:check": "tsc"
   },
+  "engines": {
+    "node": "20.11.0"
+  },
   "dependencies": {
     "@expo/metro-config": "^0.17.3",
     "@expo/metro-runtime": "~3.1.1",

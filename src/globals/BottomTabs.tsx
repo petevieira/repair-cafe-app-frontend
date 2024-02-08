@@ -67,7 +67,7 @@ export default function BottomTabs(props) {
           />
         }
         <Tab
-          text="Queue"
+          text="Repairs"
           name="tools"
           style={styles.bottomTab}
           handlePress={() => navigation.navigate("Repairs")}

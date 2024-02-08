@@ -24,6 +24,7 @@ const Login = ({navigation}) => {
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [emailsValid, setEmailsValid] = useState(false);
   const [emailsBlurred, setEmailsBlurred] = useState(false);
+  let emailInputRef = useRef()
   let pwdInputRef = useRef();
 
   /**
@@ -49,12 +50,7 @@ const Login = ({navigation}) => {
           const response = await UserRequests.userIsAdmin(email);
           setShowPasswordInput(true);
           // Checking here maybe b/c it's a race condition for it to load first?
-          setTimeout(() => {
-            if (!!pwdInputRef.current) {
-              pwdInputRef.current.focus();
-            }
-            setShowLoader(false);
-          }, 200);
+          setShowLoader(false);
         } catch (error) {
           console.error(error);
           setShowLoader(false);
@@ -93,8 +89,16 @@ const Login = ({navigation}) => {
   };
 
   useEffect(() => {
+    if (!!showPasswordInput && !!pwdInputRef.current) {
+      pwdInputRef.current.focus();
+    }
+  }, [showPasswordInput]);
+
+  useEffect(() => {
     if (isLoggedIn) {
       navigation.navigate('Repairs');
+    } else {
+      emailInputRef.current.focus();
     }
   }, [isLoggedIn]);
 
@@ -135,6 +139,7 @@ const Login = ({navigation}) => {
               setEmailsValid(emailIsValid());
               setEmailsBlurred(true);
             }}
+            ref={emailInputRef}
             onChangeText={email => setEmail(email.trim().toLowerCase())}
           />
           <HelperText type="error" visible={emailsBlurred && !emailsValid}>

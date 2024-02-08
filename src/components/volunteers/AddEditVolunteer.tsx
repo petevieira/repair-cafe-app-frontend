@@ -74,8 +74,10 @@ const AddEditVolunteer = ({route, navigation}) => {
       let response = null;
       if (!!volunteer._id) {
         response = await updateVolunteer(volunteer);
+        setSnackbarMsg("Volunteer updated.");
       } else {
         response = await addVolunteer(volunteer);
+        setSnackbarMsg("New volunteer added.")
       }
       setShowLoader(false);
       navigation.navigate("Volunteers");

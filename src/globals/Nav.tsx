@@ -77,6 +77,9 @@ const Nav = (props) => {
               resizeMode="contain"
               style={styles.logo}
               source={require('./assets/trc-logo-transparent-icon.png')}
+              onPress={() => {
+                navigation.navigate('Repairs');
+              }}
             />
           </View>
           <View style={{alignText: 'center'}}>

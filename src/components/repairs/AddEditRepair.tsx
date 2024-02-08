@@ -237,7 +237,9 @@ const AddEditRepair = ({route, navigation}) => {
   }
 
   useEffect(() => {
-    emailInputRef.current.focus();
+    if (isNewItem(paramItem)) {
+      emailInputRef.current.focus();
+    }
     getVolunteers();
   }, []);
 

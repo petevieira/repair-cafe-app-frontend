@@ -44,8 +44,7 @@ export default function BottomTabs(props) {
   let routeName = props.routeName;
 
   return (
-    <SafeAreaView
-      style={{backgroundColor: "#96db73"}}>
+    <>
       <View
         style={{
           backgroundColor: "#96db73",
@@ -84,6 +83,6 @@ export default function BottomTabs(props) {
           routeName={routeName}
         />
       </View>
-    </SafeAreaView>
+    </>
   );
 }

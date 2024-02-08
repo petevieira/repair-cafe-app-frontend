@@ -61,7 +61,6 @@ const Nav = (props) => {
   }
 
   return (
-    <SafeAreaView>
       <View
         style={{
           alignItems: 'center',
@@ -113,7 +112,6 @@ const Nav = (props) => {
           </Menu>
         </View>
       </View>
-    </SafeAreaView>
   );
 }
 

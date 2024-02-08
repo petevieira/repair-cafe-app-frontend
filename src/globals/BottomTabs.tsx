@@ -1,13 +1,12 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Pressable, SafeAreaView } from 'react-native';
 import { Text } from 'react-native-paper';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { useNavigation } from '@react-navigation/native';
-import { AuthContext } from '../contexts/auth-context';
-import AsyncStorageHelpers from '../globals/async-storage-helpers';
-import ScreensNav from './ScreensNav';
 import { NavigationState } from 'react-navigation';
+
 import styles from './Styles';
+import { useAuth } from '../contexts/auth-context';
 
 export const Tab = ({ name, text, handlePress, screenName, routeName }) => {
   let isActiveScreen = screenName === routeName;
@@ -40,74 +39,51 @@ export const Tab = ({ name, text, handlePress, screenName, routeName }) => {
 };
 
 export default function BottomTabs(props) {
-  // Add state from AuthContext
-  const [state, setState] = useContext(AuthContext);
-  // Set whether the user is authenticated from the AuthContext state
-  let authenticated = !!state && state.token !== '' && state.user !== null;
+  const { isLoggedIn, setIsLoggedIn } = useAuth();
   const navigation = useNavigation();
-  let authTab;
   let routeName = props.routeName;
-
-  const logOut = async () => {
-    try {
-      const result = await AsyncStorageHelpers.removeAuth();
-      if (!result) {
-        console.info("Failed to remove auth token");
-        return false;
-      }
-      setState({
-        ...state, user: undefined, token: undefined
-      });
-      authenticated = false;
-      return true;
-    } catch (error) {
-      console.info(error);
-      return false;
-    }
-  };
 
   return (
     <SafeAreaView
       style={{backgroundColor: "#96db73"}}>
-    <View
-      style={{
-        backgroundColor: "#96db73",
-        flexDirection: "row",
-        justifyContent: "space-evenly",
-        height: 70,
-        alignItems: "center",
-      }}
-    >
-      { !authenticated ?
+      <View
+        style={{
+          backgroundColor: "#96db73",
+          flexDirection: "row",
+          justifyContent: "space-evenly",
+          height: 70,
+          alignItems: "center",
+        }}
+      >
+        { !isLoggedIn &&
+          <Tab
+            text={"Login"}
+            name={"sign-in-alt"}
+            style={styles.bottomTab}
+            handlePress={async () => {
+              navigation.navigate("Volunteer Login")}
+            }
+            routeName={routeName}
+            screenName={"Volunteer Login"}
+          />
+        }
         <Tab
-          text={"Login"}
-          name={"sign-in-alt"}
+          text="Queue"
+          name="tools"
           style={styles.bottomTab}
-          handlePress={async () => {
-            navigation.navigate("Volunteer Login")}
-          }
+          handlePress={() => navigation.navigate("Repairs")}
+          screenName="Repairs"
           routeName={routeName}
-          screenName={"Volunteer Login"}
         />
-        : <></>
-      }
-      <Tab
-        text="Queue"
-        name="tools"
-        style={styles.bottomTab}
-        handlePress={() => navigation.navigate("Repairs")}
-        screenName="Repairs"
-        routeName={routeName}
-      />
-      <Tab
-        text="Volunteers"
-        name="users"
-        style={styles.bottomTab}
-        handlePress={() => navigation.navigate("Volunteers")}
-        screenName="Volunteers"
-        routeName={routeName}
-      />
-    </View>
+        <Tab
+          text="Volunteers"
+          name="users"
+          style={styles.bottomTab}
+          handlePress={() => navigation.navigate("Volunteers")}
+          screenName="Volunteers"
+          routeName={routeName}
+        />
+      </View>
     </SafeAreaView>
   );
 }

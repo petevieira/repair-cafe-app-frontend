@@ -9,30 +9,33 @@ import SubmitButton from "../../globals/SubmitButton"
 import styles from '../../globals/Styles'
 import { getTodaysItems } from '../../requests/item-requests';
 import Item from '../../models/Item';
-import { AuthContext } from '../../contexts/auth-context';
+import { useAuth } from '../../contexts/auth-context';
 import { Config } from '../../consts/app.consts';
 
 const Repairs = () => {
   const [items, setItems] = useState([]);
-  const [state, setState] = useContext(AuthContext);
+  const {
+    authToken, setAuthToken,
+    isLoggedIn, setIsLoggedIn,
+    showLoader, setShowLoader,
+    snackbarMsg, setSnackbarMsg
+  } = useAuth();
   const [repairsRetrieved, setRepairsRetrieved] = useState(false);
-
-  // Set whether the user is authenticated from the AuthContext state
-  let authenticated = !!state && state.token !== '' && state.user !== null;
   const navigation = useNavigation();
 
   // Today's date
   const todaysDate = format(new Date(), "MMMM do, yyyy");
 
   const getItems = async () => {
-    setState({...state, showLoader: true});
+    setShowLoader(true);
     try {
       const response = await getTodaysItems();
       setItems(response.data.items);
-      setState({...state, showLoader: false});
+      setShowLoader(false);
     } catch (error) {
       console.error(error);
-      setState({...state, snackbarMsg: error.message, showLoader: false});
+      setSnackbarMsg(error.message);
+      setShowLoader(false);
     }
     setRepairsRetrieved(true);
   }
@@ -44,7 +47,7 @@ const Repairs = () => {
   }
 
   const itemPressed = (item) => {
-    if (!authenticated) {
+    if (!isLoggedIn) {
       return;
     }
     navigation.navigate('Add/Edit Repair', {
@@ -74,7 +77,7 @@ const Repairs = () => {
           {items.map((item, idx) => (
             <DataTable.Row
               key={item._id}
-              onPress={authenticated ? (() => itemPressed(item)) : undefined}
+              onPress={isLoggedIn ? (() => itemPressed(item)) : undefined}
             >
               <DataTable.Cell>{idx+1}</DataTable.Cell>
               <DataTable.Cell>{item.type}</DataTable.Cell>
@@ -93,7 +96,7 @@ const Repairs = () => {
           </Text>
         }
       </View>
-      { authenticated &&
+      { isLoggedIn &&
         <SafeAreaView>
           <View>
           <FAB

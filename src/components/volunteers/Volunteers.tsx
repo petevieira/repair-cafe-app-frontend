@@ -7,16 +7,18 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import styles from '../../globals/Styles'
 import { getTodaysVolunteers } from '../../requests/volunteer-requests';
 import Volunteer from '../../models/Volunteer';
-import { AuthContext } from '../../contexts/auth-context';
+import { useAuth } from '../../contexts/auth-context';
 
 const Volunteers = () => {
   const [volunteers, setVolunteers] = useState([]);
-  const [state, setState] = useContext(AuthContext);
+  const {
+    authToken, setAuthToken,
+    isLoggedIn, setIsLoggedIn,
+    showLoader, setShowLoader,
+    snackbarMsg, setSnackbarMsg
+  } = useAuth();
   const [volunteersRetrieved, setVolunteersRetrieved] = useState(false);
   const navigation = useNavigation();
-
-  // Set whether the user is authenticated from the AuthContext state
-  let authenticated = !!state && state.token !== '' && state.user !== null;
 
   // Today's date
   const todaysDate = format(new Date(), "MMMM do, yyyy");
@@ -41,14 +43,15 @@ const Volunteers = () => {
   };
 
   const getVolunteers = async () => {
-    setState({...state, showLoader: true});
+    setShowLoader(true);
     try {
       const response = await getTodaysVolunteers();
       setVolunteers(response.data.volunteers);
-      setState({...state, showLoader: false});
+      setShowLoader(false);
     } catch (error) {
       console.error(error.message);
-      setState({...state, snackbarMsg: error.message});
+      setSnackbarMsg(error.message)
+      setShowLoader(false);
     }
     setVolunteersRetrieved(true);
   };
@@ -71,7 +74,7 @@ const Volunteers = () => {
 
           {volunteers.map((volunteer) => (
             <DataTable.Row key={volunteer._id}
-              onPress={(!authenticated ? undefined : () => {volunteerPressed(volunteer)})}
+              onPress={(!isLoggedIn ? undefined : () => {volunteerPressed(volunteer)})}
             >
               <DataTable.Cell>{volunteer.firstName}</DataTable.Cell>
               <DataTable.Cell>{volunteer.lastName}</DataTable.Cell>
@@ -88,7 +91,7 @@ const Volunteers = () => {
           </Text>
         }
       </View>
-      { authenticated &&
+      { isLoggedIn &&
         <FAB
           icon="plus"
           style={styles.fab}

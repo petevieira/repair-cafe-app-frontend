@@ -1,17 +1,17 @@
 import * as React from 'react';
 import { View, SafeAreaView } from 'react-native';
 import { Portal, ActivityIndicator } from 'react-native-paper';
-import { AuthContext } from '../contexts/auth-context';
+import { useAuth } from '../contexts/auth-context';
 import styles from '../globals/Styles'
 
 const Loader = () => {
-  const [state, setState] = React.useContext(AuthContext);
+  const { showLoader } = useAuth();
 
-  return (state.showLoader &&
+  return (showLoader &&
     <View
       style={styles.loader}>
       <ActivityIndicator
-        animating={state.showLoader}
+        animating={showLoader}
         size="large"
       />
     </View>

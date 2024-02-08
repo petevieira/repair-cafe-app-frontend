@@ -11,7 +11,7 @@ import SubmitButton from "../../globals/SubmitButton"
 import styles from '../../globals/Styles'
 import Item from '../../models/Item';
 import CheckBox from "../../globals/CheckBox"
-import { AuthContext } from '../../contexts/auth-context';
+import { useAuth } from '../../contexts/auth-context';
 import { getTodaysVolunteers } from '../../requests/volunteer-requests';
 import { addFullItem, getItem, updateItem, deleteItem, findOwnerByEmail } from '../../requests/item-requests';
 import { ProductCategoryValues, RepairStatusValues, RepairBarrierValues} from '../../globals/ords';
@@ -50,12 +50,14 @@ const AddEditRepair = ({route, navigation}) => {
   const [productCategoryIdx, setProductCategoryIdx] = useState(MiscCategoryIdx)
   const [productCategoryFocused, setProductCategoryFocused] = useState(false);
   const [showDeleteConfirmationDialog, setShowDeleteConfirmationDialog] = useState(false);
-  const [state, setState] = useContext(AuthContext);
+  const {
+    authToken, setAuthToken,
+    isLoggedIn, setIsLoggedIn,
+    showLoader, setShowLoader,
+    snackbarMsg, setSnackbarMsg
+  } = useAuth();
 
   let emailInputRef = useRef()
-
-  // Set whether the user is authenticated from the AuthContext state
-  const authenticated = !!state && state.token !== '' && state.user !== null;
 
   const paramItem = route.params.item;
 
@@ -86,7 +88,7 @@ const AddEditRepair = ({route, navigation}) => {
       msg = "Please enter a valid cost";
     }
     if (msg !== '') {
-      setState({...state, snackbarMsg: msg});
+      setSnackbarMsg(msg);
       return false;
     }
     return true;
@@ -96,37 +98,42 @@ const AddEditRepair = ({route, navigation}) => {
     if (!itemOkToSave(itemDetails)) {
       return
     }
-
+    setShowLoader(true);
     try {
       let response = null;
       if (!!itemDetails._id) {
         response = await updateItem(itemDetails);
+        setSnackbarMsg("Item updated.");
       } else {
         response = await addFullItem(itemDetails);
+        setSnackbarMsg("New item added.");
       }
-      setState({...state, snackbarMsg: response.msg, showLoader: false});
+      setShowLoader(false);
       navigation.navigate('Repairs');
     } catch (error) {
       console.error(error);
-      setState({...state, snackbarMsg: error.message, showLoader: false});
+      setShowLoader(false);
+      setSnackbarMsg(error.message);
     }
   }
 
   const deleteCurrentItem = async () => {
     if (!itemDetails._id) {
-      setState({...state, snackbarMsg: "Item can't be deleted. It doesn't have an _id."});
+      setSnackbarMsg("Item can't be deleted. It doesn't have an _id.");
       return;
     }
-    setState({...state, showLoader: true});
+    setShowLoader(false);
     try {
       const response = await deleteItem(itemDetails._id);
-      setState({...state, snackbarMsg: "Item deleted", showLoader: false});
+      setShowLoader(false);
+      setSnackbarMsg("Item deleted.");
       setTimeout(() => {
         navigation.navigate('Repairs');
-      }, 1000);
+      }, 500);
     } catch (error) {
       console.error(error);
-      setState({...state, showLoader: false, snackbarMsg: error.message});
+      setShowLoader(false);
+      setSnackbarMsg(error.message);
     }
   }
 
@@ -153,7 +160,7 @@ const AddEditRepair = ({route, navigation}) => {
       setVolunteers(response.data.volunteers);
     } catch (error) {
       console.error(error);
-      setState({...state, snackbarMsg: error.message});
+      setSnackbarMsg(error.message);
     }
   }
 
@@ -175,13 +182,13 @@ const AddEditRepair = ({route, navigation}) => {
   }
 
   const getFullItem = async (item) => {
-    setState({...state, showLoader: true});
+    setShowLoader(true);
     if (isNewItem(item)) {
       setPageTitle("New Item");
       item = initStatus(item);
       setItemDetails(item);
       setWaiverBoxChecked(item.acceptsWaiver);
-      setState({...state, showLoader: false});
+      setShowLoader(false);
       return;
     }
 
@@ -198,10 +205,11 @@ const AddEditRepair = ({route, navigation}) => {
       }
       setItemDetails(fullItem);
       setWaiverBoxChecked(response.data.item.acceptsWaiver);
-      setState({...state, showLoader: false});
+      setShowLoader(false);
     } catch (error) {
       console.error(error);
-      setState({...state, showLoader: false, snackbarMsg: error.message});
+      setShowLoader(false);
+      setSnackbarMsg(error.message);
     }
   };
 
@@ -209,7 +217,7 @@ const AddEditRepair = ({route, navigation}) => {
     if (!!itemDetails._id || !emailIsValid(itemDetails.ownersEmail)) {
       return;
     }
-    setState({...state, showLoader: true});
+    setShowLoader(true);
     try {
       const response = await findOwnerByEmail(itemDetails.ownersEmail);
       const owner = response.data.owner;
@@ -220,10 +228,11 @@ const AddEditRepair = ({route, navigation}) => {
           ownersLastName: owner.lastName
         });
       }
-      setState({...state, showLoader: false});
+      setShowLoader(false);
     } catch (error) {
       console.error(error);
-      setState({...state, showLoader: false, snackbarMsg: error.message});
+      setShowLoader(false);
+      setSnackbarMsg(error.message);
     }
   }
 
@@ -430,7 +439,7 @@ const AddEditRepair = ({route, navigation}) => {
                 <Text style={{color: 'red'}}>*</Text>
               </Text>
           }
-          inputMode={"numeric"}
+          inputMode={"decimal"}
           mode="outlined"
           autoCorrect={false}
           style={styles.short_text_input}
@@ -446,7 +455,7 @@ const AddEditRepair = ({route, navigation}) => {
               </Text>
           }
           mode="outlined"
-          inputMode={"numeric"}
+          inputMode={"decimal"}
           autoCorrect={false}
           style={styles.short_text_input}
           value={itemDetails.cost ?? ""}

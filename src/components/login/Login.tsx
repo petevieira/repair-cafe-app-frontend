@@ -6,12 +6,17 @@ import { HelperText, TextInput } from 'react-native-paper';
 import SubmitButton from "../../globals/SubmitButton"
 import styles from '../../globals/Styles'
 import UserRequests from '../../requests/user-requests';
-import { AuthContext } from '../../contexts/auth-context';
+import { useAuth } from '../../contexts/auth-context';
 import AsyncStorageHelpers from '../../globals/async-storage-helpers';
 
 const Login = ({navigation}) => {
   // State variables
-  const [state, setState] = useContext(AuthContext);
+  const {
+    authToken, setAuthToken,
+    isLoggedIn, setIsLoggedIn,
+    showLoader, setShowLoader,
+    snackbarMsg, setSnackbarMsg
+  } = useAuth();
   const [email, setEmail] = useState("");
   const [emailIsInvalid, setEmailIsInvalid] = useState(false);
   const [password, setPassword] = useState("");
@@ -19,11 +24,7 @@ const Login = ({navigation}) => {
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [emailsValid, setEmailsValid] = useState(false);
   const [emailsBlurred, setEmailsBlurred] = useState(false);
-  let authenticated: boolean = false;
-  const stateRef = useRef();
   let pwdInputRef = useRef();
-
-  authenticated = !!state && state.token !== '' && state.user !== null;
 
   /**
    * Validates the user's email they entered in the email field.
@@ -43,7 +44,7 @@ const Login = ({navigation}) => {
       }
 
       if (email !== '' && emailIsValid()) {
-        setState({...state, showLoader: true});
+        setShowLoader(true);
         try {
           const response = await UserRequests.userIsAdmin(email);
           setShowPasswordInput(true);
@@ -52,11 +53,12 @@ const Login = ({navigation}) => {
             if (!!pwdInputRef.current) {
               pwdInputRef.current.focus();
             }
-            setState({...state, showLoader: false});
+            setShowLoader(false);
           }, 200);
         } catch (error) {
           console.error(error);
-          setState({...state, snackbarMsg: error.message, showLoader: false});
+          setShowLoader(false);
+          setSnackbarMsg(error.message);
         }
       }
     } else {
@@ -71,30 +73,30 @@ const Login = ({navigation}) => {
   }
 
   const signInAdmin = async () => {
-    setState({...state, showLoader: true});
+    setShowLoader(true);
     try {
       const response = await UserRequests.signInAdmin(email, password);
       // Add auth token to state
-      setState({
-        ...state, user: response.data.user, token: response.data.token
-      });
+      setAuthToken(response.data.token);
+      setIsLoggedIn(true);
       // Store authentication items
       const ok = await AsyncStorageHelpers.storeAuth(
         { user: response.data.user, token: response.data.token }
       );
       navigation.navigate("Repairs");
-      setState({...state, showLoader: false});
+      setShowLoader(false);
     } catch (error) {
       console.error(error);
-      setState({...state, snackbarMsg: error.message, showLoader: false});
+      setShowLoader(false);
+      setSnackbarMsg(error.message);
     }
   };
 
   useEffect(() => {
-    if (authenticated) {
+    if (isLoggedIn) {
       navigation.navigate('Repairs');
     }
-  }, [authenticated]);
+  }, [isLoggedIn]);
 
   useFocusEffect(
     useCallback(() => {
@@ -121,6 +123,7 @@ const Login = ({navigation}) => {
             autoCorrect={false}
             style={styles.short_text_input}
             value={email}
+            inputMode={"email"}
             autoFocus={true}
             editable={enableEmail}
             onPress={() => {setEnableEmail(true)}}

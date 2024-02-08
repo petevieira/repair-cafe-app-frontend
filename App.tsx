@@ -11,7 +11,6 @@ import RootNavigation from './src/globals/RootNavigation';
  * Main application
  */
 const App = () => {
-
   return (
     <PaperProvider
       theme ={{
@@ -21,7 +20,7 @@ const App = () => {
         fonts: configureFonts({config: appFontConfig})
       }}
     >
-      <StatusBar hidden={true}/>
+      <StatusBar hidden/>
       <AuthProvider>
         <RootNavigation/>
       </AuthProvider>

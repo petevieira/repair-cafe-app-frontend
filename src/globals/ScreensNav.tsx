@@ -1,15 +1,12 @@
-import React from 'react';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { AuthContext } from '../contexts/auth-context';
-import AddEditRepair from '../components/repairs/AddEditRepair';
-import Repairs from '../components/repairs/Repairs';
-import AddEditVolunteer from '../components/volunteers/AddEditVolunteer';
-import Volunteers from '../components/volunteers/Volunteers';
+import { useAuth } from '../contexts/auth-context';
+
 import Login from '../components/login/Login';
+import Repairs from '../components/repairs/Repairs';
+import AddEditRepair from '../components/repairs/AddEditRepair';
+import Volunteers from '../components/volunteers/Volunteers';
+import AddEditVolunteer from '../components/volunteers/AddEditVolunteer';
 import About from '../components/About';
-import Nav from '../globals/Nav';
-import { Portal, Snackbar} from 'react-native-paper';
-import styles from './Styles'
 
 // Instantiate a stack navigator
 const Stack = createNativeStackNavigator();
@@ -22,20 +19,16 @@ const Stack = createNativeStackNavigator();
  */
 const ScreensNav = (props) => {
   // Add state from AuthContext
-  const [state, setState] = React.useContext(AuthContext);
-
-  // Set whether the user is authenticated from the AuthContext state
-  let authenticated = !!state && state.token !== '' && state.user !== null;
+  const { isLoggedIn } = useAuth();
 
   return (
     <Stack.Navigator
       initialRouteName="Login"
       screenOptions={{
         headerShown: false
-      //   header: (props) => <Nav {...props} />,
       }}
     >
-      {authenticated ? (
+      {isLoggedIn ? (
         </* Screens that require authentication */>
           <Stack.Screen
             name="Repairs"

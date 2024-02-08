@@ -1,7 +1,7 @@
-import { useContext, useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { ScrollView, View } from 'react-native';
-import { AuthContext } from '../contexts/auth-context';
+import { useAuth } from '../contexts/auth-context';
 import { Portal, Snackbar} from 'react-native-paper';
 
 // import { AuthProvider } from '../contexts/auth-context';
@@ -18,7 +18,7 @@ import Nav from './Nav';
  * which is wrapped in a NavigationContainer
  */
 const RootNavigation = () => {
-  const [state, setState] = useContext(AuthContext);
+  const { snackbarMsg, setSnackbarMsg } = useAuth();
   const [routeName, setRouteName] = useState('');
   const navigationRef = createNavigationContainerRef();
 
@@ -46,14 +46,14 @@ const RootNavigation = () => {
         <Snackbar
           duration={2000}
           style={styles.snackbar}
-          visible={!!state.snackbarMsg}
+          visible={!!snackbarMsg}
           onDismiss={() => {
-            setState({...state, snackbarMsg: ''});
+            setSnackbarMsg("");
           }}
           action={{
             label: "Close"
           }}
-        >{state.snackbarMsg}
+        >{snackbarMsg}
         </Snackbar>
       </Portal>
     </NavigationContainer>

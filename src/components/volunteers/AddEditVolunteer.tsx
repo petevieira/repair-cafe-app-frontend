@@ -18,7 +18,7 @@ import {
   addVolunteer, getVolunteer,
   updateVolunteer, deleteVolunteer, findVolunteerByEmail
 } from '../../requests/volunteer-requests';
-import { AuthContext } from '../../contexts/auth-context';
+import { useAuth } from '../../contexts/auth-context';
 import Terms from '../../globals/Terms';
 import { Dropdown } from 'react-native-element-dropdown';
 import { emailIsValid } from '../../lib/helpers';
@@ -27,13 +27,17 @@ const AddEditVolunteer = ({route, navigation}) => {
   const paramVolunteer = route.params.volunteer;
 
   // State variables
+  const [todaysVolunteers, setTodaysVolunteers] = useState([]);
   const [id, setId] = useState("");
   const [waiverBoxChecked, setWaiverBoxChecked] = useState(false);
   const [volunteer, setVolunteer] = useState(new Volunteer());
   const [termsModalVisible, setTermsModalVisible] = useState(false);
-  const [state, setState] = useContext(AuthContext);
-  // Set whether the user is authenticated from the AuthContext state
-  const authenticated = !!state && state.token !== '' && state.user !== null;
+  const {
+    authToken, setAuthToken,
+    isLoggedIn, setIsLoggedIn,
+    showLoader, setShowLoader,
+    snackbarMsg, setSnackbarMsg
+  } = useAuth();
   const [showDeleteConfirmationDialog, setShowDeleteConfirmationDialog] = useState(false);
   const [pastVolunteerIdx, setPastVolunteerIdx] = useState(0)
   const [pastVolunteersFocused, setPastVolunteersFocused] = useState(false);
@@ -53,8 +57,9 @@ const AddEditVolunteer = ({route, navigation}) => {
     } else if (!waiverBoxChecked) {
       msg = "Please agree to the terms.";
     }
+
     if (msg !== '') {
-      setState({...state, snackbarMsg: msg});
+      setSnackbarMsg(msg);
       return false;
     }
     return true;
@@ -64,7 +69,7 @@ const AddEditVolunteer = ({route, navigation}) => {
     if (!volunteerOkToSave(volunteer)) {
       return;
     }
-    setState({...state, showLoader: true});
+    setShowLoader(true);
     try {
       let response = null;
       if (!!volunteer._id) {
@@ -72,46 +77,47 @@ const AddEditVolunteer = ({route, navigation}) => {
       } else {
         response = await addVolunteer(volunteer);
       }
-      setState({...state, showLoader: false});
+      setShowLoader(false);
       navigation.navigate("Volunteers");
     } catch (error) {
       console.error(error);
-      setState({...state, showLoader: false, snackbarMsg: error.message});
+      setShowLoader(false);
+      setSnackbarMsg(error.message);
     }
   }
 
   const deleteCurrentVolunteer = async () => {
     if (!volunteer._id) {
-      setState({
-        ...state,
-        snackbarMsg: "Volunteer can't be deleted. They aren't in the database."
-      });
+      setSnackbarMsg("Volunteer can't be deleted. They aren't in the database.");
       return;
     }
-    setState({...state, showLoader: true});
+    setShowLoader(true);
     try {
       const response = await deleteVolunteer(volunteer._id);
-      setState({...state, snackbarMsg: "Volunteer deleted", showLoader: false});
+      setShowLoader(false);
+      setSnackbarMsg("Volunteer deleted.");
       setTimeout(() => {
         navigation.navigate('Volunteers');
-      }, 1000);
+      }, 500);
     } catch (error) {
       console.error(error);
-      setState({...state, showLoader: false, snackbarMsg: error.message});
+      setShowLoader(false);
+      setSnackbarMsg(error.message);
     }
   }
 
   const getExistingVolunteer = async (id: string) => {
-    setState({...state, showLoader: true});
+    setShowLoader(true);
     try {
       const response = await getVolunteer(id);
       setVolunteer(response.data.volunteer);
       setId(response.data.volunteer.id);
       setWaiverBoxChecked(response.data.volunteer.acceptsWaiver);
-      setState({...state, showLoader: false});
+      setShowLoader(false);
     } catch (error) {
       console.error(error);
-      setState({...state, snackbarMsg: error.message, showLoader: false});
+      setShowLoader(false);
+      setSnackbarMsg(error.message)
     }
   }
 
@@ -119,7 +125,7 @@ const AddEditVolunteer = ({route, navigation}) => {
     if (!!volunteer._id || !emailIsValid(volunteer.email)) {
       return;
     }
-    setState({...state, showLoader: true});
+    setShowLoader(true);
     try {
       const response = await findVolunteerByEmail(volunteer.email);
       if (!!response.data.volunteer) {
@@ -129,10 +135,11 @@ const AddEditVolunteer = ({route, navigation}) => {
           lastName: response.data.volunteer.lastName
         });
       }
-      setState({...state, showLoader: false});
+      setShowLoader(false);
     } catch (error) {
       console.error(error);
-      setState({...state, showLoader: false, snackbarMsg: error.message});
+      setShowLoader(false);
+      setSnackbarMsg(error.message);
     }
   }
 

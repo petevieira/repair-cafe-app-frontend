@@ -1,36 +1,36 @@
-import { useState, useEffect, createContext } from "react";
-// import { useNavigation } from "@react-navigation/native";
-import { Platform } from 'react-native';
+import { useState, useEffect, createContext, useContext } from "react";
 import axios from "axios";
-import styles from '../globals/Styles'
 
 import AsyncStorage from "../globals/async-storage-helpers";
-import { StorageConsts } from '../consts/app.consts';
 
 // Create a Context object.
 // When React renders a component that subscribes to this Context object it
 // will read the current context value from the closest matching Provider
 // above it in the tree.
 const AuthContext = createContext();
-  // user: null,
-  // token: '',
-  // showLoader: false,
-  // snackbarMsg: '',
-// });
+
+const useAuth = () => {
+  return useContext(AuthContext);
+}
 
 // Provider that pairs with context, allowing consuming components to
 // subscribe to context changes.
 const AuthProvider = ({ children }) => {
-  const [state, setState] = useState({
-    user: null,
-    token: '',
-    showLoader: false,
-    snackbarMsg: '',
-  });
+  const [authToken, setAuthToken] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showLoader, setShowLoader] = useState(false);
+  const [snackbarMsg, setSnackbarMsg] = useState('');
+
+  const value = {
+    authToken, setAuthToken,
+    isLoggedIn, setIsLoggedIn,
+    showLoader, setShowLoader,
+    snackbarMsg, setSnackbarMsg
+  };
 
   const configureAxios = () => {
     // Configure axios
-    const token = state?.token ? state.token : '';
+    const token = authToken ?? '';
     axios.defaults.baseURL = '';
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
@@ -49,7 +49,8 @@ const AuthProvider = ({ children }) => {
           let res = error.response;
           if (res.status === 401 && res.config && !res.config.__isRetryRequest) {
             await AsyncStorage.storeAuth('');
-            setState({ ...state, user: null, token: '' });
+            setAuthToken(null);
+            setIsLoggedIn(false);
             navigation.navigate('Volunteer Login');
           } else {
             if (error.response?.data?.msg) {
@@ -74,9 +75,12 @@ const AuthProvider = ({ children }) => {
       if (!data) {
         return;
       }
-      setState({ ...state, user: data.user, token: data.token });
-    } catch (err) {
-      console.error(err);
+      setAuthToken(data.token);
+      setIsLoggedIn(true);
+    } catch (error) {
+      console.error(error);
+      setAuthToken(null);
+      setIsLoggedIn(false);
     }
   };
 
@@ -88,10 +92,10 @@ const AuthProvider = ({ children }) => {
 
   // Return the auth context provider
   return (
-    <AuthContext.Provider value={[state, setState]}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export { AuthContext, AuthProvider };
+export { AuthContext, AuthProvider, useAuth };

@@ -4,17 +4,21 @@ import { Appbar, Text, Menu, Button } from 'react-native-paper';
 import { getHeaderTitle } from '@react-navigation/elements';
 import styles from './Styles';
 import AsyncStorageHelpers from '../globals/async-storage-helpers';
-import { AuthContext } from '../contexts/auth-context';
+import { useAuth } from '../contexts/auth-context';
 import { useNavigation } from '@react-navigation/native';
 
 const Nav = (props) => {
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState({ x: 0, y: 0 })
-  const [state, setState] = useContext(AuthContext);
+  const {
+    authToken, setAuthToken,
+    isLoggedIn, setIsLoggedIn,
+    showLoader, setShowLoader,
+    snackbarMsg, setSnackbarMsg
+  } = useAuth();
   const navigation = useNavigation();
   let routeName = props.routeName;
-  // Set whether the user is authenticated from the AuthContext state
-  let authenticated = !!state && state.token !== '' && state.user !== null;
+
   const title = routeName;
 
   const openMenu = (event) => {
@@ -37,19 +41,22 @@ const Nav = (props) => {
 
   const logoutPressed = async () => {
     closeMenu();
-    setState({...state, showLoader: true});
+    setShowLoader(true);
     try {
       const result = await AsyncStorageHelpers.removeAuth();
       if (!result) {
         console.error("Failed to remove auth token");
       } else {
-        setState({...state, user: null, token: '', showLoader: false});
-        authenticated = false;
+        setAuthToken(null);
+        setIsLoggedIn(false);
+        setShowLoader(false);
         navigation.navigate('Volunteer Login');
       }
     } catch (error) {
       console.error(error);
-      setState({...state, user: null, token: '', showLoader: false});
+      setAuthToken(null);
+      setIsLoggedIn(false);
+      setShowLoader(false);
     }
   }
 
@@ -97,12 +104,11 @@ const Nav = (props) => {
               title="About"
               onPress={aboutPressed}
             />
-            {authenticated ?
+            {isLoggedIn &&
               <Menu.Item
                 title="Log out"
                 onPress={logoutPressed}
               />
-              : <></>
             }
           </Menu>
         </View>

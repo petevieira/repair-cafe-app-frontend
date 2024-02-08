@@ -22,9 +22,9 @@ const App = () => {
     >
       <StatusBar hidden/>
       <AuthProvider>
-        { Platform.OS !== 'ios' &&
+{/*        { Platform.OS !== 'ios' &&
           <SafeAreaView style={{flex: 0, backgroundColor: 'white'}}/>
-        }
+        }*/}
         <SafeAreaView style={{flex: 1, backgroundColor: '#96db73'}}>
           <RootNavigation/>
         </SafeAreaView>

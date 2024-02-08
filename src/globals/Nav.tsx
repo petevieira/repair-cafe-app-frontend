@@ -65,7 +65,8 @@ const Nav = (props) => {
         style={{
           alignItems: 'center',
           flexDirection: 'row',
-          justifyContent: 'space-evenly'
+          justifyContent: 'space-evenly',
+          backgroundColor: 'white',
         }}
       >
         <View style={styles.appBar}>

@@ -30,14 +30,12 @@ const About = () => {
   }, []);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.content}>
-        <HTMLView
-          stylesheet={styles.html}
-          value={aboutText}
-        />
-      </View>
-    </ScrollView>
+    <View style={[styles.content, { paddingHorizontal: 10 }]}>
+      <HTMLView
+        stylesheet={styles.html}
+        value={aboutText}
+      />
+    </View>
   )
 }
 

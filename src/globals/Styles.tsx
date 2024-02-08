@@ -4,19 +4,24 @@ export default StyleSheet.create({
   appBar: {
     backgroundColor: 'white',
     height: 60,
-    width: '100%',
+    maxWidth: 738,
+    minWidth: 320,
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-evenly',
   },
   appBarTitle: {
     fontFamily: 'Futura',
     fontSize: 24,
     fontWeight: 'bold',
+    flex: 1,
   },
   logo: {
     height: 60,
     width: 60,
+    marginLeft: 10,
+    flex: 1,
   },
   itemImage: {
     width: "25%",
@@ -162,5 +167,10 @@ export default StyleSheet.create({
       fontSize: 24,
       fontWeight: 'bold',
     }
-  }
+  },
+  bottomTab: {
+    color: "black",
+    backgroundColor: "red",
+    flex: 1,
+  },
 });

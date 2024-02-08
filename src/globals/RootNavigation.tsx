@@ -26,12 +26,10 @@ const RootNavigation = () => {
     <NavigationContainer
       ref={navigationRef}
       onReady={() => {
-        setRouteName(navigationRef.getCurrentRoute().name)
+        setRouteName(navigationRef.getCurrentRoute().name);
       }}
       onStateChange={async () => {
-        const previousRouteName = routeName;
         const currentRouteName = navigationRef.getCurrentRoute().name;
-        console.log("route", currentRouteName)
         setRouteName(currentRouteName);
       }}
     >
@@ -42,7 +40,7 @@ const RootNavigation = () => {
       >
         <ScreensNav/>
       </ScrollView>
-      <BottomTabs/>
+      <BottomTabs routeName={routeName}/>
       <Loader/>
       <Portal>
         <Snackbar

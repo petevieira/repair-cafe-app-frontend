@@ -120,7 +120,7 @@ const Login = ({navigation}) => {
             style={styles.short_text_input}
             value={email}
             autoFocus={true}
-            editable={{enableEmail}}
+            editable={enableEmail}
             onPress={() => {setEnableEmail(true)}}
             onFocus={() => {
               setEmailsBlurred(false);

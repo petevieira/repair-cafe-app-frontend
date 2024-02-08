@@ -1,6 +1,6 @@
-import { useContext, useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { ScrollView } from 'react-native';
+import { useContext, useEffect, useState, useRef } from 'react';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
+import { ScrollView, View } from 'react-native';
 import { AuthContext } from '../contexts/auth-context';
 import { Portal, Snackbar} from 'react-native-paper';
 
@@ -9,6 +9,7 @@ import ScreensNav from './ScreensNav';
 import BottomTabs from './BottomTabs';
 import Loader from './Loader';
 import styles from './Styles';
+import Nav from './Nav';
 
 /**
  * A component that wraps the ScreensNav stack navigator in an
@@ -18,10 +19,29 @@ import styles from './Styles';
  */
 const RootNavigation = () => {
   const [state, setState] = useContext(AuthContext);
+  const [routeName, setRouteName] = useState('');
+  const navigationRef = createNavigationContainerRef();
 
   return (
-    <NavigationContainer>
-      <ScreensNav/>
+    <NavigationContainer
+      ref={navigationRef}
+      onReady={() => {
+        setRouteName(navigationRef.getCurrentRoute().name)
+      }}
+      onStateChange={async () => {
+        const previousRouteName = routeName;
+        const currentRouteName = navigationRef.getCurrentRoute().name;
+        console.log("route", currentRouteName)
+        setRouteName(currentRouteName);
+      }}
+    >
+      <Nav routeName={routeName}/>
+      <ScrollView
+        contentContainerStyle={styles.topScrollView}
+        style={{backgroundColor: '#f2f2f2'}}
+      >
+        <ScreensNav/>
+      </ScrollView>
       <BottomTabs/>
       <Loader/>
       <Portal>
@@ -33,7 +53,7 @@ const RootNavigation = () => {
             setState({...state, snackbarMsg: ''});
           }}
           action={{
-            label: "close"
+            label: "Close"
           }}
         >{state.snackbarMsg}
         </Snackbar>

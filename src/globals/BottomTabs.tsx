@@ -56,43 +56,43 @@ export default function BottomTabs() {
   };
 
   return (
-    <SafeAreaView>
-      <View
-        style={{
-          backgroundColor: "#96db73",
-          flexDirection: "row",
-          paddingTop: 10,
-          paddingBottom: 10,
-          justifyContent: "space-evenly",
-          alignItems: "center"
-        }}
-      >
-        { !authenticated ?
-          <Tab
-            text={"Login"}
-            name={"sign-in-alt"}
-            style={{color: "black"}}
-            handlePress={async () => {
-              navigation.navigate("Volunteer Login")}
-            }
-            screenName={"Volunteer Login"}
-          />
-          : <></>
-        }
+    <SafeAreaView
+      style={{backgroundColor: "#96db73"}}>
+    <View
+      style={{
+        backgroundColor: "#96db73",
+        flexDirection: "row",
+        justifyContent: "space-evenly",
+        height: 70,
+        alignItems: "center"
+      }}
+    >
+      { !authenticated ?
+        <Tab
+          text={"Login"}
+          name={"sign-in-alt"}
+          style={{color: "black"}}
+          handlePress={async () => {
+            navigation.navigate("Volunteer Login")}
+          }
+          screenName={"Volunteer Login"}
+        />
+        : <></>
+      }
 
-        <Tab
-          text="Queue"
-          name="tools"
-          handlePress={() => navigation.navigate("Repairs")}
-          screenName="Repairs"
-        />
-        <Tab
-          text="Volunteers"
-          name="users"
-          handlePress={() => navigation.navigate("Volunteers")}
-          screenName="Volunteers"
-        />
-      </View>
+      <Tab
+        text="Queue"
+        name="tools"
+        handlePress={() => navigation.navigate("Repairs")}
+        screenName="Repairs"
+      />
+      <Tab
+        text="Volunteers"
+        name="users"
+        handlePress={() => navigation.navigate("Volunteers")}
+        screenName="Volunteers"
+      />
+    </View>
     </SafeAreaView>
   );
 }

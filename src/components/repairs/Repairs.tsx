@@ -1,5 +1,5 @@
 import { useState, useContext, useCallback } from 'react';
-import { View, ScrollView } from 'react-native';
+import { View, ScrollView, SafeAreaView } from 'react-native';
 import { Button, TextInput, Text, DataTable, FAB } from 'react-native-paper';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { format } from "date-fns";
@@ -60,49 +60,50 @@ const Repairs = () => {
 
   return (
     <>
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.content}>
+      <View style={styles.content}>
+        <Text style={{textAlign: "center"}}>({todaysDate})</Text>
+        <DataTable style={{flex: 6}}>
+          <DataTable.Header>
+            <DataTable.Title>#</DataTable.Title>
+            <DataTable.Title>Item</DataTable.Title>
+            <DataTable.Title>Owner</DataTable.Title>
+            <DataTable.Title>Repairer</DataTable.Title>
+            <DataTable.Title>Status</DataTable.Title>
+          </DataTable.Header>
 
-          <Text style={{textAlign: "center"}}>({todaysDate})</Text>
-          <DataTable>
-            <DataTable.Header style={{minWidth: 320}}>
-              <DataTable.Title>#</DataTable.Title>
-              <DataTable.Title>Item</DataTable.Title>
-              <DataTable.Title>Owner</DataTable.Title>
-              <DataTable.Title>Repairer</DataTable.Title>
-              <DataTable.Title>Status</DataTable.Title>
-            </DataTable.Header>
-
-            {items.map((item, idx) => (
-              <DataTable.Row
-                key={item._id}
-                onPress={authenticated ? (() => itemPressed(item)) : undefined}
-              >
-                <DataTable.Cell>{idx+1}</DataTable.Cell>
-                <DataTable.Cell>{item.type}</DataTable.Cell>
-                <DataTable.Cell>{item.ownersFirstName} {item.ownersLastName}</DataTable.Cell>
-                <DataTable.Cell>{item.repairerFirstName} {item.repairerLastName}</DataTable.Cell>
-                <DataTable.Cell>{item.repairStatus}</DataTable.Cell>
-              </DataTable.Row>
-            ))}
-          </DataTable>
-          { repairsRetrieved && items.length <= 0 &&
-            <Text
-              style={{
-                padding: 10,
-                alignSelf: 'center'
-              }}>{"No repairs yet today"}
-            </Text>
-          }
-        </View>
-      </ScrollView>
+          {items.map((item, idx) => (
+            <DataTable.Row
+              key={item._id}
+              onPress={authenticated ? (() => itemPressed(item)) : undefined}
+            >
+              <DataTable.Cell>{idx+1}</DataTable.Cell>
+              <DataTable.Cell>{item.type}</DataTable.Cell>
+              <DataTable.Cell>{item.ownersFirstName} {item.ownersLastName}</DataTable.Cell>
+              <DataTable.Cell>{item.repairerFirstName} {item.repairerLastName}</DataTable.Cell>
+              <DataTable.Cell>{item.repairStatus}</DataTable.Cell>
+            </DataTable.Row>
+          ))}
+        </DataTable>
+        { repairsRetrieved && items.length <= 0 &&
+          <Text
+            style={{
+              padding: 10,
+              alignSelf: 'center'
+            }}>{"No repairs yet today"}
+          </Text>
+        }
+      </View>
       { authenticated &&
-        <FAB
-          icon="plus"
-          style={styles.fab}
-          animated={false}
-          onPress={addItemPressed}
-        />
+        <SafeAreaView>
+          <View>
+          <FAB
+            icon="plus"
+            style={styles.fab}
+            animated={false}
+            onPress={addItemPressed}
+          />
+          </View>
+        </SafeAreaView>
       }
     </>
   )

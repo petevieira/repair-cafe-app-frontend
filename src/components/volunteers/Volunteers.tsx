@@ -61,37 +61,33 @@ const Volunteers = () => {
 
   return (
     <>
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.content}>
+      <View style={styles.content}>
+        <Text style={{textAlign: "center"}}>({todaysDate})</Text>
+        <DataTable>
+          <DataTable.Header style={{minWidth: 320}}>
+            <DataTable.Title>First</DataTable.Title>
+            <DataTable.Title>Last</DataTable.Title>
+          </DataTable.Header>
 
-          <Text style={{textAlign: "center"}}>({todaysDate})</Text>
-          <DataTable>
-            <DataTable.Header style={{minWidth: 320}}>
-              <DataTable.Title>First</DataTable.Title>
-              <DataTable.Title>Last</DataTable.Title>
-            </DataTable.Header>
+          {volunteers.map((volunteer) => (
+            <DataTable.Row key={volunteer._id}
+              onPress={(!authenticated ? undefined : () => {volunteerPressed(volunteer)})}
+            >
+              <DataTable.Cell>{volunteer.firstName}</DataTable.Cell>
+              <DataTable.Cell>{volunteer.lastName}</DataTable.Cell>
+            </DataTable.Row>
+          ))}
+        </DataTable>
 
-            {volunteers.map((volunteer) => (
-              <DataTable.Row key={volunteer._id}
-                onPress={(!authenticated ? undefined : () => {volunteerPressed(volunteer)})}
-              >
-                <DataTable.Cell>{volunteer.firstName}</DataTable.Cell>
-                <DataTable.Cell>{volunteer.lastName}</DataTable.Cell>
-              </DataTable.Row>
-            ))}
-          </DataTable>
-
-          { volunteersRetrieved && volunteers.length <= 0 &&
-            <Text
-              style={{
-                padding: 10,
-                alignSelf: 'center'
-              }}>{"No volunteers yet today"}
-            </Text>
-          }
-
-        </View>
-      </ScrollView>
+        { volunteersRetrieved && volunteers.length <= 0 &&
+          <Text
+            style={{
+              padding: 10,
+              alignSelf: 'center'
+            }}>{"No volunteers yet today"}
+          </Text>
+        }
+      </View>
       { authenticated &&
         <FAB
           icon="plus"

@@ -43,13 +43,13 @@ const AddEditVolunteer = ({route, navigation}) => {
   const volunteerOkToSave = (volunteer): boolean => {
     let msg = "";
     if (!volunteer.email) {
-      msg = "Please enter in your email.";
+      msg = "Please enter your email.";
     } else if (!emailIsValid(volunteer.email)) {
       msg = "Please enter a valid email."
     } else if (!volunteer.firstName) {
       msg = "Please enter your first name.";
     } else if (!volunteer.lastName) {
-      msg = "Please enter in your last name.";
+      msg = "Please enter your last name.";
     } else if (!waiverBoxChecked) {
       msg = "Please agree to the terms.";
     }
@@ -153,85 +153,83 @@ const AddEditVolunteer = ({route, navigation}) => {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style = {styles.content}>
-          <Text
-            style={{ fontWeight: 'bold', fontSize: 22, alignSelf: 'center' }}>
-            {"Volunteer"}
-          </Text>
+      <View style = {styles.content}>
+        <Text
+          style={{ fontWeight: 'bold', fontSize: 22, alignSelf: 'center' }}>
+          {"Volunteer"}
+        </Text>
 
-          <TextInput
-            label={<><Text style={{color: '#717171'}}>Email</Text><Text style={{color: 'red'}}>*</Text></>}
-            mode="outlined"
-            autoCorrect={false}
-            style={styles.short_text_input}
-            value={volunteer.email}
-            onBlur={onEmailBlur}
-            ref={emailInputRef}
-            onChangeText={newEmail => setVolunteer(
-              {...volunteer, email: newEmail.trim()}
-            )}
-          />
+        <TextInput
+          label={<><Text style={{color: '#717171'}}>Email</Text><Text style={{color: 'red'}}>*</Text></>}
+          mode="outlined"
+          autoCorrect={false}
+          style={styles.short_text_input}
+          value={volunteer.email}
+          onBlur={onEmailBlur}
+          ref={emailInputRef}
+          onChangeText={newEmail => setVolunteer(
+            {...volunteer, email: newEmail.trim()}
+          )}
+        />
 
-          <TextInput
-            label={<><Text style={{color: '#717171'}}>First name</Text><Text style={{color: 'red'}}>*</Text></>}
-            mode="outlined"
-            autoCorrect={false}
-            style={styles.short_text_input}
-            value={volunteer.firstName}
-            onChangeText={newFirstName => setVolunteer({...volunteer, firstName: newFirstName.trim()})}
-          />
+        <TextInput
+          label={<><Text style={{color: '#717171'}}>First name</Text><Text style={{color: 'red'}}>*</Text></>}
+          mode="outlined"
+          autoCorrect={false}
+          style={styles.short_text_input}
+          value={volunteer.firstName}
+          onChangeText={newFirstName => setVolunteer({...volunteer, firstName: newFirstName.trim()})}
+        />
 
-          <TextInput
-            label={<><Text style={{color: '#717171'}}>Last name</Text><Text style={{color: 'red'}}>*</Text></>}
-            mode="outlined"
-            autoCorrect={false}
-            style={styles.short_text_input}
-            value={volunteer.lastName}
-            onChangeText={newLastName => setVolunteer({...volunteer, lastName: newLastName.trim()})}
-          />
+        <TextInput
+          label={<><Text style={{color: '#717171'}}>Last name</Text><Text style={{color: 'red'}}>*</Text></>}
+          mode="outlined"
+          autoCorrect={false}
+          style={styles.short_text_input}
+          value={volunteer.lastName}
+          onChangeText={newLastName => setVolunteer({...volunteer, lastName: newLastName.trim()})}
+        />
 
-          <CheckBox
-            label={<Text>I agree to the <Text style={{color: "blue"}} onPress={() => {
-              setTermsModalVisible(true);
-            }}>terms and conditions</Text><Text style={{color: 'red'}}>*</Text></Text>}
-            status={waiverBoxChecked ? 'checked' : 'unchecked'}
-            onPress={async () => {
-              setVolunteer({...volunteer, acceptsWaiver: !waiverBoxChecked});
-              setWaiverBoxChecked(!waiverBoxChecked);
-            }}
-          />
+        <CheckBox
+          label={<Text>I agree to the <Text style={{color: "blue"}} onPress={() => {
+            setTermsModalVisible(true);
+          }}>terms and conditions</Text><Text style={{color: 'red'}}>*</Text></Text>}
+          status={waiverBoxChecked ? 'checked' : 'unchecked'}
+          onPress={async () => {
+            setVolunteer({...volunteer, acceptsWaiver: !waiverBoxChecked});
+            setWaiverBoxChecked(!waiverBoxChecked);
+          }}
+        />
 
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: "space-evently",
-              alignItems: "center",
-              marginBottom: 15,
-              alignSelf: 'center'
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: "space-evently",
+            alignItems: "center",
+            marginBottom: 15,
+            alignSelf: 'center'
+          }}
+        >
+          { !!volunteer._id &&
+            <SubmitButton
+              style={styles.deleteButton}
+              rippleColor="rgba(168,37,33,0.4)"
+              text="Delete"
+              onPress={() => {
+                setShowDeleteConfirmationDialog(true);
+              }}
+            />
+          }
+
+          <SubmitButton
+            text="Save"
+            onPress={() => {
+              addSaveVolunteer(volunteer);
             }}
           >
-            { !!volunteer._id &&
-              <SubmitButton
-                style={styles.deleteButton}
-                rippleColor="rgba(168,37,33,0.4)"
-                text="Delete"
-                onPress={() => {
-                  setShowDeleteConfirmationDialog(true);
-                }}
-              />
-            }
-
-            <SubmitButton
-              text="Save"
-              onPress={() => {
-                addSaveVolunteer(volunteer);
-              }}
-            >
-            </SubmitButton>
-          </View>
+          </SubmitButton>
         </View>
-      </ScrollView>
+      </View>
 
       { termsModalVisible &&
         <View

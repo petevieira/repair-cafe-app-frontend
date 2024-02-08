@@ -47,13 +47,13 @@ const Login = ({navigation}) => {
         try {
           const response = await UserRequests.userIsAdmin(email);
           setShowPasswordInput(true);
-          setState({...state, showLoader: false});
           // Checking here maybe b/c it's a race condition for it to load first?
           setTimeout(() => {
             if (!!pwdInputRef.current) {
               pwdInputRef.current.focus();
             }
-          }, 500);
+            setState({...state, showLoader: false});
+          }, 200);
         } catch (error) {
           console.error(error);
           setState({...state, snackbarMsg: error.message, showLoader: false});
@@ -71,6 +71,7 @@ const Login = ({navigation}) => {
   }
 
   const signInAdmin = async () => {
+    setState({...state, showLoader: true});
     try {
       const response = await UserRequests.signInAdmin(email, password);
       // Add auth token to state
@@ -82,9 +83,10 @@ const Login = ({navigation}) => {
         { user: response.data.user, token: response.data.token }
       );
       navigation.navigate("Repairs");
+      setState({...state, showLoader: false});
     } catch (error) {
       console.error(error);
-      setState({...state, snackbarMsg: error.message});
+      setState({...state, snackbarMsg: error.message, showLoader: false});
     }
   };
 
@@ -120,7 +122,7 @@ const Login = ({navigation}) => {
             style={styles.short_text_input}
             value={email}
             autoFocus={true}
-            editable={{enableEmail}}
+            editable={enableEmail}
             onPress={() => {setEnableEmail(true)}}
             onFocus={() => {
               setEmailsBlurred(false);

@@ -3,34 +3,49 @@ import { StyleSheet, Dimensions } from "react-native";
 export default StyleSheet.create({
   appBar: {
     backgroundColor: 'white',
+    height: 60,
+    maxWidth: 738,
+    minWidth: 320,
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
   },
   appBarTitle: {
     fontFamily: 'Futura',
     fontSize: 24,
     fontWeight: 'bold',
-    alignText: "center"
+    flex: 1,
   },
   logo: {
     height: 60,
-    aspectRatio: 1,
+    width: 60,
+    marginLeft: 10,
+    flex: 1,
   },
   itemImage: {
     width: "25%",
     aspectRatio: 1
   },
+  topScrollView: {
+    minHeight: '100%',
+    overflow: 'visible',
+  },
   container: {
+    flex: 1,
     flexDirection: 'column',
     justifyContent: 'flex-start',
     alignItems: 'center',
     paddingTop: 15,
     paddingBottom: 15,
-    paddingHorizontal: 10,
-    height: '80vh',
+    paddingHorizontal: 10
   },
   content: {
+    flex: 1,
     maxWidth: 738,
     minWidth: 320,
-    paddingBottom: '10vh',
+    paddingTop: 10,
+    marginHorizontal: 'auto',
   },
   home_buttons: {
   	height: 120,
@@ -47,7 +62,7 @@ export default StyleSheet.create({
   },
   submitButton: {
     marginTop: 20,
-    marginHorizontal: 20,
+    // marginHorizontal: 20,
     backgroundColor: '#246fb0',
     borderColor: '#1a5385',
   },
@@ -141,7 +156,7 @@ export default StyleSheet.create({
     position: 'fixed',
     margin: 16,
     right: '5%',
-    bottom: 60,
+    bottom: 10,
     backgroundColor: '#96db73',
   },
   html: {
@@ -152,5 +167,10 @@ export default StyleSheet.create({
       fontSize: 24,
       fontWeight: 'bold',
     }
-  }
+  },
+  bottomTab: {
+    color: "black",
+    backgroundColor: "red",
+    flex: 1,
+  },
 });

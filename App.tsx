@@ -1,5 +1,5 @@
 import { configureFonts, MD3LightTheme, PaperProvider } from 'react-native-paper';
-import { View } from 'react-native';
+import { View, StatusBar } from 'react-native';
 import { AuthProvider } from './src/contexts/auth-context';
 
 // Custom Components
@@ -13,12 +13,15 @@ import RootNavigation from './src/globals/RootNavigation';
 const App = () => {
 
   return (
-    <PaperProvider theme ={{
-      ...MD3LightTheme,
-      mode: 'adaptive',
-      colors: appColors,
-      fonts: configureFonts({config: appFontConfig})
-    }}>
+    <PaperProvider
+      theme ={{
+        ...MD3LightTheme,
+        mode: 'adaptive',
+        colors: appColors,
+        fonts: configureFonts({config: appFontConfig})
+      }}
+    >
+      <StatusBar hidden={true}/>
       <AuthProvider>
         <RootNavigation/>
       </AuthProvider>

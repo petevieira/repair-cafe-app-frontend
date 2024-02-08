@@ -1,20 +1,32 @@
 import { useState, useContext } from "react";
-import { View, Text, Image, Platform } from "react-native";
-import { Appbar, Menu } from 'react-native-paper';
+import { View, Image, SafeAreaView, Platform } from "react-native";
+import { Appbar, Text, Menu, Button } from 'react-native-paper';
 import { getHeaderTitle } from '@react-navigation/elements';
 import styles from './Styles';
 import AsyncStorageHelpers from '../globals/async-storage-helpers';
 import { AuthContext } from '../contexts/auth-context';
+import { useNavigation } from '@react-navigation/native';
 
-const Nav = ({ navigation, route, options }) => {
+const Nav = (props) => {
   const [menuVisible, setMenuVisible] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState({ x: 0, y: 0 })
   const [state, setState] = useContext(AuthContext);
+  const navigation = useNavigation();
+  let routeName = props.routeName;
   // Set whether the user is authenticated from the AuthContext state
   let authenticated = !!state && state.token !== '' && state.user !== null;
-  const title = getHeaderTitle(options, route.name);
-  const MORE_ICON = Platform.OS === 'ios' ? 'dots-horizontal' : 'dots-vertical';
+  const title = routeName;
 
-  const openMenu = () => setMenuVisible(true);
+  const openMenu = (event) => {
+    const { nativeEvent } = event;
+    const anchor = {
+      x: nativeEvent.pageX,
+      y: nativeEvent.pageY,
+    };
+
+    setMenuAnchor(anchor);
+    setMenuVisible(true);
+  }
 
   const closeMenu = () => setMenuVisible(false);
 
@@ -42,44 +54,61 @@ const Nav = ({ navigation, route, options }) => {
   }
 
   return (
-    <Appbar.Header
-      style={styles.appBar}
-      mode="center-aligned"
-      elevated={true}
-    >
-      <Appbar.Action
-        icon={"/trc-logo-transparent.png"}
-        isLeading={true}
-        size={60}
-      />
-      <Appbar.Content
-        title={<Text style={styles.appBarTitle}>{title}</Text>}
-        style={{fontSize: 30}}
-      />
-      <Menu
-        visible={menuVisible}
-        onDismiss={closeMenu}
-        anchor={
-          <Appbar.Action
-            icon={MORE_ICON}
-            onPress={openMenu}
-          />
-        }
+    <SafeAreaView>
+      <View
+        style={{
+          alignItems: 'center',
+          flexDirection: 'row',
+          justifyContent: 'space-evenly'
+        }}
       >
-        <Menu.Item
-          title="About"
-          onPress={aboutPressed}
-        />
-        {authenticated ?
-          <Menu.Item
-            title="Log out"
-            onPress={logoutPressed}
-          />
-          : <></>
-        }
-      </Menu>
-    </Appbar.Header>
+        <View style={styles.appBar}>
+          <View
+            style={{marginRight: 'auto'}}
+          >
+            <Image
+              resizeMethod="scale"
+              resizeMode="contain"
+              style={styles.logo}
+              source={require('./assets/trc-logo-transparent-icon.png')}
+            />
+          </View>
+          <View style={{alignText: 'center'}}>
+            <Text style={styles.appBarTitle}>
+              {title}
+            </Text>
+          </View>
+          <View
+            style={{marginLeft: 'auto'}}
+          >
+            <Button
+              width={60}
+              icon={Platform.OS === 'ios' ? 'dots-horizontal' : 'dots-vertical'}
+              onPress={openMenu}
+              style={{flex: 1, width: 60}}
+            />
+          </View>
+          <Menu
+            visible={menuVisible}
+            onDismiss={closeMenu}
+            anchor={menuAnchor}
+          >
+            <Menu.Item
+              title="About"
+              onPress={aboutPressed}
+            />
+            {authenticated ?
+              <Menu.Item
+                title="Log out"
+                onPress={logoutPressed}
+              />
+              : <></>
+            }
+          </Menu>
+        </View>
+      </View>
+    </SafeAreaView>
   );
-};
+}
 
 export default Nav;

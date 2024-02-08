@@ -1,5 +1,6 @@
 import { useState, useEffect, createContext } from "react";
 // import { useNavigation } from "@react-navigation/native";
+import { Platform } from 'react-native';
 import axios from "axios";
 import styles from '../globals/Styles'
 

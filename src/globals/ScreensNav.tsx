@@ -31,13 +31,13 @@ const ScreensNav = (props) => {
     <Stack.Navigator
       initialRouteName="Login"
       screenOptions={{
-        header: (props) => <Nav {...props} />,
+        headerShown: false
+      //   header: (props) => <Nav {...props} />,
       }}
     >
       {authenticated ? (
         </* Screens that require authentication */>
           <Stack.Screen
-            style={{marginBottom: 20}}
             name="Repairs"
             component={Repairs}
           />
@@ -46,7 +46,6 @@ const ScreensNav = (props) => {
             component={Volunteers}
           />
           <Stack.Screen
-            style={{marginBottom: 20}}
             name="Add/Edit Repair"
             component={AddEditRepair}
           />

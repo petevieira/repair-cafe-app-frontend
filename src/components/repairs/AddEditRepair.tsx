@@ -309,255 +309,256 @@ const AddEditRepair = ({route, navigation}) => {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.content}>
-
-          <Text
-            style={{
-              fontWeight: 'bold',
-              fontSize: 22,
-              alignSelf: 'center'
-            }}>{pageTitle}
-          </Text>
-          <CheckBox
-            label={
-              <Text>{"I agree to the "}
-                <Text style={{color: "blue"}}
-                  onPress={() => {
-                    setTermsModalVisible(true);
-                  }}
-                >{"terms and conditions"}</Text>
+      <View style={styles.content}>
+        <Text
+          style={{
+            fontWeight: 'bold',
+            fontSize: 22,
+            alignSelf: 'center'
+          }}>{pageTitle}
+        </Text>
+        <CheckBox
+        style={{alignSelf: 'center'}}
+          label={
+            <Text>{"I agree to the "}
+              <Text style={{color: "blue"}}
+                onPress={() => {
+                  setTermsModalVisible(true);
+                }}
+              >{"terms and conditions"}</Text>
+              <Text style={{color: 'red'}}>*</Text>
+            </Text>
+          }
+          status={waiverBoxChecked ? 'checked' : 'unchecked'}
+          onPress={() => {
+            setItemDetails({...itemDetails, acceptsWaiver: !waiverBoxChecked});
+            setWaiverBoxChecked(!waiverBoxChecked);
+          }}
+        />
+        <TextInput
+          label={
+              <Text style={{color: '#717171'}}>{"Owner's email "}
                 <Text style={{color: 'red'}}>*</Text>
               </Text>
-            }
-            status={waiverBoxChecked ? 'checked' : 'unchecked'}
-            onPress={() => {
-              setItemDetails({...itemDetails, acceptsWaiver: !waiverBoxChecked});
-              setWaiverBoxChecked(!waiverBoxChecked);
+          }
+          autoComplete={false}
+          inputMode={"email"}
+          mode="outlined"
+          autoCorrect={false}
+          style={styles.short_text_input}
+          value={itemDetails.ownersEmail ?? ""}
+          onBlur={onEmailBlur}
+          ref={emailInputRef}
+          onChangeText={newEmail => setItemDetails(
+            { ...itemDetails, ownersEmail: newEmail.trim() }
+          )}
+        />
+        <TextInput
+          label={
+              <Text style={{color: '#717171'}}>{"Owner's first name "}
+                <Text style={{color: 'red'}}>*</Text>
+              </Text>
+          }
+          mode="outlined"
+          autoCorrect={false}
+          style={styles.short_text_input}
+          value={itemDetails.ownersFirstName ?? ""}
+          onChangeText={newFirstName => setItemDetails(
+            {...itemDetails, ownersFirstName: newFirstName.trim()}
+          )}
+        />
+        <TextInput
+          label={
+              <Text style={{color: '#717171'}}>{"Owner's last name "}
+                <Text style={{color: 'red'}}>*</Text>
+              </Text>
+          }
+          mode="outlined"
+          autoCorrect={false}
+          style={styles.short_text_input}
+          value={itemDetails.ownersLastName ?? ""}
+          onChangeText={newLastName => setItemDetails(
+            {...itemDetails, ownersLastName: newLastName}
+          )}
+        />
+        <View style={styles.dropdownContainer}>
+          <View style={[styles.label]}>
+            <Text style={{color: '#717171'}}>
+              Product Category
+              <Text style={{color: 'red'}}>*</Text>
+            </Text>
+          </View>
+          <Dropdown
+            style={[styles.dropdown, productCategoryFocused && {borderWidth: 2}]}
+            placeholderStyle={styles.placeholderStyle}
+            selectedTextStyle={styles.selectedTextStyle}
+            inputSearchStyle={styles.inputSearchStyle}
+            itemTextStyle={styles.itemTextStyle}
+            iconStyle={styles.iconStyle}
+            data={ordsProductCategoryList}
+            search
+            maxHeight={300}
+            labelField="label"
+            valueField="value"
+            placeholder="Select Product Category"
+            searchPlaceholder="Search..."
+            value={productCategoryIdx}
+            onFocus={() => setProductCategoryFocused(true)}
+            onBlur={() => setProductCategoryFocused(false)}
+            onChange={v => {
+              setProductCategoryIdx(v.value);
             }}
           />
-          <TextInput
-            label={
-                <Text style={{color: '#717171'}}>{"Owner's email "}
-                  <Text style={{color: 'red'}}>*</Text>
-                </Text>
-            }
-            mode="outlined"
-            autoCorrect={false}
-            style={styles.short_text_input}
-            value={itemDetails.ownersEmail ?? ""}
-            onBlur={onEmailBlur}
-            ref={emailInputRef}
-            onChangeText={newEmail => setItemDetails(
-              { ...itemDetails, ownersEmail: newEmail.trim() }
-            )}
-          />
-          <TextInput
-            label={
-                <Text style={{color: '#717171'}}>{"Owner's first name "}
-                  <Text style={{color: 'red'}}>*</Text>
-                </Text>
-            }
-            mode="outlined"
-            autoCorrect={false}
-            style={styles.short_text_input}
-            value={itemDetails.ownersFirstName ?? ""}
-            onChangeText={newFirstName => setItemDetails(
-              {...itemDetails, ownersFirstName: newFirstName.trim()}
-            )}
-          />
-          <TextInput
-            label={
-                <Text style={{color: '#717171'}}>{"Owner's last name "}
-                  <Text style={{color: 'red'}}>*</Text>
-                </Text>
-            }
-            mode="outlined"
-            autoCorrect={false}
-            style={styles.short_text_input}
-            value={itemDetails.ownersLastName ?? ""}
-            onChangeText={newLastName => setItemDetails(
-              {...itemDetails, ownersLastName: newLastName}
-            )}
-          />
-          <View style={styles.dropdownContainer}>
-            <View style={[styles.label]}>
-              <Text style={{color: '#717171'}}>
-                Product Category
+        </View>
+        <TextInput
+          label={
+              <Text style={{color: '#717171'}}>{"Symptoms "}
                 <Text style={{color: 'red'}}>*</Text>
               </Text>
-            </View>
-            <Dropdown
-              style={[styles.dropdown, productCategoryFocused && {borderWidth: 2}]}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              inputSearchStyle={styles.inputSearchStyle}
-              itemTextStyle={styles.itemTextStyle}
-              iconStyle={styles.iconStyle}
-              data={ordsProductCategoryList}
-              search
-              maxHeight={300}
-              labelField="label"
-              valueField="value"
-              placeholder="Select Product Category"
-              searchPlaceholder="Search..."
-              value={productCategoryIdx}
-              onFocus={() => setProductCategoryFocused(true)}
-              onBlur={() => setProductCategoryFocused(false)}
-              onChange={v => {
-                setProductCategoryIdx(v.value);
-              }}
+          }
+          mode="outlined"
+          autoCorrect={false}
+          style={styles.short_text_input}
+          value={itemDetails.symptoms ?? ""}
+          onChangeText={newSymptoms => setItemDetails(
+            {...itemDetails, symptoms: newSymptoms}
+          )}
+        />
+        <TextInput
+          label={
+              <Text style={{color: '#717171'}}>{`Weight (${WEIGHT_UNITS})`}
+                <Text style={{color: 'red'}}>*</Text>
+              </Text>
+          }
+          inputMode={"numeric"}
+          mode="outlined"
+          autoCorrect={false}
+          style={styles.short_text_input}
+          value={itemDetails.weight ?? ""}
+          onChangeText={newWeight => setItemDetails(
+            {...itemDetails, weight: newWeight}
+          )}
+        />
+        <TextInput
+          label={
+              <Text style={{color: '#717171'}}>{`Cost (${COST_UNITS})`}
+                <Text style={{color: 'red'}}>*</Text>
+              </Text>
+          }
+          mode="outlined"
+          inputMode={"numeric"}
+          autoCorrect={false}
+          style={styles.short_text_input}
+          value={itemDetails.cost ?? ""}
+          onChangeText={newCost => setItemDetails(
+            {...itemDetails, cost: newCost}
+          )}
+        />
+        <TextInput
+          label="Brand"
+          mode="outlined"
+          autoCorrect={false}
+          style={styles.short_text_input}
+          value={itemDetails.brand ?? ""}
+          onChangeText={newBrand => setItemDetails(
+            {...itemDetails, brand: newBrand}
+          )}
+        />
+        <TextInput
+          label="Model"
+          mode="outlined"
+          autoCorrect={false}
+          style={styles.short_text_input}
+          value={itemDetails.model ?? ""}
+          onChangeText={newModel => setItemDetails({...itemDetails, model: newModel})}
+        />
+        <TextInput
+          label="Repair Notes"
+          mode="outlined"
+          autoCorrect={false}
+          style={styles.short_text_input}
+          value={itemDetails.repairNotes ?? ""}
+          onChangeText={newNotes => setItemDetails({...itemDetails, repairNotes: newNotes})}
+        />
+        {
+          repairerList.length > 0 &&
+          <View
+            style={{marginTop: 5, width: '100%', maxWidth: 500}}
+          >
+            <DropDown
+              label={"Repairer"}
+              mode="outlined"
+              visible={showRepairerDropdown}
+              showDropDown={() => setShowRepairerDropdown(true)}
+              onDismiss={() => setShowRepairerDropdown(false)}
+              value={repairerIdx}
+              setValue={setRepairerIdx}
+              list={repairerList}
+              dropdownPosition={"top"}
             />
           </View>
-          <TextInput
-            label={
-                <Text style={{color: '#717171'}}>{"Symptoms "}
-                  <Text style={{color: 'red'}}>*</Text>
-                </Text>
-            }
+        }
+        <View
+          style={{marginTop: 10, width: '100%'}}
+        >
+          <DropDown
+            label={"Repair Status"}
             mode="outlined"
-            autoCorrect={false}
-            style={styles.short_text_input}
-            value={itemDetails.symptoms ?? ""}
-            onChangeText={newSymptoms => setItemDetails(
-              {...itemDetails, symptoms: newSymptoms}
-            )}
+            visible={showStatusDropdown}
+            showDropDown={() => setShowStatusDropdown(true)}
+            onDismiss={() => setShowStatusDropdown(false)}
+            value={statusIdx}
+            setValue={setStatusIdx}
+            list={ordsRepairStatusList}
+            dropdownPosition={"top"}
+            renderRightIcon={false}
           />
-          <TextInput
-            label={
-                <Text style={{color: '#717171'}}>{`Weight (${WEIGHT_UNITS})`}
-                  <Text style={{color: 'red'}}>*</Text>
-                </Text>
-            }
-            mode="outlined"
-            autoCorrect={false}
-            style={styles.short_text_input}
-            value={itemDetails.weight ?? ""}
-            onChangeText={newWeight => setItemDetails(
-              {...itemDetails, weight: newWeight}
-            )}
-          />
-          <TextInput
-            label={
-                <Text style={{color: '#717171'}}>{`Cost (${COST_UNITS})`}
-                  <Text style={{color: 'red'}}>*</Text>
-                </Text>
-            }
-            mode="outlined"
-            autoCorrect={false}
-            style={styles.short_text_input}
-            value={itemDetails.cost ?? ""}
-            onChangeText={newCost => setItemDetails(
-              {...itemDetails, cost: newCost}
-            )}
-          />
-          <TextInput
-            label="Brand"
-            mode="outlined"
-            autoCorrect={false}
-            style={styles.short_text_input}
-            value={itemDetails.brand ?? ""}
-            onChangeText={newBrand => setItemDetails(
-              {...itemDetails, brand: newBrand}
-            )}
-          />
-          <TextInput
-            label="Model"
-            mode="outlined"
-            autoCorrect={false}
-            style={styles.short_text_input}
-            value={itemDetails.model ?? ""}
-            onChangeText={newModel => setItemDetails({...itemDetails, model: newModel})}
-          />
-          <TextInput
-            label="Repair Notes"
-            mode="outlined"
-            autoCorrect={false}
-            style={styles.short_text_input}
-            value={itemDetails.repairNotes ?? ""}
-            onChangeText={newNotes => setItemDetails({...itemDetails, repairNotes: newNotes})}
-          />
-          {
-            repairerList.length > 0 &&
-            <View
-              style={{marginTop: 5, width: '100%', maxWidth: 500}}
-            >
-              <DropDown
-                label={"Repairer"}
-                mode="outlined"
-                visible={showRepairerDropdown}
-                showDropDown={() => setShowRepairerDropdown(true)}
-                onDismiss={() => setShowRepairerDropdown(false)}
-                value={repairerIdx}
-                setValue={setRepairerIdx}
-                list={repairerList}
-                dropdownPosition={"top"}
-              />
-            </View>
-          }
+        </View>
+        { statusIdx >= 0 && ordsRepairStatusList[statusIdx].label === 'End of life' &&
           <View
             style={{marginTop: 10, width: '100%'}}
           >
             <DropDown
-              label={"Repair Status"}
+              label={"Repair Barrier"}
               mode="outlined"
-              visible={showStatusDropdown}
-              showDropDown={() => setShowStatusDropdown(true)}
-              onDismiss={() => setShowStatusDropdown(false)}
-              value={statusIdx}
-              setValue={setStatusIdx}
-              list={ordsRepairStatusList}
+              visible={showBarrierDropdown}
+              showDropDown={() => setShowBarrierDropdown(true)}
+              onDismiss={() => setShowBarrierDropdown(false)}
+              value={barrierIdx}
+              setValue={setBarrierIdx}
+              list={ordsRepairBarrierList}
               dropdownPosition={"top"}
               renderRightIcon={false}
             />
           </View>
-          { statusIdx >= 0 && ordsRepairStatusList[statusIdx].label === 'End of life' &&
-            <View
-              style={{marginTop: 10, width: '100%'}}
-            >
-              <DropDown
-                label={"Repair Barrier"}
-                mode="outlined"
-                visible={showBarrierDropdown}
-                showDropDown={() => setShowBarrierDropdown(true)}
-                onDismiss={() => setShowBarrierDropdown(false)}
-                value={barrierIdx}
-                setValue={setBarrierIdx}
-                list={ordsRepairBarrierList}
-                dropdownPosition={"top"}
-                renderRightIcon={false}
-              />
-            </View>
-          }
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: "space-evenly",
-              alignItems: "center",
-              marginBottom: 15
-            }}
-          >
-            { !!itemDetails._id &&
-              <SubmitButton
-                style={styles.deleteButton}
-                rippleColor="rgba(168,37,33,0.4)"
-                text="Delete"
-                onPress={() => {
-                  setShowDeleteConfirmationDialog(true);
-                }}
-              />
-            }
+        }
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: "space-evenly",
+            alignItems: "center",
+            marginBottom: 15
+          }}
+        >
+          { !!itemDetails._id &&
             <SubmitButton
-              text="Save"
-              style={{marginHorizontal: 10}}
+              style={styles.deleteButton}
+              rippleColor="rgba(168,37,33,0.4)"
+              text="Delete"
               onPress={() => {
-                saveItem(itemDetails)
+                setShowDeleteConfirmationDialog(true);
               }}
             />
-          </View>
-
+          }
+          <SubmitButton
+            text="Save"
+            style={{marginHorizontal: 10}}
+            onPress={() => {
+              saveItem(itemDetails)
+            }}
+          />
         </View>
-      </ScrollView>
+      </View>
 
       { termsModalVisible &&
         <View
@@ -569,7 +570,6 @@ const AddEditRepair = ({route, navigation}) => {
             height: '70vh',
             maxWidth: '80vw',
             minWidth: 320,
-            backgroundColor: '#f2f2f2'
           }}
         >
           <Text
@@ -582,7 +582,7 @@ const AddEditRepair = ({route, navigation}) => {
           >
             {"Close"}
           </Text>
-          <Terms />
+          <Terms/>
         </View>
       }
 

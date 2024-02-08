@@ -20,14 +20,14 @@
     "ios": {
       "icon": "./assets/ios-icon.png",
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.RepairCafeMobile"
+      "bundleIdentifier": "org.tucsonrepaircafe.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/trc-logo-transparent.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "org.trc.app"
+      "package": "org.tucsonrepaircafe.app"
     },
     "web": {
       "favicon": "./favicon.png",

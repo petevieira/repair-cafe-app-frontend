@@ -62,7 +62,7 @@ export default StyleSheet.create({
   },
   submitButton: {
     marginTop: 20,
-    marginHorizontal: 20,
+    // marginHorizontal: 20,
     backgroundColor: '#246fb0',
     borderColor: '#1a5385',
   },

@@ -62,7 +62,7 @@ const Repairs = () => {
     <>
       <View style={styles.content}>
         <Text style={{textAlign: "center"}}>({todaysDate})</Text>
-        <DataTable style={{flex: 6}}>
+        <DataTable>
           <DataTable.Header>
             <DataTable.Title>#</DataTable.Title>
             <DataTable.Title>Item</DataTable.Title>

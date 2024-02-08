@@ -341,6 +341,8 @@ const AddEditRepair = ({route, navigation}) => {
                 <Text style={{color: 'red'}}>*</Text>
               </Text>
           }
+          autoComplete={false}
+          inputMode={"email"}
           mode="outlined"
           autoCorrect={false}
           style={styles.short_text_input}
@@ -428,6 +430,7 @@ const AddEditRepair = ({route, navigation}) => {
                 <Text style={{color: 'red'}}>*</Text>
               </Text>
           }
+          inputMode={"numeric"}
           mode="outlined"
           autoCorrect={false}
           style={styles.short_text_input}
@@ -443,6 +446,7 @@ const AddEditRepair = ({route, navigation}) => {
               </Text>
           }
           mode="outlined"
+          inputMode={"numeric"}
           autoCorrect={false}
           style={styles.short_text_input}
           value={itemDetails.cost ?? ""}

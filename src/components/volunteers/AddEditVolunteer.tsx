@@ -146,8 +146,6 @@ const AddEditVolunteer = ({route, navigation}) => {
     }
   }, []);
 
-  // Today's date
-  const today = format(new Date(), "MMMM do, yyyy");
   // Component's view
   return (
     <KeyboardAvoidingView
@@ -162,6 +160,8 @@ const AddEditVolunteer = ({route, navigation}) => {
         <TextInput
           label={<><Text style={{color: '#717171'}}>Email</Text><Text style={{color: 'red'}}>*</Text></>}
           mode="outlined"
+          inputMode={"email"}
+          autoComplete={false}
           autoCorrect={false}
           style={styles.short_text_input}
           value={volunteer.email}

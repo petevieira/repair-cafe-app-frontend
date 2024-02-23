@@ -1,8 +1,9 @@
 import { useState, useContext, useCallback } from 'react';
-import { View, ScrollView, SafeAreaView } from 'react-native';
+import { View, ScrollView, SafeAreaView, SectionList } from 'react-native';
 import { Button, TextInput, Text, DataTable, FAB } from 'react-native-paper';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { format } from "date-fns";
+import { RepairStatusValues } from '../../globals/ords';
 
 import Nav from "../../globals/Nav"
 import SubmitButton from "../../globals/SubmitButton"
@@ -12,8 +13,21 @@ import Item from '../../models/Item';
 import { useAuth } from '../../contexts/auth-context';
 import { Config } from '../../consts/app.consts';
 
+/**
+ * {
+ *   'In Queue': 0,
+ *   'In Progress': 1,
+ *   ...
+ * }
+ */
+const orderedRepairStatuses = {}
+RepairStatusValues.forEach((el, idx) => {
+  orderedRepairStatuses[el] = idx;
+});
+
 const Repairs = () => {
   const [items, setItems] = useState([]);
+  const [sectionData, setSectionData] = useState([]);
   const {
     authToken, setAuthToken,
     isLoggedIn, setIsLoggedIn,
@@ -26,11 +40,49 @@ const Repairs = () => {
   // Today's date
   const todaysDate = format(new Date(), "MMMM do, yyyy");
 
+  const sortItems = (items) => {
+    let listSections = [
+      // { title: string, data: [object] },
+      // ...
+    ];
+
+    const sortedItems = items.sort((a, b) => {
+      if (orderedRepairStatuses[a.repairStatus] < orderedRepairStatuses[b.repairStatus]) {
+        return -1;
+      } else if (orderedRepairStatuses[a.repairStatus] > orderedRepairStatuses[b.repairStatus]) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+
+    sortedItems.forEach((el, idx) => {
+      let foundSection = false
+      for (let i=0; i < listSections.length; i++) {
+        if (listSections[i].title === el.repairStatus) {
+          foundSection;
+          break;
+        }
+      }
+      if (!foundSection) {
+        // Add section with empty data array
+        listSections.push({ title: el.repairStatus, data: []});
+      }
+      listSections[orderedRepairStatuses[el.repairStatus]].data.push(el);
+    });
+
+    setSectionData(listSections);
+  }
+
   const getItems = async () => {
     setShowLoader(true);
     try {
       const response = await getTodaysItems();
       setItems(response.data.items);
+      console.debug("items: ", response.data.items);
+      if (response.data.items.length) {
+        sortItems(response.data.items);
+      }
       setShowLoader(false);
     } catch (error) {
       console.error(error);
@@ -69,28 +121,44 @@ const Repairs = () => {
       >
       <View style={styles.content}>
         <Text style={{textAlign: "center"}}>({todaysDate})</Text>
-        <DataTable>
-          <DataTable.Header>
-            <DataTable.Title>#</DataTable.Title>
-            <DataTable.Title>Item</DataTable.Title>
-            <DataTable.Title>Owner</DataTable.Title>
-            <DataTable.Title>Repairer</DataTable.Title>
-            <DataTable.Title>Status</DataTable.Title>
-          </DataTable.Header>
-
-          {items.map((item, idx) => (
-            <DataTable.Row
-              key={item._id}
-              onPress={isLoggedIn ? (() => itemPressed(item)) : undefined}
-            >
+            {/*onPress={isLoggedIn ? (() => itemPressed(item)) : undefined}
               <DataTable.Cell>{idx+1}</DataTable.Cell>
               <DataTable.Cell>{item.type}</DataTable.Cell>
               <DataTable.Cell>{item.ownersFirstName} {item.ownersLastName}</DataTable.Cell>
               <DataTable.Cell>{item.repairerFirstName} {item.repairerLastName}</DataTable.Cell>
-              <DataTable.Cell>{item.repairStatus}</DataTable.Cell>
-            </DataTable.Row>
-          ))}
-        </DataTable>
+              <DataTable.Cell>{item.repairStatus}</DataTable.Cell>*/}
+        <View style={{flexDirection: 'row', marginBottom: 10}} onPress={isLoggedIn ? (() => itemPressed(item)) : undefined}>
+          <Text style={{flex: 1, fontSize: 18, fontWeight: 'bold'}}>#</Text>
+          <Text style={{flex: 4, fontSize: 18, fontWeight: 'bold'}}>Type</Text>
+          <Text style={{flex: 4, fontSize: 18, fontWeight: 'bold'}}>Owner</Text>
+          <Text style={{flex: 4, fontSize: 18, fontWeight: 'bold'}}>Repairer</Text>
+        </View>
+        <SectionList
+          sections={sectionData}
+          stickySectionHeadersEnabled={true}
+          keyExtractor={(item, index) => index}
+          renderItem={({item, index}) => {
+            return (
+              <View
+                style={{flex: 1, flexDirection: 'row', marginVertical: 5}}
+                onPress={() => {itemPressed(item)}}
+              >
+                <Text style={{flex: 1, fontSize: 16}}>{index}</Text>
+                <Text style={{flex: 4, fontSize: 16}}>{item.type}</Text>
+                <Text style={{flex: 4, fontSize: 16}}>{item.ownersFirstName} {item.ownersLastName}</Text>
+                <Text style={{flex: 4, fontSize: 16}}>{item.repairerFirstName} { item.repairerLastName}</Text>
+              </View>
+            )
+          }}
+          renderSectionHeader={({section}) => {
+            return (
+              <> { section.data.length &&
+                <Text style={{backgroundColor: '#cacaca', paddingVertical: 4, fontWeight: '500', textAlign: 'center', width: '100%', fontSize: 20}}>{section.title}</Text>
+              }
+              </>
+            )
+          }}
+        />
         { repairsRetrieved && items.length <= 0 &&
           <Text
             style={{

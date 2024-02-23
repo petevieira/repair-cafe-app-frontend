@@ -63,6 +63,10 @@ const Repairs = () => {
 
   return (
     <>
+      <ScrollView
+        contentContainerStyle={styles.topScrollView}
+        style={{backgroundColor: '#f2f2f2'}}
+      >
       <View style={styles.content}>
         <Text style={{textAlign: "center"}}>({todaysDate})</Text>
         <DataTable>
@@ -96,17 +100,18 @@ const Repairs = () => {
           </Text>
         }
       </View>
+      </ScrollView>
       { isLoggedIn &&
-        <SafeAreaView>
-          <View>
+        // <SafeAreaView>
+          // <View>
           <FAB
             icon="plus"
             style={styles.fab}
             animated={false}
             onPress={addItemPressed}
           />
-          </View>
-        </SafeAreaView>
+          // </View>
+        // </SafeAreaView>
       }
     </>
   )

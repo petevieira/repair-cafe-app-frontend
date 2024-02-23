@@ -30,12 +30,17 @@ const About = () => {
   }, []);
 
   return (
+    <ScrollView
+      contentContainerStyle={styles.topScrollView}
+      style={{backgroundColor: '#f2f2f2'}}
+    >
     <View style={[styles.content, { paddingHorizontal: 10 }]}>
       <HTMLView
         stylesheet={styles.html}
         value={aboutText}
       />
     </View>
+    </ScrollView>
   )
 }
 

@@ -153,7 +153,7 @@ export default StyleSheet.create({
     color: '#717171',
   },
   fab: {
-    position: 'fixed',
+    position: 'absolute',
     margin: 16,
     right: '5%',
     bottom: 10,

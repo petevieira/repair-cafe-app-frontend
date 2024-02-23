@@ -3,18 +3,18 @@
   "version": "1.0.0",
   "scripts": {
     "start": "expo start --dev-client",
-    "android": "npm run start --android",
-    "ios": "npm run start --ios",
-    "web": "npm run start --web",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
     "build:web": "npx expo export:web",
     "ts:check": "tsc"
   },
   "engines": {
-    "node": "20.11.0"
+    "node": "20.11.1"
   },
   "dependencies": {
     "@expo/metro-config": "^0.17.3",
-    "@expo/metro-runtime": "~3.1.1",
+    "@expo/metro-runtime": "~3.1.3",
     "@react-native-async-storage/async-storage": "1.21.0",
     "@react-navigation/elements": "^1.3.21",
     "@react-navigation/native": "^6.1.9",
@@ -24,7 +24,7 @@
     "crypto-browserify": "^3.12.0",
     "date-fns": "^2.29.3",
     "dotenv": "^16.4.1",
-    "expo": "~50.0.6",
+    "expo": "~50.0.7",
     "expo-splash-screen": "^0.26.4",
     "expo-status-bar": "~1.11.1",
     "react": "18.2.0",

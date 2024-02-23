@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect, useContext, useRef } from 'react';
-import { View, Platform, KeyboardAvoidingView } from 'react-native';
+import { View, ScrollView, Platform, KeyboardAvoidingView } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { HelperText, TextInput } from 'react-native-paper';
 
@@ -48,6 +48,10 @@ const Login = ({navigation}) => {
         setShowLoader(true);
         try {
           const response = await UserRequests.userIsAdmin(email);
+          console.debug("response: ", response);
+          if (!response.status) {
+            throw new Error("Unknown error");
+          }
           setShowPasswordInput(true);
           // Checking here maybe b/c it's a race condition for it to load first?
           setShowLoader(false);
@@ -112,63 +116,66 @@ const Login = ({navigation}) => {
 
   // Component's view
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    <ScrollView
+      contentContainerStyle={styles.topScrollView}
+      style={{backgroundColor: '#f2f2f2'}}
     >
-      <View
-        style={styles.container}
-        accessibilityRole="form"
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <View
-          style={styles.content}>
-          <TextInput
-            label="Admin Email"
-            mode={enableEmail ? "outlined" : "outlined (disabled)"}
-            autoCorrect={false}
-            style={styles.short_text_input}
-            value={email}
-            inputMode={"email"}
-            autoFocus={true}
-            editable={enableEmail}
-            onPress={() => {setEnableEmail(true)}}
-            onFocus={() => {
-              setEmailsBlurred(false);
-              setEnableEmail(true);
-            }}
-            onBlur={() => {
-              setEmailsValid(emailIsValid());
-              setEmailsBlurred(true);
-            }}
-            ref={emailInputRef}
-            onChangeText={email => setEmail(email.trim().toLowerCase())}
-          />
-          <HelperText type="error" visible={emailsBlurred && !emailsValid}>
-            Please enter a valid email.
-          </HelperText>
-          {showPasswordInput &&
-            <>
-              <TextInput
-                label="Admin Password"
-                mode="outlined"
-                secureTextEntry={true}
-                autoCorrect={false}
-                style={styles.short_text_input}
-                value={password}
-                ref={pwdInputRef}
-                onChangeText={
-                  password => setPassword(password.trim().toLowerCase())
-                }
-              />
-            </>
-          }
-          <SubmitButton
-            onPress={() => {handleSubmit()}}
-          />
+          style={styles.container}
+        >
+          <View
+            style={styles.content}>
+            <TextInput
+              label="Admin Email"
+              mode={enableEmail ? "outlined" : "outlined (disabled)"}
+              autoCorrect={false}
+              style={styles.short_text_input}
+              value={email}
+              inputMode={"email"}
+              autoFocus={true}
+              editable={enableEmail}
+              onPress={() => {setEnableEmail(true)}}
+              onFocus={() => {
+                setEmailsBlurred(false);
+                setEnableEmail(true);
+              }}
+              onBlur={() => {
+                setEmailsValid(emailIsValid());
+                setEmailsBlurred(true);
+              }}
+              ref={emailInputRef}
+              onChangeText={email => setEmail(email.trim().toLowerCase())}
+            />
+            <HelperText type="error" visible={emailsBlurred && !emailsValid}>
+              Please enter a valid email.
+            </HelperText>
+            {showPasswordInput &&
+              <>
+                <TextInput
+                  label="Admin Password"
+                  mode="outlined"
+                  secureTextEntry={true}
+                  autoCorrect={false}
+                  style={styles.short_text_input}
+                  value={password}
+                  ref={pwdInputRef}
+                  onChangeText={
+                    password => setPassword(password.trim().toLowerCase())
+                  }
+                />
+              </>
+            }
+            <SubmitButton
+              onPress={() => {handleSubmit()}}
+            />
+          </View>
         </View>
-      </View>
 
-    </KeyboardAvoidingView>
-
+      </KeyboardAvoidingView>
+    </ScrollView>
   );
 
 };

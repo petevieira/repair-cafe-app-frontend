@@ -64,6 +64,10 @@ const Volunteers = () => {
 
   return (
     <>
+      <ScrollView
+        contentContainerStyle={styles.topScrollView}
+        style={{backgroundColor: '#f2f2f2'}}
+      >
       <View style={styles.content}>
         <Text style={{textAlign: "center"}}>({todaysDate})</Text>
         <DataTable>
@@ -91,6 +95,7 @@ const Volunteers = () => {
           </Text>
         }
       </View>
+      </ScrollView>
       { isLoggedIn &&
         <FAB
           icon="plus"

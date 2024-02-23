@@ -34,12 +34,12 @@ const RootNavigation = () => {
       }}
     >
       <Nav routeName={routeName}/>
-      <ScrollView
+{/*      <ScrollView
         contentContainerStyle={styles.topScrollView}
         style={{backgroundColor: '#f2f2f2'}}
-      >
+      >*/}
         <ScreensNav/>
-      </ScrollView>
+      {/*</ScrollView>*/}
       <BottomTabs routeName={routeName}/>
       <Loader/>
       <Portal>

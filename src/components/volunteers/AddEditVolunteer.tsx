@@ -157,142 +157,147 @@ const AddEditVolunteer = ({route, navigation}) => {
 
   // Component's view
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    <ScrollView
+      contentContainerStyle={styles.topScrollView}
+      style={{backgroundColor: '#f2f2f2'}}
     >
-      <View style = {styles.content}>
-        <Text
-          style={{ fontWeight: 'bold', fontSize: 22, alignSelf: 'center' }}>
-          {"Volunteer"}
-        </Text>
-
-        <TextInput
-          label={<><Text style={{color: '#717171'}}>Email</Text><Text style={{color: 'red'}}>*</Text></>}
-          mode="outlined"
-          inputMode={"email"}
-          autoComplete={false}
-          autoCorrect={false}
-          style={styles.short_text_input}
-          value={volunteer.email}
-          onBlur={onEmailBlur}
-          ref={emailInputRef}
-          onChangeText={newEmail => setVolunteer(
-            {...volunteer, email: newEmail.trim()}
-          )}
-        />
-
-        <TextInput
-          label={<><Text style={{color: '#717171'}}>First name</Text><Text style={{color: 'red'}}>*</Text></>}
-          mode="outlined"
-          autoCorrect={false}
-          style={styles.short_text_input}
-          value={volunteer.firstName}
-          onChangeText={newFirstName => setVolunteer({...volunteer, firstName: newFirstName.trim()})}
-        />
-
-        <TextInput
-          label={<><Text style={{color: '#717171'}}>Last name</Text><Text style={{color: 'red'}}>*</Text></>}
-          mode="outlined"
-          autoCorrect={false}
-          style={styles.short_text_input}
-          value={volunteer.lastName}
-          onChangeText={newLastName => setVolunteer({...volunteer, lastName: newLastName.trim()})}
-        />
-
-        <CheckBox
-          label={<Text>I agree to the <Text style={{color: "blue"}} onPress={() => {
-            setTermsModalVisible(true);
-          }}>terms and conditions</Text><Text style={{color: 'red'}}>*</Text></Text>}
-          status={waiverBoxChecked ? 'checked' : 'unchecked'}
-          onPress={async () => {
-            setVolunteer({...volunteer, acceptsWaiver: !waiverBoxChecked});
-            setWaiverBoxChecked(!waiverBoxChecked);
-          }}
-        />
-
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: "space-evently",
-            alignItems: "center",
-            marginBottom: 15,
-            alignSelf: 'center'
-          }}
-        >
-          { !!volunteer._id &&
-            <SubmitButton
-              style={styles.deleteButton}
-              rippleColor="rgba(168,37,33,0.4)"
-              text="Delete"
-              onPress={() => {
-                setShowDeleteConfirmationDialog(true);
-              }}
-            />
-          }
-
-          <SubmitButton
-            text="Save"
-            onPress={() => {
-              addSaveVolunteer(volunteer);
-            }}
-          >
-          </SubmitButton>
-        </View>
-      </View>
-
-      { termsModalVisible &&
-        <View
-          style={{
-            position: 'absolute',
-            top: 5,
-            left: '50%',
-            transform: [{translateX: '-50%'}],
-            height: '70vh',
-            maxWidth: '80vw',
-            minWidth: 320,
-            backgroundColor: '#f2f2f2'
-          }}
-        >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <View style={styles.content}>
           <Text
-            onPress={() => { setTermsModalVisible(false) }}
+            style={{ fontWeight: 'bold', fontSize: 22, alignSelf: 'center' }}>
+            {"Volunteer"}
+          </Text>
+
+          <TextInput
+            label={<><Text style={{color: '#717171'}}>Email</Text><Text style={{color: 'red'}}>*</Text></>}
+            mode="outlined"
+            inputMode={"email"}
+            autoComplete={false}
+            autoCorrect={false}
+            style={styles.short_text_input}
+            value={volunteer.email}
+            onBlur={onEmailBlur}
+            ref={emailInputRef}
+            onChangeText={newEmail => setVolunteer(
+              {...volunteer, email: newEmail.trim()}
+            )}
+          />
+
+          <TextInput
+            label={<><Text style={{color: '#717171'}}>First name</Text><Text style={{color: 'red'}}>*</Text></>}
+            mode="outlined"
+            autoCorrect={false}
+            style={styles.short_text_input}
+            value={volunteer.firstName}
+            onChangeText={newFirstName => setVolunteer({...volunteer, firstName: newFirstName.trim()})}
+          />
+
+          <TextInput
+            label={<><Text style={{color: '#717171'}}>Last name</Text><Text style={{color: 'red'}}>*</Text></>}
+            mode="outlined"
+            autoCorrect={false}
+            style={styles.short_text_input}
+            value={volunteer.lastName}
+            onChangeText={newLastName => setVolunteer({...volunteer, lastName: newLastName.trim()})}
+          />
+
+          <CheckBox
+            label={<Text>I agree to the <Text style={{color: "blue"}} onPress={() => {
+              setTermsModalVisible(true);
+            }}>terms and conditions</Text><Text style={{color: 'red'}}>*</Text></Text>}
+            status={waiverBoxChecked ? 'checked' : 'unchecked'}
+            onPress={async () => {
+              setVolunteer({...volunteer, acceptsWaiver: !waiverBoxChecked});
+              setWaiverBoxChecked(!waiverBoxChecked);
+            }}
+          />
+
+          <View
             style={{
-              fontSize: 22,
-              marginLeft: 'auto',
-              paddingRight: 5,
+              flexDirection: 'row',
+              justifyContent: "space-evently",
+              alignItems: "center",
+              marginBottom: 15,
+              alignSelf: 'center'
             }}
           >
-            {"Close"}
-          </Text>
-          <Terms />
-        </View>
-      }
+            { !!volunteer._id &&
+              <SubmitButton
+                style={styles.deleteButton}
+                rippleColor="rgba(168,37,33,0.4)"
+                text="Delete"
+                onPress={() => {
+                  setShowDeleteConfirmationDialog(true);
+                }}
+              />
+            }
 
-      <Portal>
-        <Dialog
-          style={{
-            minWidth: 320, maxWidth: 738, alignSelf: 'center'
-          }}
-          visible={showDeleteConfirmationDialog}
-          onDismiss={() => { setShowDeleteConfirmationDialog(false) }}
-        >
-          <Dialog.Title>Alert</Dialog.Title>
-          <Dialog.Content>
-            <Text>Are you sure you want to delete {volunteer.firstName} {volunteer.lastName}</Text>
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={() => {setShowDeleteConfirmationDialog(false)}}>Cancel</Button>
-            <Button
+            <SubmitButton
+              text="Save"
               onPress={() => {
-                deleteCurrentVolunteer(volunteer);
-                setShowDeleteConfirmationDialog(false);
+                addSaveVolunteer(volunteer);
               }}
-              labelStyle={{color: 'red'}}
-            >Delete</Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
+            >
+            </SubmitButton>
+          </View>
+        </View>
 
-    </KeyboardAvoidingView>
+        { termsModalVisible &&
+          <View
+            style={{
+              position: 'absolute',
+              top: 5,
+              left: '50%',
+              transform: [{translateX: '-50%'}],
+              height: '70vh',
+              maxWidth: '80vw',
+              minWidth: 320,
+              backgroundColor: '#f2f2f2'
+            }}
+          >
+            <Text
+              onPress={() => { setTermsModalVisible(false) }}
+              style={{
+                fontSize: 22,
+                marginLeft: 'auto',
+                paddingRight: 5,
+              }}
+            >
+              {"Close"}
+            </Text>
+            <Terms />
+          </View>
+        }
+
+        <Portal>
+          <Dialog
+            style={{
+              minWidth: 320, maxWidth: 738, alignSelf: 'center'
+            }}
+            visible={showDeleteConfirmationDialog}
+            onDismiss={() => { setShowDeleteConfirmationDialog(false) }}
+          >
+            <Dialog.Title>Alert</Dialog.Title>
+            <Dialog.Content>
+              <Text>Are you sure you want to delete {volunteer.firstName} {volunteer.lastName}</Text>
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button onPress={() => {setShowDeleteConfirmationDialog(false)}}>Cancel</Button>
+              <Button
+                onPress={() => {
+                  deleteCurrentVolunteer(volunteer);
+                  setShowDeleteConfirmationDialog(false);
+                }}
+                labelStyle={{color: 'red'}}
+              >Delete</Button>
+            </Dialog.Actions>
+          </Dialog>
+        </Portal>
+
+      </KeyboardAvoidingView>
+    </ScrollView>
   );
 
 };

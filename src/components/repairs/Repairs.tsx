@@ -71,11 +71,11 @@ const Repairs = () => {
         <Text style={{textAlign: "center"}}>({todaysDate})</Text>
         <DataTable>
           <DataTable.Header>
-            <DataTable.Title>#</DataTable.Title>
-            <DataTable.Title>Item</DataTable.Title>
-            <DataTable.Title>Owner</DataTable.Title>
-            <DataTable.Title>Repairer</DataTable.Title>
-            <DataTable.Title>Status</DataTable.Title>
+            <DataTable.Title style={{flex: 1}}>#</DataTable.Title>
+            <DataTable.Title style={{flex: 4}}>Item</DataTable.Title>
+            <DataTable.Title style={{flex: 4}}>Owner</DataTable.Title>
+            <DataTable.Title style={{flex: 4}}>Repairer</DataTable.Title>
+            <DataTable.Title style={{flex: 4}}>Status</DataTable.Title>
           </DataTable.Header>
 
           {items.map((item, idx) => (
@@ -83,11 +83,11 @@ const Repairs = () => {
               key={item._id}
               onPress={isLoggedIn ? (() => itemPressed(item)) : undefined}
             >
-              <DataTable.Cell>{idx+1}</DataTable.Cell>
-              <DataTable.Cell>{item.type}</DataTable.Cell>
-              <DataTable.Cell>{item.ownersFirstName} {item.ownersLastName}</DataTable.Cell>
-              <DataTable.Cell>{item.repairerFirstName} {item.repairerLastName}</DataTable.Cell>
-              <DataTable.Cell>{item.repairStatus}</DataTable.Cell>
+              <DataTable.Cell style={{flex: 1}}>{idx+1}</DataTable.Cell>
+              <DataTable.Cell style={{flex: 4}}>{item.type}</DataTable.Cell>
+              <DataTable.Cell style={{flex: 4}}>{item.ownersFirstName} {item.ownersLastName}</DataTable.Cell>
+              <DataTable.Cell style={{flex: 4}}>{item.repairerFirstName} {item.repairerLastName}</DataTable.Cell>
+              <DataTable.Cell style={{flex: 4}}>{item.repairStatus}</DataTable.Cell>
             </DataTable.Row>
           ))}
         </DataTable>

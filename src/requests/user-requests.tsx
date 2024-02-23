@@ -6,7 +6,6 @@ import axios from 'axios';
 import Api from './request-consts';
 
 const userIsAdmin = async (email) => {
-  console.debug("api: ", Api.Users.USER_IS_ADMIN);
   return await axios.get(Api.Users.USER_IS_ADMIN + `/${email}`);
 }
 

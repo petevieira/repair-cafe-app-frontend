@@ -22,8 +22,7 @@ const App = () => {
     >
       <StatusBar hidden/>
       <AuthProvider>
-
-          <SafeAreaView style={{flex: 0, backgroundColor: 'white'}}/>
+        <SafeAreaView style={{flex: 0, backgroundColor: 'white'}}/>
         <SafeAreaView style={{flex: 1, backgroundColor: '#96db73'}}>
           <RootNavigation/>
         </SafeAreaView>

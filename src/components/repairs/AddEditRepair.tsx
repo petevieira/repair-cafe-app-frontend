@@ -405,7 +405,7 @@ const AddEditRepair = ({route, navigation}) => {
               </Text>
             </View>
             <Dropdown
-              style={[styles.dropdown, productCategoryFocused && {borderWidth: 2}]}
+              style={[styles.dropdown, productCategoryFocused && {borderWidth: 1}]}
               placeholderStyle={styles.placeholderStyle}
               selectedTextStyle={styles.selectedTextStyle}
               inputSearchStyle={styles.inputSearchStyle}
@@ -498,36 +498,59 @@ const AddEditRepair = ({route, navigation}) => {
           />
           {
             repairerList.length > 0 &&
-            <View
-              style={{marginTop: 5, width: '100%', maxWidth: 500}}
-            >
-              <DropDown
-                label={"Repairer"}
-                mode="outlined"
-                visible={showRepairerDropdown}
-                showDropDown={() => setShowRepairerDropdown(true)}
-                onDismiss={() => setShowRepairerDropdown(false)}
-                value={repairerIdx}
-                setValue={setRepairerIdx}
-                list={repairerList}
-                dropdownPosition={"top"}
-              />
-            </View>
+              <View style={styles.dropdownContainer}>
+                <View style={[styles.label]}>
+                  <Text style={{color: '#717171'}}>
+                    Repairer
+                    <Text style={{color: 'red'}}>*</Text>
+                  </Text>
+                </View>
+                <Dropdown
+                  placeholder={"Select repairer"}
+                  value={repairerIdx}
+                  data={repairerList}
+                  style={[styles.dropdown, showStatusDropdown && {borderWidth: 1}]}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  inputSearchStyle={styles.inputSearchStyle}
+                  itemTextStyle={styles.itemTextStyle}
+                  iconStyle={styles.iconStyle}
+                  maxHeight={300}
+                  labelField="label"
+                  valueField="value"
+                  onFocus={() => setShowRepairerDropdown(true)}
+                  onBlur={() => setShowRepairerDropdown(false)}
+                  onChange={v => {
+                    setRepairerIdx(v.value);
+                  }}
+                />
+              </View>
           }
-          <View
-            style={{marginTop: 10, width: '100%'}}
-          >
-            <DropDown
-              label={"Repair Status"}
-              mode="outlined"
-              visible={showStatusDropdown}
-              showDropDown={() => setShowStatusDropdown(true)}
-              onDismiss={() => setShowStatusDropdown(false)}
+          <View style={styles.dropdownContainer}>
+            <View style={[styles.label]}>
+              <Text style={{color: '#717171'}}>
+                Repair Status
+                <Text style={{color: 'red'}}>*</Text>
+              </Text>
+            </View>
+            <Dropdown
+              placeholder={"Repair Status"}
               value={statusIdx}
-              setValue={setStatusIdx}
-              list={ordsRepairStatusList}
-              dropdownPosition={"top"}
-              renderRightIcon={false}
+              data={ordsRepairStatusList}
+              style={[styles.dropdown, showStatusDropdown && {borderWidth: 1}]}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              inputSearchStyle={styles.inputSearchStyle}
+              itemTextStyle={styles.itemTextStyle}
+              iconStyle={styles.iconStyle}
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              onFocus={() => setShowStatusDropdown(true)}
+              onBlur={() => setShowStatusDropdown(false)}
+              onChange={v => {
+                setStatusIdx(v.value);
+              }}
             />
           </View>
           { statusIdx >= 0 && ordsRepairStatusList[statusIdx].label === 'End of life' &&

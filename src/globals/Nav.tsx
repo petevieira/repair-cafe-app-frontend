@@ -6,6 +6,7 @@ import styles from './Styles';
 import AsyncStorageHelpers from '../globals/async-storage-helpers';
 import { useAuth } from '../contexts/auth-context';
 import { useNavigation } from '@react-navigation/native';
+import { useFonts } from 'expo-font';
 
 const Nav = (props) => {
   const [menuVisible, setMenuVisible] = useState(false);
@@ -18,6 +19,15 @@ const Nav = (props) => {
   } = useAuth();
   const navigation = useNavigation();
   let routeName = props.routeName;
+
+  const [fontsLoaded, fontError] = useFonts({
+    'Salsa-Regular': require('../../assets/fonts/Salsa-Regular.ttf'),
+    'jempolfreak': require('../../assets/fonts/jempolfreak.ttf'),
+    'Aquifer': require('../../assets/fonts/Aquifer.ttf'),
+    'HandTIMES': require('../../assets/fonts/HandTIMES.ttf'),
+  });
+
+  const titleFont = 'HandTIMES';
 
   const title = routeName;
 
@@ -83,8 +93,8 @@ const Nav = (props) => {
               }}
             />
           </View>
-          <View style={{alignText: 'center'}}>
-            <Text style={styles.appBarTitle}>
+          <View style={{alignText: 'center', justifyContent: 'center'}}>
+            <Text style={[styles.appBarTitle, {fontFamily: titleFont}]}>
               {title}
             </Text>
           </View>
@@ -95,7 +105,7 @@ const Nav = (props) => {
               width={60}
               icon={Platform.OS === 'ios' ? 'dots-horizontal' : 'dots-vertical'}
               onPress={openMenu}
-              style={{flex: 1, width: 60}}
+              style={{width: 60}}
             />
           </View>
           <Menu

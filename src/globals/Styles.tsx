@@ -1,4 +1,12 @@
-import { StyleSheet, Dimensions } from "react-native";
+import { StyleSheet, Platform, Dimensions } from "react-native";
+
+let mainFont = 'Futura';
+if (Platform.OS === 'ios') {
+  mainFont = 'system font';
+} else if (Platform.OS === 'android') {
+  mainFont = 'system font';
+}
+let titleFont = 'Salsa-Regular';
 
 export default StyleSheet.create({
   appBar: {
@@ -10,12 +18,12 @@ export default StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-evenly',
+    alignContent: 'center',
+    justifyItems: 'center',
   },
   appBarTitle: {
-    fontFamily: 'Futura',
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    flex: 1,
   },
   logo: {
     height: 60,
@@ -42,6 +50,7 @@ export default StyleSheet.create({
   },
   content: {
     flex: 1,
+    width: '100%',
     maxWidth: 738,
     minWidth: 320,
     paddingTop: 10,
@@ -59,7 +68,9 @@ export default StyleSheet.create({
     margin: 20,
   },
   short_text_input: {
-    marginVertical: 5
+    marginVertical: 5,
+    flex: 1,
+    backgroundColor: 'white',
   },
   submitButton: {
     marginTop: 20,
@@ -107,40 +118,43 @@ export default StyleSheet.create({
     paddingHorizontal: 8,
     fontSize: 14,
     color: '#717171',
-    fontFamily: 'Futura',
+    fontFamily: mainFont,
   },
   dropdownContainer: {
     paddingTop: 16,
     paddingBottom: 5,
     width: "100%",
-    maxWidth: 500,
+    flex: 1,
   },
   dropdown: {
     backgroundColor: 'white',
     color: '#717171',
     height: 50,
-    borderColor: 'gray',
+    flex: 1,
+    borderColor: 'black',
     borderWidth: 0.5,
     borderRadius: 8,
     paddingHorizontal: 8,
-    fontFamily: 'Futura',
+    fontFamily: mainFont,
   },
   icon: {
     marginRight: 5,
   },
   placeholderStyle: {
     fontSize: 16,
-    color: '#717171',
-    fontFamily: 'Futura',
+    color: '#49454f',
+    fontFamily: mainFont,
+    marginLeft: 5,
   },
   selectedTextStyle: {
     fontSize: 16,
-    fontFamily: 'Futura',
-    color: 'black',
+    fontFamily: mainFont,
+    color: '#1c1b1f',
+    marginLeft: 5,
   },
   itemTextStyle: {
     fontSize: 16,
-    fontFamily: 'Futura',
+    fontFamily: mainFont,
     color: '#717171',
   },
   iconStyle: {
@@ -150,7 +164,7 @@ export default StyleSheet.create({
   inputSearchStyle: {
     height: 40,
     fontSize: 16,
-    fontFamily: 'Futura',
+    fontFamily: mainFont,
     color: '#717171',
   },
   fab: {

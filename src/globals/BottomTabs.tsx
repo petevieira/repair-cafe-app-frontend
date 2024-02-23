@@ -19,13 +19,13 @@ export const Tab = ({ name, text, handlePress, screenName, routeName }) => {
         name={name}
         size={25}
         style={{
+          borderRadius: 20,
           marginBottom: 3,
           alignSelf: "center",
           color: 'black',
           backgroundColor: isActiveScreen ? '#80b963' : 'rgba(0,0,0,0)',
           paddingVertical: 5,
           paddingHorizontal: 15,
-          borderRadius: 20
         }}
       />
       <Text

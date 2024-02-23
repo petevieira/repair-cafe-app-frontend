@@ -165,10 +165,6 @@ const AddEditVolunteer = ({route, navigation}) => {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <View style={styles.content}>
-          <Text
-            style={{ fontWeight: 'bold', fontSize: 22, alignSelf: 'center' }}>
-            {"Volunteer"}
-          </Text>
 
           <TextInput
             label={<><Text style={{color: '#717171'}}>Email</Text><Text style={{color: 'red'}}>*</Text></>}

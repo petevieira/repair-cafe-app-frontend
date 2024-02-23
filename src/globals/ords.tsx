@@ -163,6 +163,7 @@ export const ProductCategoryValues = [
 
 export const RepairStatusValues = [
   "In Queue",
+  "In Progress",
   "Fixed",
   "Repairable",
   "End of life",

@@ -37,6 +37,19 @@
       "eas": {
         "projectId": "0238b59e-a034-4777-88e8-769b0635713f"
       }
-    }
+    },
+    "plugins": [
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Salsa-Regular.ttf",
+            "./assets/fonts/jempolfreak.ttf",
+            "./assets/fonts/Aquifer.ttf",
+            "./assets/fonts/HandTIMES.ttf"
+          ]
+        }
+      ]
+    ]
   }
 }

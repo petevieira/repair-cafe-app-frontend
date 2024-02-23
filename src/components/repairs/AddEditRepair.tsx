@@ -357,7 +357,7 @@ const AddEditRepair = ({route, navigation}) => {
                   <Text style={{color: 'red'}}>*</Text>
                 </Text>
             }
-            autoComplete={false}
+            autoComplete={"off"}
             inputMode={"email"}
             mode="outlined"
             autoCorrect={false}
@@ -450,7 +450,7 @@ const AddEditRepair = ({route, navigation}) => {
             mode="outlined"
             autoCorrect={false}
             style={styles.short_text_input}
-            value={itemDetails.weight ?? ""}
+            value={itemDetails.weight ? itemDetails.weight.toString() : ""}
             onChangeText={newWeight => setItemDetails(
               {...itemDetails, weight: newWeight}
             )}
@@ -465,7 +465,7 @@ const AddEditRepair = ({route, navigation}) => {
             inputMode={"decimal"}
             autoCorrect={false}
             style={styles.short_text_input}
-            value={itemDetails.cost ?? ""}
+            value={itemDetails.cost ? itemDetails.cost.toString() : ""}
             onChangeText={newCost => setItemDetails(
               {...itemDetails, cost: newCost}
             )}

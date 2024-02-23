@@ -45,6 +45,7 @@ export default StyleSheet.create({
     maxWidth: 738,
     minWidth: 320,
     paddingTop: 10,
+    paddingHorizontal: 10,
     marginHorizontal: 'auto',
   },
   home_buttons: {

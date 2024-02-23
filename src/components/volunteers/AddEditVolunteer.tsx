@@ -174,7 +174,7 @@ const AddEditVolunteer = ({route, navigation}) => {
             label={<><Text style={{color: '#717171'}}>Email</Text><Text style={{color: 'red'}}>*</Text></>}
             mode="outlined"
             inputMode={"email"}
-            autoComplete={false}
+            autoComplete={"off"}
             autoCorrect={false}
             style={styles.short_text_input}
             value={volunteer.email}

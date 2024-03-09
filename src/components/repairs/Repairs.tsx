@@ -4,6 +4,8 @@ import { Button, TextInput, Text, DataTable, FAB } from 'react-native-paper';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { format } from "date-fns";
 import { RepairStatusValues } from '../../globals/ords';
+import { NestableScrollContainer, NestableDraggableFlatList } from "react-native-draggable-flatlist"
+import DraggableFlatList from 'react-native-draggable-flatlist'
 
 import Nav from "../../globals/Nav"
 import SubmitButton from "../../globals/SubmitButton"
@@ -52,7 +54,14 @@ const Repairs = () => {
       } else if (orderedRepairStatuses[a.repairStatus] > orderedRepairStatuses[b.repairStatus]) {
         return 1;
       } else {
-        return 0;
+        // Same status. Check order number
+        if (a.orderNumber < b.orderNumber) {
+          return -1;
+        } else if (a.orderNumber > b.orderNumber) {
+          return 1;
+        } else {
+          return 0;
+        }
       }
     });
 
@@ -113,6 +122,14 @@ const Repairs = () => {
     },[])
   );
 
+  type DraggableItem = {
+    key: string;
+    label: string;
+    height: number;
+    width: number;
+    backgroundColor: string;
+  };
+
   return (
     <>
       <ScrollView
@@ -133,6 +150,23 @@ const Repairs = () => {
           <Text style={{flex: 4, fontSize: 18, fontWeight: 'bold'}}>Owner</Text>
           <Text style={{flex: 4, fontSize: 18, fontWeight: 'bold'}}>Repairer</Text>
         </View>
+
+        <DraggableFlatList
+          data={data}
+          onDragEnd={({ data }) => setData(data)}
+          keyExtractor={(item) => item.key}
+          renderItem={({ item, drag, isActive }): RenderItemParams<DraggableItem> => {
+            return (
+              <TouchableOpacity>
+                <Text style={{flex: 1, fontSize: 16}}>{index}</Text>
+                <Text style={{flex: 4, fontSize: 16}}>{item.type}</Text>
+                <Text style={{flex: 4, fontSize: 16}}>{item.ownersFirstName} {item.ownersLastName}</Text>
+                <Text style={{flex: 4, fontSize: 16}}>{item.repairerFirstName} { item.repairerLastName}</Text>
+              </TouchableOpacity>
+            );
+          }}
+        />
+
         <SectionList
           sections={sectionData}
           stickySectionHeadersEnabled={true}

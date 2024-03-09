@@ -313,8 +313,6 @@ const AddEditRepair = ({route, navigation}) => {
     }
   }, [volunteers, itemDetails]);
 
-
-
   // Component's view
   return (
     <ScrollView
@@ -324,7 +322,6 @@ const AddEditRepair = ({route, navigation}) => {
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-
         <View style={styles.content}>
           <Text
             style={{
@@ -333,24 +330,6 @@ const AddEditRepair = ({route, navigation}) => {
               alignSelf: 'center'
             }}>{pageTitle}
           </Text>
-          <CheckBox
-          style={{alignSelf: 'center'}}
-            label={
-              <Text>{"I agree to the "}
-                <Text style={{color: "blue"}}
-                  onPress={() => {
-                    setTermsModalVisible(true);
-                  }}
-                >{"terms and conditions"}</Text>
-                <Text style={{color: 'red'}}>*</Text>
-              </Text>
-            }
-            status={waiverBoxChecked ? 'checked' : 'unchecked'}
-            onPress={() => {
-              setItemDetails({...itemDetails, acceptsWaiver: !waiverBoxChecked});
-              setWaiverBoxChecked(!waiverBoxChecked);
-            }}
-          />
           <TextInput
             label={
                 <Text style={{color: '#717171'}}>{"Owner's email "}
@@ -571,6 +550,24 @@ const AddEditRepair = ({route, navigation}) => {
               />
             </View>
           }
+          <CheckBox
+            style={{alignSelf: 'center'}}
+            label={
+              <Text>{"Item owner agrees to the "}
+                <Text style={{color: "blue"}}
+                  onPress={() => {
+                    setTermsModalVisible(true);
+                  }}
+                >{"terms and conditions"}</Text>
+                <Text style={{color: 'red'}}>*</Text>
+              </Text>
+            }
+            status={waiverBoxChecked ? 'checked' : 'unchecked'}
+            onPress={() => {
+              setItemDetails({...itemDetails, acceptsWaiver: !waiverBoxChecked});
+              setWaiverBoxChecked(!waiverBoxChecked);
+            }}
+          />
           <View
             style={{
               flexDirection: 'row',

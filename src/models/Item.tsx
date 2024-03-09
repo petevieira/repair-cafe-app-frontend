@@ -1,6 +1,7 @@
 class Item {
   _id: string;
   acceptsWaiver: boolean;
+  orderNumber: number;
   ownersFirstName: string;
   ownersLastName: string;
   ownersEmail: string;
@@ -19,6 +20,7 @@ class Item {
   constructor(
     id: string = "",
     acceptsWaiver: boolean = false,
+    orderNumber: number,
     ownersFirstName: string = "",
     ownersLastName: string = "",
     ownersEmail: string,
@@ -36,6 +38,7 @@ class Item {
   ) {
     this._id = id;
     this.acceptsWaiver = acceptsWaiver;
+    this.orderNumber = orderNumber;
     this.ownersEmail = ownersEmail;
     this.ownersFirstName = ownersFirstName;
     this.ownersLastName = ownersLastName;

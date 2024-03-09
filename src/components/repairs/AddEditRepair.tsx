@@ -68,7 +68,7 @@ const AddEditRepair = ({route, navigation}) => {
   const itemOkToSave = (item): boolean => {
     let msg = "";
     if (!waiverBoxChecked) {
-      msg = "Please agree to the terms at the top";
+      msg = "Please agree to the terms";
     } else if (!item.ownersEmail) {
       msg = "Please enter the owner's email";
     } else if (!emailIsValid(item.ownersEmail)) {
@@ -304,8 +304,8 @@ const AddEditRepair = ({route, navigation}) => {
 
   useEffect(() => {
     volunteers.forEach((v, idx) => {
-      if (v.firstName === itemDetails.repairerFirstName
-        && v.lastName === itemDetails.repairerLastName
+      if (v.firstName.toLowerCase() === itemDetails.repairerFirstName.toLowerCase()
+        && v.lastName.toLowerCase() === itemDetails.repairerLastName.toLowerCase()
       ) {
         setRepairerIdx(idx);
       }

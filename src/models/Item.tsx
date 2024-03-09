@@ -4,6 +4,7 @@ class Item {
   ownersFirstName: string;
   ownersLastName: string;
   ownersEmail: string;
+  product: string;
   type: string;
   brand: string;
   model: string;
@@ -22,6 +23,7 @@ class Item {
     ownersFirstName: string = "",
     ownersLastName: string = "",
     ownersEmail: string,
+    product: string = "",
     type: string = "",
     brand: string = "",
     model: string = "",
@@ -39,6 +41,7 @@ class Item {
     this.ownersEmail = ownersEmail;
     this.ownersFirstName = ownersFirstName;
     this.ownersLastName = ownersLastName;
+    this.product = product;
     this.type = type;
     this.brand = brand;
     this.model = model;

@@ -77,6 +77,8 @@ const AddEditRepair = ({route, navigation}) => {
       msg = "Please enter the owner's first name";
     } else if (!item.ownersLastName) {
       msg = "Please enter the owner's last name";
+    } else if (!item.product) {
+      msg = "Please enter the product";
     } else if (!item.type) {
       msg = "Please select a product category";
     } else if (!item.symptoms) {
@@ -333,24 +335,7 @@ const AddEditRepair = ({route, navigation}) => {
               alignSelf: 'center'
             }}>{pageTitle}
           </Text>
-          <CheckBox
-          style={{alignSelf: 'center'}}
-            label={
-              <Text>{"I agree to the "}
-                <Text style={{color: "blue"}}
-                  onPress={() => {
-                    setTermsModalVisible(true);
-                  }}
-                >{"terms and conditions"}</Text>
-                <Text style={{color: 'red'}}>*</Text>
-              </Text>
-            }
-            status={waiverBoxChecked ? 'checked' : 'unchecked'}
-            onPress={() => {
-              setItemDetails({...itemDetails, acceptsWaiver: !waiverBoxChecked});
-              setWaiverBoxChecked(!waiverBoxChecked);
-            }}
-          />
+
           <TextInput
             label={
                 <Text style={{color: '#717171'}}>{"Owner's email "}
@@ -397,6 +382,22 @@ const AddEditRepair = ({route, navigation}) => {
               {...itemDetails, ownersLastName: newLastName}
             )}
           />
+          <TextInput
+            label={
+              <Text style={{color: '#717171'}}>{"Product"}
+                <Text style={{color: 'red'}}>*</Text>
+              </Text>
+            }
+            mode="outlined"
+            autoCorrect={false}
+            style={styles.short_text_input}
+            value={itemDetails.product ?? ""}
+            onChangeText={newProduct => setItemDetails(
+              {...itemDetails, product: newProduct}
+            )}
+            placeholder="Vacuum / Toaster / Pants / ..."
+            placeholderTextColor={'#717171'}
+          />
           <View style={styles.dropdownContainer}>
             <View style={[styles.label]}>
               <Text style={{color: '#717171'}}>
@@ -427,6 +428,28 @@ const AddEditRepair = ({route, navigation}) => {
             />
           </View>
           <TextInput
+            label="Brand"
+            mode="outlined"
+            autoCorrect={false}
+            style={styles.short_text_input}
+            value={itemDetails.brand ?? ""}
+            onChangeText={newBrand => setItemDetails(
+              {...itemDetails, brand: newBrand}
+            )}
+            placeholder="Sony / Philips / Unknown / n.a."
+            placeholderTextColor={'#717171'}
+          />
+          <TextInput
+            label="Model"
+            mode="outlined"
+            autoCorrect={false}
+            style={styles.short_text_input}
+            value={itemDetails.model ?? ""}
+            onChangeText={newModel => setItemDetails({...itemDetails, model: newModel})}
+            placeholder="Senseo HD 7850 / iPhone 15 / ..."
+            placeholderTextColor={'#717171'}
+          />
+          <TextInput
             label={
                 <Text style={{color: '#717171'}}>{"Symptoms "}
                   <Text style={{color: 'red'}}>*</Text>
@@ -439,6 +462,8 @@ const AddEditRepair = ({route, navigation}) => {
             onChangeText={newSymptoms => setItemDetails(
               {...itemDetails, symptoms: newSymptoms}
             )}
+            placeholder="Doesn't turn on / no sound / won't heat / ..."
+            placeholderTextColor={'#717171'}
           />
           <TextInput
             label={
@@ -471,30 +496,14 @@ const AddEditRepair = ({route, navigation}) => {
             )}
           />
           <TextInput
-            label="Brand"
-            mode="outlined"
-            autoCorrect={false}
-            style={styles.short_text_input}
-            value={itemDetails.brand ?? ""}
-            onChangeText={newBrand => setItemDetails(
-              {...itemDetails, brand: newBrand}
-            )}
-          />
-          <TextInput
-            label="Model"
-            mode="outlined"
-            autoCorrect={false}
-            style={styles.short_text_input}
-            value={itemDetails.model ?? ""}
-            onChangeText={newModel => setItemDetails({...itemDetails, model: newModel})}
-          />
-          <TextInput
             label="Repair Notes"
             mode="outlined"
             autoCorrect={false}
             style={styles.short_text_input}
             value={itemDetails.repairNotes ?? ""}
             onChangeText={newNotes => setItemDetails({...itemDetails, repairNotes: newNotes})}
+            placeholder="Fuse was blown. Replaced. / Soldered severed wire / ..."
+            placeholderTextColor={'#717171'}
           />
           {
             repairerList.length > 0 &&
@@ -571,6 +580,25 @@ const AddEditRepair = ({route, navigation}) => {
               />
             </View>
           }
+          <CheckBox
+            style={{alignSelf: 'center'}}
+            label={
+              <Text>{"Item owner agrees to the "}
+                <Text style={{color: "blue"}}
+                  onPress={() => {
+                    setTermsModalVisible(true);
+                  }}
+                >{"terms and conditions"}</Text>
+                <Text>?</Text>
+                <Text style={{color: 'red'}}>*</Text>
+              </Text>
+            }
+            status={waiverBoxChecked ? 'checked' : 'unchecked'}
+            onPress={() => {
+              setItemDetails({...itemDetails, acceptsWaiver: !waiverBoxChecked});
+              setWaiverBoxChecked(!waiverBoxChecked);
+            }}
+          />
           <View
             style={{
               flexDirection: 'row',

@@ -112,6 +112,7 @@ const createItem = (item: Item) => {
     ownersEmail: item.ownersEmail ?? "",
     ownersFirstName: item.ownersFirstName ?? "",
     ownersLastName: item.ownersLastName ?? "",
+    product: item.product ?? "",
     type: item.type ?? "",
     brand: item.brand ?? "",
     model: item.model ?? "",

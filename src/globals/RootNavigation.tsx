@@ -1,15 +1,33 @@
 import { useEffect, useState, useRef } from 'react';
 import { navigationRef } from './navigation-ref';
-import { ScrollView, View } from 'react-native';
 import { useAuth } from 'contexts/auth-context';
 import { Portal, Snackbar} from 'react-native-paper';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RouteProp } from '@react-navigation/native';
 
-// import { AuthProvider } from '../contexts/auth-context';
 import ScreensNav from 'globals/ScreensNav';
 import BottomTabs from 'globals/BottomTabs';
 import Loader from 'globals/Loader';
 import styles from 'globals/Styles';
 import Nav from 'globals/Nav';
+import Item from 'models/Item';
+import Volunteer from 'models/Volunteer';
+
+// Define the type for your app's screen names and params
+export type RootStackParamList = {
+    "Home": undefined;
+    "Repairs": undefined;
+    "Add/Edit Repair": { item: Item };
+    "Volunteer Login": undefined;
+    "Add/Edit Volunteer": { volunteer: Volunteer };
+    "About": undefined;
+};
+
+// Type for navigation prop
+export type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
+// Type for route prop
+export type RouteProps<T extends keyof RootStackParamList> = RouteProp<RootStackParamList, T>;
 
 /**
  * A component that wraps the ScreensNav stack navigator in an
@@ -38,24 +56,24 @@ const RootNavigation = () => {
 
     return (
         <>
-        <Nav routeName={routeName}/>
-        <ScreensNav/>
-        <BottomTabs routeName={routeName}/>
-        <Loader/>
-        <Portal>
-        <Snackbar
-        duration={2000}
-        style={styles.snackbar}
-        visible={!!snackbarMsg}
-        onDismiss={() => {
-            setSnackbarMsg("");
-        }}
-        action={{
-            label: "Close"
-        }}
-        >{snackbarMsg}
-        </Snackbar>
-        </Portal>
+            <Nav routeName={routeName}/>
+            <ScreensNav/>
+            <BottomTabs routeName={routeName}/>
+            <Loader/>
+            <Portal>
+                <Snackbar
+                    duration={2000}
+                    style={styles.snackbar}
+                    visible={!!snackbarMsg}
+                    onDismiss={() => {
+                        setSnackbarMsg("");
+                    }}
+                    action={{
+                        label: "Close"
+                    }}
+                    >{snackbarMsg}
+                </Snackbar>
+            </Portal>
         </>
     );
 }

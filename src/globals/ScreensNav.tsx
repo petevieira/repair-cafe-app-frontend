@@ -28,53 +28,53 @@ const ScreensNav = (props) => {
             headerShown: false
         }}
         >
-        {isLoggedIn ? (
-            </* Screens that require authentication */>
-            <Stack.Screen
-            name="Repairs"
-            component={Repairs}
-            />
-            <Stack.Screen
-            name="Volunteers"
-            component={Volunteers}
-            />
-            <Stack.Screen
-            name="Add/Edit Repair"
-            component={AddEditRepair}
-            />
-            <Stack.Screen
-            name="Add/Edit Volunteer"
-            component={AddEditVolunteer}
-            />
-            <Stack.Screen
-            name="About"
-            component={About}
-            />
-            <Stack.Screen
-            name="Volunteer Login"
-            component={Login}
-            />
-            </>
-        ) : (
-            </* Screens that don't require authentication */>
-            <Stack.Screen
-            name="Volunteer Login"
-            component={Login}
-            />
-            <Stack.Screen
-            name="Repairs"
-            component={Repairs}
-            />
-            <Stack.Screen
-            name="Volunteers"
-            component={Volunteers}
-            />
-            <Stack.Screen
-            name="About"
-            component={About}
-            />
-            </>
-        )}
+            {isLoggedIn ? (
+                </* Screens that require authentication */>
+                    <Stack.Screen
+                        name="Repairs"
+                        component={Repairs}
+                    />
+                    <Stack.Screen
+                        name="Volunteers"
+                        component={Volunteers}
+                    />
+                    <Stack.Screen
+                        name="Add/Edit Repair"
+                        component={AddEditRepair}
+                    />
+                    <Stack.Screen
+                        name="Add/Edit Volunteer"
+                        component={AddEditVolunteer}
+                    />
+                    <Stack.Screen
+                        name="About"
+                        component={About}
+                    />
+                    <Stack.Screen
+                        name="Volunteer Login"
+                        component={Login}
+                    />
+                </>
+            ) : (
+                </* Screens that don't require authentication */>
+                    <Stack.Screen
+                        name="Volunteer Login"
+                        component={Login}
+                    />
+                    <Stack.Screen
+                        name="Repairs"
+                        component={Repairs}
+                    />
+                    <Stack.Screen
+                        name="Volunteers"
+                        component={Volunteers}
+                    />
+                    <Stack.Screen
+                        name="About"
+                        component={About}
+                    />
+                </>
+            )}
         </Stack.Navigator>
     );
 }

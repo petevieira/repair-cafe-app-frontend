@@ -16,13 +16,14 @@ class Item {
     repairBarrier: string;
     weight: string;
     cost: string;
+    isFollowUpRepair: boolean;
 
     constructor(
         id: string = "",
         acceptsWaiver: boolean = false,
         ownersFirstName: string = "",
         ownersLastName: string = "",
-        ownersEmail: string,
+        ownersEmail: string = "",
         product: string = "",
         type: string = "",
         brand: string = "",
@@ -35,6 +36,7 @@ class Item {
         repairBarrier: string = "TBD",
         weight: string = "",
         cost: string = "",
+        isFollowUpRepair: boolean = false
     ) {
         this._id = id;
         this.acceptsWaiver = acceptsWaiver;
@@ -53,6 +55,7 @@ class Item {
         this.repairBarrier = repairBarrier;
         this.weight = weight;
         this.cost = cost;
+        this.isFollowUpRepair = isFollowUpRepair;
     }
 };
 

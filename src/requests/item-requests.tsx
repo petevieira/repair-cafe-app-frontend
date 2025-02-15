@@ -90,6 +90,7 @@ const createItem = (item: Item) => {
         repairStatus: item.repairStatus ?? "",
         repairBarrier: item.repairBarrier ?? "",
         weight: item.weight ?? WEIGHT_UNITS,
-        cost: item.cost ?? COST_UNITS
+        cost: item.cost ?? COST_UNITS,
+        isFollowUpRepair: item.isFollowUpRepair ?? false
     };
 };

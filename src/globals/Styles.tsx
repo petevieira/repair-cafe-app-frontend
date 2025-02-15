@@ -19,7 +19,6 @@ export default StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-evenly',
         alignContent: 'center',
-        justifyItems: 'center',
     },
     appBarTitle: {
         fontSize: 28,

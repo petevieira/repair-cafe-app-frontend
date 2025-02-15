@@ -48,7 +48,6 @@ const Login = ({navigation}) => {
                 setShowLoader(true);
                 try {
                     const response = await UserRequests.userIsAdmin(email);
-                    console.debug("response: ", response);
                     if (!response.status) {
                         throw new Error("Unknown error");
                     }

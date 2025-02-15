@@ -44,7 +44,6 @@ export default function BottomTabs(props) {
     let routeName = props.routeName;
 
     useEffect(() => {
-        console.debug("isLoggedIn: ", isLoggedIn);
     }, [isLoggedIn]);
 
     return (
@@ -70,26 +69,22 @@ export default function BottomTabs(props) {
             screenName={"Volunteer Login"}
             />
         }
-        { isLoggedIn &&
-            <Tab
-            text="Repairs"
-            name="tools"
-            style={styles.bottomTab}
-            handlePress={() => navigation.navigate("Repairs")}
-            screenName="Repairs"
-            routeName={routeName}
-            />
-        }
-        { isLoggedIn &&
-            <Tab
-            text="Volunteers"
-            name="users"
-            style={styles.bottomTab}
-            handlePress={() => navigation.navigate("Volunteers")}
-            screenName="Volunteers"
-            routeName={routeName}
-            />
-        }
+        <Tab
+        text="Repairs"
+        name="tools"
+        style={styles.bottomTab}
+        handlePress={() => navigation.navigate("Repairs")}
+        screenName="Repairs"
+        routeName={routeName}
+        />
+        <Tab
+        text="Volunteers"
+        name="users"
+        style={styles.bottomTab}
+        handlePress={() => navigation.navigate("Volunteers")}
+        screenName="Volunteers"
+        routeName={routeName}
+        />
         </View>
         </>
     );

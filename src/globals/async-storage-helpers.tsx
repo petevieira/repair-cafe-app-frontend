@@ -16,17 +16,22 @@ const storeAuth = async (data) => {
 
 const getAuth = async () => {
     try {
-        const data = JSON.parse(
-            await AsyncStorage.getItem(StorageConsts.AUTH)
-        );
-        console.log('data: ', data);
-        if (!data || data === '' || !data.user || !data.token) {
-            throw new Error(`No ${StorageConsts.AUTH} in AsyncStorage`);
+        const storedData = await AsyncStorage.getItem(StorageConsts.AUTH);
+
+        if (!storedData) {
+            return null;
         }
+
+        const data = JSON.parse(storedData);
+
+        if (!data || typeof data !== 'object' || !data.user || !data.token) {
+            return null
+        }
+
         return data;
     } catch (error) {
         console.error(error);
-        return Promise.reject(error);
+        return null;
     }
 }
 

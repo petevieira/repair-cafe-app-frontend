@@ -1,11 +1,12 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import axios from "axios";
 import AsyncStorage from "globals/async-storage-helpers";
-import jwt_decode, { jwtDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { navigate } from "globals/navigation-ref";
 
 // Track the Axios Interceptor ID globally
-let globalInterceptor: number;
+let globalInterceptor: any;
+const tokenCheckIntervalMs = 1000 * 5; // 5 seconds
 
 // Create a Context object.
 // When React renders a component that subscribes to this Context object it
@@ -42,23 +43,37 @@ const AuthProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        if (!authToken) {
-            axios.defaults.headers.common['Authorization'] = '';
-        } else {
-            axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
-        }
+        const interval = setInterval(async () => {
+            const data = await AsyncStorage.getAuth();
+            if (!data || !data.token || tokenIsExpired(data.token)) {
+                if (isLoggedIn) {
+                    console.log("Token expired or missing - logging out");
+                    logOut();
+                }
+            }
+        }, tokenCheckIntervalMs);
+
+        return () => clearInterval(interval);
     }, [authToken])
 
-    const configureAxios = () => {
+    const configureAxios = (token: string) => {
         axios.defaults.baseURL = "";
 
         // Remove any existing interceptors before adding a new one
-        axios.interceptors.request.eject(globalInterceptor);
+        if (globalInterceptor !== null) {
+            axios.interceptors.response.eject(globalInterceptor);
+        }
+
+        if (token) {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        } else {
+            axios.defaults.headers.common['Authorization'] = '';
+        }
 
         // Handle expired token or 401 Unauthorized error
         globalInterceptor = axios.interceptors.response.use(
             async function (response) {
-                // If response is valid, return it to final destination
+                // Response is valid. Return it to final destination.
                 return response.data;
             },
             async function (error) {
@@ -69,7 +84,8 @@ const AuthProvider = ({ children }) => {
                 // If there's an error, remove the auth if unauthorized
                 // and return to the sign-in page.
                 let res = error.response;
-                if (res.status === 401 && res.config && !res.config.__isRetryRequest) {
+                if (res.status === 401 && res.config && !res.config?.__isRetryRequest) {
+                    // 401 Unauthorized - Log user out.
                     await logOut();
                 } else {
                     if (error.response?.data?.msg) {
@@ -84,7 +100,6 @@ const AuthProvider = ({ children }) => {
                 }
             }
         );
-        console.debug("Axios configured with ID ", globalInterceptor);
     }
 
     const tokenIsExpired = (token: string) => {
@@ -102,15 +117,9 @@ const AuthProvider = ({ children }) => {
 
     // Retrieve the auth token from AsyncStorage
     const loadFromAsyncStorage = async () => {
-        console.debug("loadFromAsyncStorage");
         try {
             let data = await AsyncStorage.getAuth();
-            if (!data) {
-                await logOut();
-                return;
-            }
-
-            if (tokenIsExpired(data.token)) {
+            if (!data || !data.token || tokenIsExpired(data.token)) {
                 await logOut();
                 return;
             }
@@ -122,23 +131,22 @@ const AuthProvider = ({ children }) => {
     };
 
     const logOut = async () => {
+        console.log("Logging out user...");
+        await AsyncStorage.storeAuth('');
         setAuthToken(null);
         setIsLoggedIn(false);
-        await AsyncStorage.storeAuth('');
-        navigate("Volunteer Login");
+        // navigate("Volunteer Login");
     }
 
-    // Retrieve auth from storage on first render
+    // Call `configurationAxios(authToken)` whenever `authToken` changes
     useEffect(() => {
-        configureAxios();
+        configureAxios(authToken);
+    }, [authToken]);
+
+    // Load auth token on app start
+    useEffect(() => {
         loadFromAsyncStorage();
     }, []);
-
-    useEffect(() => {
-        if (!authToken || (authToken && tokenIsExpired(authToken))) {
-            logOut();
-        }
-    }, [authToken]);
 
     // Return the auth context provider
     return (

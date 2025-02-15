@@ -17,12 +17,7 @@ export const getItem = async (id: string, signal) => {
     if (!authToken) {
         throw new Error("[getItem] failed to get auth token");
     }
-    return await axios.get(
-        Api.Items.GET_ITEM + `/${id}`,
-        {
-            headers: {'Authorization': `Bearer ${authToken.token}`}
-        }
-    );
+    return await axios.get(Api.Items.GET_ITEM + `/${id}`);
 };
 
 /**
@@ -31,16 +26,10 @@ export const getItem = async (id: string, signal) => {
  * @returns Promise which resolves to the array of items, or rejects
  */
 export const getTodaysItems = async () => {
-    const authToken = await AsyncStorageHelpers.getAuth();
-    if (!authToken) {
-        throw new Error("[getTodaysItems] failed to get auth token");
-    }
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const todayIso = today.toISOString();
-    return await axios.get(
-        Api.Items.GET_ITEMS_BASIC + `/${todayIso}`
-    );
+    return await axios.get(Api.Items.GET_ITEMS_BASIC + `/${todayIso}`);
 }
 
 export const addFullItem = async (item: Item) => {
@@ -48,13 +37,7 @@ export const addFullItem = async (item: Item) => {
     if (!authToken) {
         throw new Error("[addFullItem] failed to get auth token");
     }
-    return await axios.post(
-        Api.Items.ADD_FULL_ITEM,
-        createItem(item),
-        {
-            headers: {'Authorization': `Bearer ${authToken.token}`}
-        }
-    );
+    return await axios.post(Api.Items.ADD_FULL_ITEM, createItem(item));
 }
 
 export const updateItem = async (item: Item) => {
@@ -62,13 +45,7 @@ export const updateItem = async (item: Item) => {
     if (!authToken) {
         throw new Error("[updateItem] failed to get auth token");
     }
-    return await axios.put(
-        Api.Items.UPDATE_ITEM,
-        createItem(item),
-        {
-            headers: {'Authorization': `Bearer ${authToken.token}`}
-        }
-    );
+    return await axios.put(Api.Items.UPDATE_ITEM, createItem(item));
 }
 
 export const deleteItem = async (id: string) => {
@@ -80,14 +57,7 @@ export const deleteItem = async (id: string) => {
     if (!authToken) {
         throw new Error("[deleteItem] failed to get auth token");
     }
-    return await axios.delete(
-        Api.Items.DELETE_ITEM + `/${id}`,
-        {
-            headers: {
-                'Authorization': `Bearer ${authToken.token}`
-            }
-        }
-    );
+    return await axios.delete(Api.Items.DELETE_ITEM + `/${id}`);
 };
 
 export const findOwnerByEmail = async (email: string) => {
@@ -99,14 +69,7 @@ export const findOwnerByEmail = async (email: string) => {
     if (!authToken) {
         throw new Error("[findOwnerByEmail] failed to get auth token");
     }
-    return await axios.get(
-        Api.Items.FIND_OWNER_BY_EMAIL + `/${email}`,
-        {
-            headers: {
-                'Authorization': `Bearer ${authToken.token}`
-            }
-        }
-    );
+    return await axios.get(Api.Items.FIND_OWNER_BY_EMAIL + `/${email}`);
 };
 
 const createItem = (item: Item) => {

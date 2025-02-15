@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { View, Image, SafeAreaView, Platform } from "react-native";
 import { Appbar, Text, Menu, Button } from 'react-native-paper';
 import { getHeaderTitle } from '@react-navigation/elements';
@@ -30,6 +30,9 @@ const Nav = (props) => {
     const titleFont = 'HandTIMES';
 
     const title = routeName;
+
+    useEffect(() => {
+    }, [isLoggedIn]);
 
     const openMenu = (event) => {
         const { nativeEvent } = event;

@@ -12,10 +12,10 @@ import {
 } from 'react-native-paper';
 import { format } from "date-fns";
 // Custom Components
-import Nav from "../../globals/Nav"
-import SubmitButton from "../../globals/SubmitButton"
+import Nav from "globals/Nav"
+import SubmitButton from "globals/SubmitButton"
 // Styles
-import styles from '../../globals/Styles.js'
+import styles from 'globals/Styles.js'
 // Fake data
 
 fakeUserEventsItems.sort((a, b) => (new Date(b.startDatetime)).getTime() - (new Date(a.startDatetime)).getTime());

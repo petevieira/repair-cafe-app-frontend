@@ -49,7 +49,7 @@ class Item {
     this.repairerFirstName = repairerFirstName;
     this.repairerLastName = repairerLastName;
     this.repairNotes = repairNotes;
-    this.repairStatue = repairStatus;
+    this.repairStatus = repairStatus;
     this.repairBarrier = repairBarrier;
     this.weight = weight;
     this.cost = cost;

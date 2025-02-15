@@ -6,18 +6,18 @@ import DropDown from "react-native-paper-dropdown";
 import HTMLView from 'react-native-htmlview';
 import { Dropdown } from 'react-native-element-dropdown';
 
-import Nav from "../../globals/Nav"
-import SubmitButton from "../../globals/SubmitButton"
-import styles from '../../globals/Styles'
-import Item from '../../models/Item';
-import CheckBox from "../../globals/CheckBox"
-import { useAuth } from '../../contexts/auth-context';
-import { getTodaysVolunteers } from '../../requests/volunteer-requests';
-import { addFullItem, getItem, updateItem, deleteItem, findOwnerByEmail } from '../../requests/item-requests';
-import { ProductCategoryValues, RepairStatusValues, RepairBarrierValues} from '../../globals/ords';
-import Terms from '../../globals/Terms';
+import Nav from "globals/Nav"
+import SubmitButton from "globals/SubmitButton"
+import styles from 'globals/Styles'
+import Item from 'models/Item';
+import CheckBox from "globals/CheckBox"
+import { useAuth } from 'contexts/auth-context';
+import { getTodaysVolunteers } from 'requests/volunteer-requests';
+import { addFullItem, getItem, updateItem, deleteItem, findOwnerByEmail } from 'requests/item-requests';
+import { ProductCategoryValues, RepairStatusValues, RepairBarrierValues} from 'globals/ords';
+import Terms from 'globals/Terms';
 import { WEIGHT_UNITS, COST_UNITS } from '@env';
-import { emailIsValid } from '../../lib/helpers';
+import { emailIsValid } from 'lib/helpers';
 
 const ordsProductCategoryList = ProductCategoryValues.map((el, idx) => {
   return { label: el.text, value: idx };

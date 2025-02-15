@@ -6,22 +6,22 @@ import { Button, TextInput, HelperText, Text, Modal, Dialog, Portal
 } from 'react-native-paper';
 import { format } from "date-fns";
 // Custom Components
-import Nav from "../../globals/Nav"
-import SubmitButton from "../../globals/SubmitButton"
-import CheckBox from "../../globals/CheckBox"
+import Nav from "globals/Nav"
+import SubmitButton from "globals/SubmitButton"
+import CheckBox from "globals/CheckBox"
 // Styles
-import styles from '../../globals/Styles'
+import styles from 'globals/Styles'
 // Fake data
 import HTMLView from 'react-native-htmlview';
-import Volunteer from '../../models/Volunteer';
+import Volunteer from 'models/Volunteer';
 import {
   addVolunteer, getVolunteer,
   updateVolunteer, deleteVolunteer, findVolunteerByEmail
-} from '../../requests/volunteer-requests';
-import { useAuth } from '../../contexts/auth-context';
-import Terms from '../../globals/Terms';
+} from 'requests/volunteer-requests';
+import { useAuth } from 'contexts/auth-context';
+import Terms from 'globals/Terms';
 import { Dropdown } from 'react-native-element-dropdown';
-import { emailIsValid } from '../../lib/helpers';
+import { emailIsValid } from 'lib/helpers';
 
 const AddEditVolunteer = ({route, navigation}) => {
   const paramVolunteer = route.params.volunteer;

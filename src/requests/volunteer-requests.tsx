@@ -3,8 +3,8 @@
  */
 
 import axios from 'axios';
-import Api from './request-consts';
-import AsyncStorageHelpers from '../globals/async-storage-helpers';
+import Api from 'requests/request-consts';
+import AsyncStorageHelpers from 'globals/async-storage-helpers';
 
 /**
  * Checks if the passed in email is registered in the database

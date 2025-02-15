@@ -1,6 +1,6 @@
 import { View, Platform } from 'react-native';
 import { Button } from 'react-native-paper';
-import styles from './Styles'
+import styles from 'globals/Styles'
 
 
 const SubmitButton = (props) => {

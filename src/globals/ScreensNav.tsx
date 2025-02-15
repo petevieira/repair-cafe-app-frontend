@@ -1,12 +1,12 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useAuth } from '../contexts/auth-context';
+import { useAuth } from 'contexts/auth-context';
 
-import Login from '../components/login/Login';
-import Repairs from '../components/repairs/Repairs';
-import AddEditRepair from '../components/repairs/AddEditRepair';
-import Volunteers from '../components/volunteers/Volunteers';
-import AddEditVolunteer from '../components/volunteers/AddEditVolunteer';
-import About from '../components/About';
+import Login from 'components/login/Login';
+import Repairs from 'components/repairs/Repairs';
+import AddEditRepair from 'components/repairs/AddEditRepair';
+import Volunteers from 'components/volunteers/Volunteers';
+import AddEditVolunteer from 'components/volunteers/AddEditVolunteer';
+import About from 'components/About';
 
 // Instantiate a stack navigator
 const Stack = createNativeStackNavigator();

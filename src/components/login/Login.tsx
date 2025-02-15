@@ -3,11 +3,11 @@ import { View, ScrollView, Platform, KeyboardAvoidingView } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { HelperText, TextInput } from 'react-native-paper';
 
-import SubmitButton from "../../globals/SubmitButton"
-import styles from '../../globals/Styles'
-import UserRequests from '../../requests/user-requests';
-import { useAuth } from '../../contexts/auth-context';
-import AsyncStorageHelpers from '../../globals/async-storage-helpers';
+import SubmitButton from "globals/SubmitButton"
+import styles from 'globals/Styles'
+import UserRequests from 'requests/user-requests';
+import { useAuth } from 'contexts/auth-context';
+import AsyncStorageHelpers from 'globals/async-storage-helpers';
 
 const Login = ({navigation}) => {
   // State variables

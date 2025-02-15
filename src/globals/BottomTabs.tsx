@@ -5,8 +5,8 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationState } from 'react-navigation';
 
-import styles from './Styles';
-import { useAuth } from '../contexts/auth-context';
+import styles from 'globals/Styles';
+import { useAuth } from 'contexts/auth-context';
 
 export const Tab = ({ name, text, handlePress, screenName, routeName }) => {
   let isActiveScreen = screenName === routeName;
@@ -43,6 +43,10 @@ export default function BottomTabs(props) {
   const navigation = useNavigation();
   let routeName = props.routeName;
 
+  useEffect(() => {
+    console.debug("isLoggedIn: ", isLoggedIn);
+  }, [isLoggedIn]);
+
   return (
     <>
       <View
@@ -66,22 +70,26 @@ export default function BottomTabs(props) {
             screenName={"Volunteer Login"}
           />
         }
-        <Tab
-          text="Repairs"
-          name="tools"
-          style={styles.bottomTab}
-          handlePress={() => navigation.navigate("Repairs")}
-          screenName="Repairs"
-          routeName={routeName}
-        />
-        <Tab
-          text="Volunteers"
-          name="users"
-          style={styles.bottomTab}
-          handlePress={() => navigation.navigate("Volunteers")}
-          screenName="Volunteers"
-          routeName={routeName}
-        />
+        { isLoggedIn &&
+          <Tab
+            text="Repairs"
+            name="tools"
+            style={styles.bottomTab}
+            handlePress={() => navigation.navigate("Repairs")}
+            screenName="Repairs"
+            routeName={routeName}
+          />
+        }
+        { isLoggedIn &&
+          <Tab
+            text="Volunteers"
+            name="users"
+            style={styles.bottomTab}
+            handlePress={() => navigation.navigate("Volunteers")}
+            screenName="Volunteers"
+            routeName={routeName}
+          />
+        }
       </View>
     </>
   );

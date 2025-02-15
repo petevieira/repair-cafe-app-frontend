@@ -2,9 +2,9 @@ import { useState, useEffect, useContext } from 'react';
 import { View, ScrollView } from 'react-native';
 import HTMLView from 'react-native-htmlview';
 
-import styles from '../globals/Styles'
-import { getText } from '../requests/text-requests';
-import { useAuth } from '../contexts/auth-context';
+import styles from 'globals/Styles'
+import { getText } from 'requests/text-requests';
+import { useAuth } from 'contexts/auth-context';
 
 const About = () => {
   const {

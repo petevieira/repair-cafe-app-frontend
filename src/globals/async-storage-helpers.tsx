@@ -19,9 +19,9 @@ const getAuth = async () => {
     const data = JSON.parse(
       await AsyncStorage.getItem(StorageConsts.AUTH)
     );
+    console.log('data: ', data);
     if (!data || data === '' || !data.user || !data.token) {
-      return console.debug(`No ${StorageConsts.AUTH} in AsyncStorage`);
-      return null
+      throw new Error(`No ${StorageConsts.AUTH} in AsyncStorage`);
     }
     return data;
   } catch (error) {

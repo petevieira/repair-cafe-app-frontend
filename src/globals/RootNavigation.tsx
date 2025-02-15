@@ -1,15 +1,15 @@
 import { useEffect, useState, useRef } from 'react';
-import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
+import { navigationRef } from './navigation-ref';
 import { ScrollView, View } from 'react-native';
-import { useAuth } from '../contexts/auth-context';
+import { useAuth } from 'contexts/auth-context';
 import { Portal, Snackbar} from 'react-native-paper';
 
 // import { AuthProvider } from '../contexts/auth-context';
-import ScreensNav from './ScreensNav';
-import BottomTabs from './BottomTabs';
-import Loader from './Loader';
-import styles from './Styles';
-import Nav from './Nav';
+import ScreensNav from 'globals/ScreensNav';
+import BottomTabs from 'globals/BottomTabs';
+import Loader from 'globals/Loader';
+import styles from 'globals/Styles';
+import Nav from 'globals/Nav';
 
 /**
  * A component that wraps the ScreensNav stack navigator in an
@@ -20,26 +20,26 @@ import Nav from './Nav';
 const RootNavigation = () => {
   const { snackbarMsg, setSnackbarMsg } = useAuth();
   const [routeName, setRouteName] = useState('');
-  const navigationRef = createNavigationContainerRef();
+
+  useEffect(() => {
+    const updateRouteName = () => {
+        const currentRoute = navigationRef.getCurrentRoute();
+        if (currentRoute) {
+            setRouteName(currentRoute.name);
+        }
+    }
+
+    const unsubscribe = navigationRef.addListener('state', updateRouteName);
+
+    return () => {
+        unsubscribe();
+    };
+  }, []);
 
   return (
-    <NavigationContainer
-      ref={navigationRef}
-      onReady={() => {
-        setRouteName(navigationRef.getCurrentRoute().name);
-      }}
-      onStateChange={async () => {
-        const currentRouteName = navigationRef.getCurrentRoute().name;
-        setRouteName(currentRouteName);
-      }}
-    >
+    <>
       <Nav routeName={routeName}/>
-{/*      <ScrollView
-        contentContainerStyle={styles.topScrollView}
-        style={{backgroundColor: '#f2f2f2'}}
-      >*/}
-        <ScreensNav/>
-      {/*</ScrollView>*/}
+      <ScreensNav/>
       <BottomTabs routeName={routeName}/>
       <Loader/>
       <Portal>
@@ -56,7 +56,7 @@ const RootNavigation = () => {
         >{snackbarMsg}
         </Snackbar>
       </Portal>
-    </NavigationContainer>
+    </>
   );
 }
 

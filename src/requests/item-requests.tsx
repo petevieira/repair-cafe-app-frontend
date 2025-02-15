@@ -3,9 +3,9 @@
  */
 
 import axios from 'axios';
-import Api from './request-consts';
-import AsyncStorageHelpers from '../globals/async-storage-helpers';
-import Item from '../models/Item';
+import Api from 'requests/request-consts';
+import AsyncStorageHelpers from 'globals/async-storage-helpers';
+import Item from 'models/Item';
 import { WEIGHT_UNITS, COST_UNITS } from '@env';
 
 export const getItem = async (id: string, signal) => {
@@ -13,9 +13,9 @@ export const getItem = async (id: string, signal) => {
     console.error("Can't get item. 'id' not defined");
     return null;
   }
-  const authToken = await AsyncStorageHelpers.getAuth(authToken);
+  const authToken = await AsyncStorageHelpers.getAuth();
   if (!authToken) {
-    throw new Error("[updateItem] failed to get auth token");
+    throw new Error("[getItem] failed to get auth token");
   }
   return await axios.get(
     Api.Items.GET_ITEM + `/${id}`,
@@ -31,6 +31,10 @@ export const getItem = async (id: string, signal) => {
  * @returns Promise which resolves to the array of items, or rejects
  */
 export const getTodaysItems = async () => {
+  const authToken = await AsyncStorageHelpers.getAuth();
+  if (!authToken) {
+    throw new Error("[getTodaysItems] failed to get auth token");
+  }
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const todayIso = today.toISOString();
@@ -40,9 +44,9 @@ export const getTodaysItems = async () => {
 }
 
 export const addFullItem = async (item: Item) => {
-  const authToken = await AsyncStorageHelpers.getAuth(authToken);
+  const authToken = await AsyncStorageHelpers.getAuth();
   if (!authToken) {
-    throw new Error("[updateItem] failed to get auth token");
+    throw new Error("[addFullItem] failed to get auth token");
   }
   return await axios.post(
     Api.Items.ADD_FULL_ITEM,
@@ -54,7 +58,7 @@ export const addFullItem = async (item: Item) => {
 }
 
 export const updateItem = async (item: Item) => {
-  const authToken = await AsyncStorageHelpers.getAuth(authToken);
+  const authToken = await AsyncStorageHelpers.getAuth();
   if (!authToken) {
     throw new Error("[updateItem] failed to get auth token");
   }
@@ -72,7 +76,7 @@ export const deleteItem = async (id: string) => {
     console.error("Can't delete item. 'id' not defined");
     return { status: null };
   }
-  const authToken = await AsyncStorageHelpers.getAuth(authToken);
+  const authToken = await AsyncStorageHelpers.getAuth();
   if (!authToken) {
     throw new Error("[deleteItem] failed to get auth token");
   }
@@ -91,7 +95,7 @@ export const findOwnerByEmail = async (email: string) => {
     console.error("Can't find owner by email. 'email' not defined");
     return { status: false };
   }
-  const authToken = await AsyncStorageHelpers.getAuth(authToken);
+  const authToken = await AsyncStorageHelpers.getAuth();
   if (!authToken) {
     throw new Error("[findOwnerByEmail] failed to get auth token");
   }

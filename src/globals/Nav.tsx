@@ -2,9 +2,9 @@ import { useState, useContext } from "react";
 import { View, Image, SafeAreaView, Platform } from "react-native";
 import { Appbar, Text, Menu, Button } from 'react-native-paper';
 import { getHeaderTitle } from '@react-navigation/elements';
-import styles from './Styles';
-import AsyncStorageHelpers from '../globals/async-storage-helpers';
-import { useAuth } from '../contexts/auth-context';
+import styles from 'globals/Styles';
+import AsyncStorageHelpers from 'globals/async-storage-helpers';
+import { useAuth } from 'contexts/auth-context';
 import { useNavigation } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 

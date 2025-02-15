@@ -4,13 +4,13 @@ import { Button, TextInput, Text, DataTable, FAB } from 'react-native-paper';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { format } from "date-fns";
 
-import Nav from "../../globals/Nav"
-import SubmitButton from "../../globals/SubmitButton"
-import styles from '../../globals/Styles'
-import { getTodaysItems } from '../../requests/item-requests';
-import Item from '../../models/Item';
-import { useAuth } from '../../contexts/auth-context';
-import { Config } from '../../consts/app.consts';
+import Nav from "globals/Nav"
+import SubmitButton from "globals/SubmitButton"
+import styles from 'globals/Styles'
+import { getTodaysItems } from 'requests/item-requests';
+import Item from 'models/Item';
+import { useAuth } from 'contexts/auth-context';
+import { Config } from 'consts/app.consts';
 
 const Repairs = () => {
   const [items, setItems] = useState([]);

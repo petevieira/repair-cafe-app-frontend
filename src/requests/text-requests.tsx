@@ -3,7 +3,7 @@
  */
 
 import axios from 'axios';
-import Api from './request-consts';
+import Api from 'requests/request-consts';
 
 export const getText = async (field: string) => {
   if (!field) {

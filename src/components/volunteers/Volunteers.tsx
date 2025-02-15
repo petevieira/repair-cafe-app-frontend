@@ -4,10 +4,10 @@ import { TextInput, Text, DataTable, FAB } from 'react-native-paper';
 import { format } from "date-fns";
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
-import styles from '../../globals/Styles'
-import { getTodaysVolunteers } from '../../requests/volunteer-requests';
-import Volunteer from '../../models/Volunteer';
-import { useAuth } from '../../contexts/auth-context';
+import styles from 'globals/Styles'
+import { getTodaysVolunteers } from 'requests/volunteer-requests';
+import Volunteer from 'models/Volunteer';
+import { useAuth } from 'contexts/auth-context';
 
 const Volunteers = () => {
   const [volunteers, setVolunteers] = useState([]);

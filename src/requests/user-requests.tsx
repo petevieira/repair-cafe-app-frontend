@@ -3,7 +3,7 @@
  */
 
 import axios from 'axios';
-import Api from './request-consts';
+import Api from 'requests/request-consts';
 
 const userIsAdmin = async (email) => {
   return await axios.get(Api.Users.USER_IS_ADMIN + `/${email}`);

@@ -10,7 +10,7 @@ class Volunteer {
     firstName: string = "",
     lastName: string = "",
     email: string = "",
-    acceptsWaiver: boolean = ""
+    acceptsWaiver: boolean = false,
   ) {
     this._id = id;
     this.firstName = firstName;

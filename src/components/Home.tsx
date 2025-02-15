@@ -1,28 +1,28 @@
 import { View, SafeAreaView, Platform, ScrollView, StatusBar } from 'react-native';
 import { Button, Paragraph, Dialog, Portal, Provider, TextInput, Text, BottomNavigation } from 'react-native-paper';
 // Custom Components
-import SubmitButton from "../globals/SubmitButton";
-import Nav from "../globals/Nav";
+import SubmitButton from 'globals/SubmitButton';
+import Nav from 'globals/Nav';
 // Styles
-import styles from '../globals/Styles';
-import Item from '../models/Item';
+import styles from 'globals/Styles';
+import Item from 'models/Item';
 import { useNavigation } from '@react-navigation/native';
 
 const Home = () => {
-  const navigation = useNavigation();
+    const navigation = useNavigation();
 
-  const redirectVolunteer = () => {
-    navigation.navigate('Login');
-  };
+    const redirectVolunteer = () => {
+        navigation.navigate('Login');
+    };
 
-	return (
-    <View style={styles.container}>
+    return (
+        <View style={styles.container}>
         <SubmitButton
-          text={"I am a volunteer"}
-          onPress={() => {redirectVolunteer()}}
+        text={"I am a volunteer"}
+        onPress={() => {redirectVolunteer()}}
         />
-    </View>
-	);
+        </View>
+    );
 
 };
 

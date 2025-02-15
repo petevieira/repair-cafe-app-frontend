@@ -13,108 +13,108 @@ import { useAuth } from 'contexts/auth-context';
 import { Config } from 'consts/app.consts';
 
 const Repairs = () => {
-  const [items, setItems] = useState([]);
-  const {
-    authToken, setAuthToken,
-    isLoggedIn, setIsLoggedIn,
-    showLoader, setShowLoader,
-    snackbarMsg, setSnackbarMsg
-  } = useAuth();
-  const [repairsRetrieved, setRepairsRetrieved] = useState(false);
-  const navigation = useNavigation();
+    const [items, setItems] = useState([]);
+    const {
+        authToken, setAuthToken,
+        isLoggedIn, setIsLoggedIn,
+        showLoader, setShowLoader,
+        snackbarMsg, setSnackbarMsg
+    } = useAuth();
+    const [repairsRetrieved, setRepairsRetrieved] = useState(false);
+    const navigation = useNavigation();
 
-  // Today's date
-  const todaysDate = format(new Date(), "MMMM do, yyyy");
+    // Today's date
+    const todaysDate = format(new Date(), "MMMM do, yyyy");
 
-  const getItems = async () => {
-    setShowLoader(true);
-    try {
-      const response = await getTodaysItems();
-      setItems(response.data.items);
-      setShowLoader(false);
-    } catch (error) {
-      console.error(error);
-      setSnackbarMsg(error.message);
-      setShowLoader(false);
+    const getItems = async () => {
+        setShowLoader(true);
+        try {
+            const response = await getTodaysItems();
+            setItems(response.data.items);
+            setShowLoader(false);
+        } catch (error) {
+            console.error(error);
+            setSnackbarMsg(error.message);
+            setShowLoader(false);
+        }
+        setRepairsRetrieved(true);
     }
-    setRepairsRetrieved(true);
-  }
 
-  const addItemPressed = () => {
-    navigation.navigate('Add/Edit Repair', {
-      item: new Item()
-    });
-  }
-
-  const itemPressed = (item) => {
-    if (!isLoggedIn) {
-      return;
+    const addItemPressed = () => {
+        navigation.navigate('Add/Edit Repair', {
+            item: new Item()
+        });
     }
-    navigation.navigate('Add/Edit Repair', {
-      item: item
-    });
-  }
 
-  useFocusEffect(
-    useCallback(() => {
-      getItems();
-    },[])
-  );
+    const itemPressed = (item) => {
+        if (!isLoggedIn) {
+            return;
+        }
+        navigation.navigate('Add/Edit Repair', {
+            item: item
+        });
+    }
 
-  return (
-    <>
-      <ScrollView
+    useFocusEffect(
+        useCallback(() => {
+            getItems();
+        },[])
+    );
+
+    return (
+        <>
+        <ScrollView
         contentContainerStyle={styles.topScrollView}
         style={{backgroundColor: '#f2f2f2'}}
-      >
-      <View style={styles.content}>
+        >
+        <View style={styles.content}>
         <Text style={{textAlign: "center"}}>({todaysDate})</Text>
         <DataTable>
-          <DataTable.Header>
-            <DataTable.Title style={{flex: 1}}>#</DataTable.Title>
-            <DataTable.Title style={{flex: 3}}>Item</DataTable.Title>
-            <DataTable.Title style={{flex: 4}}>Owner</DataTable.Title>
-            <DataTable.Title style={{flex: 3}}>Repairer</DataTable.Title>
-            <DataTable.Title style={{flex: 4}}>Status</DataTable.Title>
-          </DataTable.Header>
+        <DataTable.Header>
+        <DataTable.Title style={{flex: 1}}>#</DataTable.Title>
+        <DataTable.Title style={{flex: 3}}>Item</DataTable.Title>
+        <DataTable.Title style={{flex: 4}}>Owner</DataTable.Title>
+        <DataTable.Title style={{flex: 3}}>Repairer</DataTable.Title>
+        <DataTable.Title style={{flex: 4}}>Status</DataTable.Title>
+        </DataTable.Header>
 
-          {items.map((item, idx) => (
+        {items.map((item, idx) => (
             <DataTable.Row
-              key={item._id}
-              onPress={isLoggedIn ? (() => itemPressed(item)) : undefined}
+            key={item._id}
+            onPress={isLoggedIn ? (() => itemPressed(item)) : undefined}
             >
-              <DataTable.Cell style={{flex: 1}}>{idx+1}</DataTable.Cell>
-              <DataTable.Cell style={{flex: 3}}>{item.product}</DataTable.Cell>
-              <DataTable.Cell style={{flex: 4}}>{item.ownersFirstName} {item.ownersLastName}</DataTable.Cell>
-              <DataTable.Cell style={{flex: 3}}>{item.repairerFirstName} {item.repairerLastName}</DataTable.Cell>
-              <DataTable.Cell style={{flex: 4}}>{item.repairStatus}</DataTable.Cell>
+            <DataTable.Cell style={{flex: 1}}>{idx+1}</DataTable.Cell>
+            <DataTable.Cell style={{flex: 3}}>{item.product}</DataTable.Cell>
+            <DataTable.Cell style={{flex: 4}}>{item.ownersFirstName} {item.ownersLastName}</DataTable.Cell>
+            <DataTable.Cell style={{flex: 3}}>{item.repairerFirstName} {item.repairerLastName}</DataTable.Cell>
+            <DataTable.Cell style={{flex: 4}}>{item.repairStatus}</DataTable.Cell>
             </DataTable.Row>
-          ))}
+        ))}
         </DataTable>
         { repairsRetrieved && items.length <= 0 &&
-          <Text
+            <Text
             style={{
-              padding: 10,
-              alignSelf: 'center'
+                padding: 10,
+                alignSelf: 'center'
             }}>{"No repairs yet today"}
-          </Text>
+            </Text>
         }
-      </View>
-      </ScrollView>
-      { isLoggedIn &&
-        // <SafeAreaView>
-          // <View>
-          <FAB
+        </View>
+        </ScrollView>
+        { isLoggedIn &&
+            // <SafeAreaView>
+            // <View>
+            <FAB
             icon="plus"
             style={styles.fab}
             animated={false}
             onPress={addItemPressed}
-          />
-          // </View>
-        // </SafeAreaView>
-      }
-    </>
-  )
+            />
+            // </View>
+            // </SafeAreaView>
+        }
+        </>
+    )
 };
 
 export default Repairs;

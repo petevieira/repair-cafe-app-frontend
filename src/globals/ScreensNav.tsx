@@ -18,65 +18,65 @@ const Stack = createNativeStackNavigator();
  * if the user is authenticated.
  */
 const ScreensNav = (props) => {
-  // Add state from AuthContext
-  const { isLoggedIn } = useAuth();
+    // Add state from AuthContext
+    const { isLoggedIn } = useAuth();
 
-  return (
-    <Stack.Navigator
-      initialRouteName="Login"
-      screenOptions={{
-        headerShown: false
-      }}
-    >
-      {isLoggedIn ? (
-        </* Screens that require authentication */>
-          <Stack.Screen
+    return (
+        <Stack.Navigator
+        initialRouteName="Login"
+        screenOptions={{
+            headerShown: false
+        }}
+        >
+        {isLoggedIn ? (
+            </* Screens that require authentication */>
+            <Stack.Screen
             name="Repairs"
             component={Repairs}
-          />
-          <Stack.Screen
+            />
+            <Stack.Screen
             name="Volunteers"
             component={Volunteers}
-          />
-          <Stack.Screen
+            />
+            <Stack.Screen
             name="Add/Edit Repair"
             component={AddEditRepair}
-          />
-          <Stack.Screen
+            />
+            <Stack.Screen
             name="Add/Edit Volunteer"
             component={AddEditVolunteer}
-          />
-          <Stack.Screen
+            />
+            <Stack.Screen
             name="About"
             component={About}
-          />
-          <Stack.Screen
+            />
+            <Stack.Screen
             name="Volunteer Login"
             component={Login}
-          />
-        </>
-      ) : (
-        </* Screens that don't require authentication */>
-          <Stack.Screen
+            />
+            </>
+        ) : (
+            </* Screens that don't require authentication */>
+            <Stack.Screen
             name="Volunteer Login"
             component={Login}
-          />
-          <Stack.Screen
+            />
+            <Stack.Screen
             name="Repairs"
             component={Repairs}
-          />
-          <Stack.Screen
+            />
+            <Stack.Screen
             name="Volunteers"
             component={Volunteers}
-          />
-          <Stack.Screen
+            />
+            <Stack.Screen
             name="About"
             component={About}
-          />
-        </>
-      )}
-    </Stack.Navigator>
-  );
+            />
+            </>
+        )}
+        </Stack.Navigator>
+    );
 }
 
 export default ScreensNav;

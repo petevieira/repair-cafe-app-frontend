@@ -18,46 +18,46 @@ import Nav from 'globals/Nav';
  * which is wrapped in a NavigationContainer
  */
 const RootNavigation = () => {
-  const { snackbarMsg, setSnackbarMsg } = useAuth();
-  const [routeName, setRouteName] = useState('');
+    const { snackbarMsg, setSnackbarMsg } = useAuth();
+    const [routeName, setRouteName] = useState('');
 
-  useEffect(() => {
-    const updateRouteName = () => {
-        const currentRoute = navigationRef.getCurrentRoute();
-        if (currentRoute) {
-            setRouteName(currentRoute.name);
+    useEffect(() => {
+        const updateRouteName = () => {
+            const currentRoute = navigationRef.getCurrentRoute();
+            if (currentRoute) {
+                setRouteName(currentRoute.name);
+            }
         }
-    }
 
-    const unsubscribe = navigationRef.addListener('state', updateRouteName);
+        const unsubscribe = navigationRef.addListener('state', updateRouteName);
 
-    return () => {
-        unsubscribe();
-    };
-  }, []);
+        return () => {
+            unsubscribe();
+        };
+    }, []);
 
-  return (
-    <>
-      <Nav routeName={routeName}/>
-      <ScreensNav/>
-      <BottomTabs routeName={routeName}/>
-      <Loader/>
-      <Portal>
+    return (
+        <>
+        <Nav routeName={routeName}/>
+        <ScreensNav/>
+        <BottomTabs routeName={routeName}/>
+        <Loader/>
+        <Portal>
         <Snackbar
-          duration={2000}
-          style={styles.snackbar}
-          visible={!!snackbarMsg}
-          onDismiss={() => {
+        duration={2000}
+        style={styles.snackbar}
+        visible={!!snackbarMsg}
+        onDismiss={() => {
             setSnackbarMsg("");
-          }}
-          action={{
+        }}
+        action={{
             label: "Close"
-          }}
+        }}
         >{snackbarMsg}
         </Snackbar>
-      </Portal>
-    </>
-  );
+        </Portal>
+        </>
+    );
 }
 
 export default RootNavigation;

@@ -9,20 +9,20 @@ import Item from 'models/Item';
 import { useNavigation } from '@react-navigation/native';
 
 const Home = () => {
-  const navigation = useNavigation();
+    const navigation = useNavigation();
 
-  const redirectVolunteer = () => {
-    navigation.navigate('Login');
-  };
+    const redirectVolunteer = () => {
+        navigation.navigate('Login');
+    };
 
-	return (
-    <View style={styles.container}>
+    return (
+        <View style={styles.container}>
         <SubmitButton
-          text={"I am a volunteer"}
-          onPress={() => {redirectVolunteer()}}
+        text={"I am a volunteer"}
+        onPress={() => {redirectVolunteer()}}
         />
-    </View>
-	);
+        </View>
+    );
 
 };
 

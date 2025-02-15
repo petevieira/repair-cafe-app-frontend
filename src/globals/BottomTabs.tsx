@@ -9,88 +9,88 @@ import styles from 'globals/Styles';
 import { useAuth } from 'contexts/auth-context';
 
 export const Tab = ({ name, text, handlePress, screenName, routeName }) => {
-  let isActiveScreen = screenName === routeName;
-  return (
-    <Pressable
-      onPress={handlePress}
-      style={{alignText: 'center'}}
-    >
-      <FontAwesome5
+    let isActiveScreen = screenName === routeName;
+    return (
+        <Pressable
+        onPress={handlePress}
+        style={{alignText: 'center'}}
+        >
+        <FontAwesome5
         name={name}
         size={25}
         style={{
-          borderRadius: 20,
-          marginBottom: 3,
-          alignSelf: "center",
-          color: 'black',
-          backgroundColor: isActiveScreen ? '#80b963' : 'rgba(0,0,0,0)',
-          paddingVertical: 5,
-          paddingHorizontal: 15,
+            borderRadius: 20,
+            marginBottom: 3,
+            alignSelf: "center",
+            color: 'black',
+            backgroundColor: isActiveScreen ? '#80b963' : 'rgba(0,0,0,0)',
+            paddingVertical: 5,
+            paddingHorizontal: 15,
         }}
-      />
-      <Text
+        />
+        <Text
         style={{
-          fontWeight: isActiveScreen ? 'bold' : 'normal',
-          alignSelf: 'center'
+            fontWeight: isActiveScreen ? 'bold' : 'normal',
+            alignSelf: 'center'
         }}
-      >{text}</Text>
-    </Pressable>
-  );
+        >{text}</Text>
+        </Pressable>
+    );
 };
 
 export default function BottomTabs(props) {
-  const { isLoggedIn, setIsLoggedIn } = useAuth();
-  const navigation = useNavigation();
-  let routeName = props.routeName;
+    const { isLoggedIn, setIsLoggedIn } = useAuth();
+    const navigation = useNavigation();
+    let routeName = props.routeName;
 
-  useEffect(() => {
-    console.debug("isLoggedIn: ", isLoggedIn);
-  }, [isLoggedIn]);
+    useEffect(() => {
+        console.debug("isLoggedIn: ", isLoggedIn);
+    }, [isLoggedIn]);
 
-  return (
-    <>
-      <View
+    return (
+        <>
+        <View
         style={{
-          backgroundColor: "#96db73",
-          flexDirection: "row",
-          justifyContent: "space-evenly",
-          height: 70,
-          alignItems: "center",
+            backgroundColor: "#96db73",
+            flexDirection: "row",
+            justifyContent: "space-evenly",
+            height: 70,
+            alignItems: "center",
         }}
-      >
+        >
         { !isLoggedIn &&
-          <Tab
+            <Tab
             text={"Login"}
             name={"sign-in-alt"}
             style={styles.bottomTab}
             handlePress={async () => {
-              navigation.navigate("Volunteer Login")}
+                navigation.navigate("Volunteer Login")}
             }
             routeName={routeName}
             screenName={"Volunteer Login"}
-          />
+            />
         }
         { isLoggedIn &&
-          <Tab
+            <Tab
             text="Repairs"
             name="tools"
             style={styles.bottomTab}
             handlePress={() => navigation.navigate("Repairs")}
             screenName="Repairs"
             routeName={routeName}
-          />
+            />
         }
         { isLoggedIn &&
-          <Tab
+            <Tab
             text="Volunteers"
             name="users"
             style={styles.bottomTab}
             handlePress={() => navigation.navigate("Volunteers")}
             screenName="Volunteers"
             routeName={routeName}
-          />
+            />
         }
-      </View>
-    </>
-  );
+        </View>
+        </>
+    );
 }

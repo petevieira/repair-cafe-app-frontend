@@ -5,17 +5,17 @@ import { useAuth } from 'contexts/auth-context';
 import styles from 'globals/Styles'
 
 const Loader = () => {
-  const { showLoader } = useAuth();
+    const { showLoader } = useAuth();
 
-  return (showLoader &&
-    <View
-      style={styles.loader}>
-      <ActivityIndicator
+    return (showLoader &&
+        <View
+        style={styles.loader}>
+        <ActivityIndicator
         animating={showLoader}
         size="large"
-      />
-    </View>
-  );
+        />
+        </View>
+    );
 };
 
 export default Loader;

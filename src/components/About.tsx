@@ -7,41 +7,41 @@ import { getText } from 'requests/text-requests';
 import { useAuth } from 'contexts/auth-context';
 
 const About = () => {
-  const {
-    showLoader, setShowLoader,
-    snackbarMsg, setSnackbarMsg,
-  } = useAuth();
-  const [aboutText, setAboutText] = useState('');
+    const {
+        showLoader, setShowLoader,
+        snackbarMsg, setSnackbarMsg,
+    } = useAuth();
+    const [aboutText, setAboutText] = useState('');
 
-  const getAboutText = async () => {
-    setShowLoader(true);
-    try {
-      const response = await getText('about');
-      setAboutText(response.data.text.content)
-    } catch (error) {
-      console.error(error);
-      setSnackbarMsg(error.message);
+    const getAboutText = async () => {
+        setShowLoader(true);
+        try {
+            const response = await getText('about');
+            setAboutText(response.data.text.content)
+        } catch (error) {
+            console.error(error);
+            setSnackbarMsg(error.message);
+        }
+        setShowLoader(false);
     }
-    setShowLoader(false);
-  }
 
-  useEffect(() => {
-    getAboutText();
-  }, []);
+    useEffect(() => {
+        getAboutText();
+    }, []);
 
-  return (
-    <ScrollView
-      contentContainerStyle={styles.topScrollView}
-      style={{backgroundColor: '#f2f2f2'}}
-    >
-    <View style={[styles.content, { paddingHorizontal: 10 }]}>
-      <HTMLView
+    return (
+        <ScrollView
+        contentContainerStyle={styles.topScrollView}
+        style={{backgroundColor: '#f2f2f2'}}
+        >
+        <View style={[styles.content, { paddingHorizontal: 10 }]}>
+        <HTMLView
         stylesheet={styles.html}
         value={aboutText}
-      />
-    </View>
-    </ScrollView>
-  )
+        />
+        </View>
+        </ScrollView>
+    )
 }
 
 export default About;

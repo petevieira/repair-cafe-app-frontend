@@ -13,26 +13,26 @@ import { NavigationContainer } from '@react-navigation/native';
  * Main application
  */
 const App = () => {
-  return (
-    <PaperProvider
-      theme ={{
-        ...MD3LightTheme,
-        mode: 'adaptive',
-        colors: appColors,
-        fonts: configureFonts({config: appFontConfig}),
-      }}
-    >
-      <StatusBar hidden/>
-      <AuthProvider>
+    return (
+        <PaperProvider
+        theme ={{
+            ...MD3LightTheme,
+            mode: 'adaptive',
+            colors: appColors,
+            fonts: configureFonts({config: appFontConfig}),
+        }}
+        >
+        <StatusBar hidden/>
+        <AuthProvider>
         <NavigationContainer ref={navigationRef}>
-          <SafeAreaView style={{flex: 0, backgroundColor: 'white'}}/>
-          <SafeAreaView style={{flex: 1, backgroundColor: '#96db73'}}>
-            <RootNavigation/>
-          </SafeAreaView>
+        <SafeAreaView style={{flex: 0, backgroundColor: 'white'}}/>
+        <SafeAreaView style={{flex: 1, backgroundColor: '#96db73'}}>
+        <RootNavigation/>
+        </SafeAreaView>
         </NavigationContainer>
-      </AuthProvider>
-    </PaperProvider>
-  );
+        </AuthProvider>
+        </PaperProvider>
+    );
 };
 
 export default App;

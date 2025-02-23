@@ -15,7 +15,8 @@ const Nav = (props) => {
         authToken, setAuthToken,
         isLoggedIn, setIsLoggedIn,
         showLoader, setShowLoader,
-        snackbarMsg, setSnackbarMsg
+        snackbarMsg, setSnackbarMsg,
+        isAdmin, setIsAdmin,
     } = useAuth();
     const navigation = useNavigation();
     let routeName = props.routeName;
@@ -75,59 +76,69 @@ const Nav = (props) => {
 
     return (
         <View
-        style={{
-            alignItems: 'center',
-            flexDirection: 'row',
-            justifyContent: 'space-evenly',
-            backgroundColor: 'white',
-        }}
+            style={{
+                alignItems: 'center',
+                flexDirection: 'row',
+                justifyContent: 'space-evenly',
+                backgroundColor: 'white',
+            }}
         >
-        <View style={styles.appBar}>
-        <View
-        style={{marginRight: 'auto'}}
-        >
-        <Image
-        resizeMethod="scale"
-        resizeMode="contain"
-        style={styles.logo}
-        source={require('./assets/trc-logo-transparent-icon.png')}
-        onPress={() => {
-            navigation.navigate('Repairs');
-        }}
-        />
-        </View>
-        <View style={{alignText: 'center', justifyContent: 'center'}}>
-        <Text style={[styles.appBarTitle, {fontFamily: titleFont}]}>
-        {title}
-        </Text>
-        </View>
-        <View
-        style={{marginLeft: 'auto'}}
-        >
-        <Button
-        width={60}
-        icon={Platform.OS === 'ios' ? 'dots-horizontal' : 'dots-vertical'}
-        onPress={openMenu}
-        style={{width: 60}}
-        />
-        </View>
-        <Menu
-        visible={menuVisible}
-        onDismiss={closeMenu}
-        anchor={menuAnchor}
-        >
-        <Menu.Item
-        title="About"
-        onPress={aboutPressed}
-        />
-        {isLoggedIn &&
-            <Menu.Item
-            title="Log out"
-            onPress={logoutPressed}
-            />
-        }
-        </Menu>
-        </View>
+            <View style={styles.appBar}>
+                <View
+                    style={{marginRight: 'auto'}}
+                >
+                    <Image
+                        resizeMethod="scale"
+                        resizeMode="contain"
+                        style={styles.logo}
+                        source={require('./assets/trc-logo-transparent-icon.png')}
+                        onPress={() => {
+                            navigation.navigate('Repairs');
+                        }}
+                    />
+                </View>
+                <View style={{alignText: 'center', justifyContent: 'center'}}>
+                    <Text style={[styles.appBarTitle, {fontFamily: titleFont}]}>
+                        {title}
+                    </Text>
+                </View>
+                <View
+                    style={{marginLeft: 'auto'}}
+                >
+                    <Button
+                        width={60}
+                        icon={Platform.OS === 'ios' ? 'dots-horizontal' : 'dots-vertical'}
+                        onPress={openMenu}
+                        style={{width: 60}}
+                    />
+                </View>
+                <Menu
+                    visible={menuVisible}
+                    onDismiss={closeMenu}
+                    anchor={menuAnchor}
+                >
+                    <Menu.Item
+                        title="About"
+                        onPress={aboutPressed}
+                    />
+                {isLoggedIn && isAdmin &&
+                    <Menu.Item
+                        title="Manage Events"
+                        onPress={() => {
+                            closeMenu();
+                            navigation.navigate('Events');
+                        }}
+                    />
+                }
+                {isLoggedIn &&
+                    <Menu.Item
+                        title="Log out"
+                        onPress={logoutPressed}
+                    />
+                }
+
+                </Menu>
+            </View>
         </View>
     );
 }

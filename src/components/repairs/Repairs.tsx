@@ -5,7 +5,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { format } from "date-fns";
 
 import styles from 'globals/Styles'
-import { getTodaysItems } from 'requests/item-requests';
+import { getItemsByDate, findPreviousEventDate, findNextEventDate } from 'requests/item-requests';
 import Item from 'models/Item';
 import { useAuth } from 'contexts/auth-context';
 import { NavigationProp } from 'globals/RootNavigation';
@@ -17,7 +17,9 @@ const Repairs = () => {
         authToken, setAuthToken,
         isLoggedIn, setIsLoggedIn,
         showLoader, setShowLoader,
-        snackbarMsg, setSnackbarMsg
+        snackbarMsg, setSnackbarMsg,
+        eventDate, setEventDate,
+        timeZone, setTimeZone,
     } = useAuth();
     const [repairsRetrieved, setRepairsRetrieved] = useState(false);
     const navigation = useNavigation<NavigationProp>();
@@ -25,15 +27,17 @@ const Repairs = () => {
     // Today's date
     const todaysDate = format(new Date(), "MMMM do, yyyy");
 
-    const getItems = async () => {
-        setShowLoader(true);
+    const getItems = async (isoDate: string) => {
+        console.debug("date: ", isoDate);
+        // Convert date string to Date object
         try {
-            const response = await getTodaysItems();
-            setItems(response.data.items);
-            setShowLoader(false);
+            setShowLoader(true);
+            const items = await getItemsByDate(isoDate);
+            setItems(items);
         } catch (error) {
             console.error(error);
             setSnackbarMsg(error.message);
+        } finally {
             setShowLoader(false);
         }
         setRepairsRetrieved(true);
@@ -54,9 +58,44 @@ const Repairs = () => {
         });
     }
 
+    const goToPreviousEvent = async () => {
+        let date = new Date(eventDate);
+        date = new Date(date.setUTCDate(date.getUTCDate() - 1));
+        date.setUTCHours(23, 59, 59, 999);
+        const previousDate = await findPreviousEventDate(date.toISOString());
+        if (!previousDate) {
+            setSnackbarMsg("No previous events");
+            return;
+        }
+        console.debug("Previous event date: ", previousDate);
+        setEventDate(format(previousDate, "MMMM do, yyyy"));
+        getItems(previousDate.toISOString());
+    }
+
+    const goToNextEvent = async () => {
+        if (new Date(eventDate).toISOString().slice(0, 10)
+            === new Date().toISOString().slice(0, 10)
+        ) {
+            setSnackbarMsg("Can't go to future events");
+            return;
+        }
+
+        let date = new Date(eventDate);
+        date.setDate(date.getDate() + 1);
+        date.setHours(0, 0, 0, 0);
+        const nextDate = await findNextEventDate(date.toISOString());
+        if (!nextDate) {
+            setSnackbarMsg("No future events");
+            return;
+        }
+        console.debug("Next event date: ", nextDate);
+        setEventDate(format(nextDate, "MMMM do, yyyy"));
+        getItems(nextDate.toISOString());
+    }
+
     useFocusEffect(
         useCallback(() => {
-            getItems();
+            getItems(todaysDate);
         },[])
     );
 
@@ -67,7 +106,26 @@ const Repairs = () => {
                 style={{backgroundColor: appColors.bgGray}}
             >
                 <View style={styles.content}>
-                    <Text style={{textAlign: "center"}}>({todaysDate})</Text>
+                    {/* Left and right arrows on either side of the date */}
+                    <View style={{flexDirection: "row", justifyContent: "space-between"}}>
+                        <Text
+                            style={{}}
+                            onPress={() => goToPreviousEvent()}
+                        >{"◄"}</Text>
+                        <View style={{flexDirection: "column", alignItems: "center"}}>
+                            <Text style={{textAlign: "center"}}>🗓️ ({eventDate})</Text>
+                            <Text style={{textAlign: "center"}}>🌐 ({timeZone})</Text>
+                        </View>
+                    { (new Date(eventDate).toISOString().slice(0, 10))
+                        < (new Date().toISOString().slice(0, 10)) ?
+                        <Text
+                            style={{ opacity: eventDate === todaysDate ? 0 : 100, height: 0}}
+                            onPress={() => goToNextEvent()}
+                        >{"►"}</Text>
+                        : <Text style={{height: 0}}>{""}</Text>
+                    }
+                    </View>
+
                     <DataTable>
                         <DataTable.Header>
                             <DataTable.Title style={{flex: 1}}>{"\u21BA"}</DataTable.Title>

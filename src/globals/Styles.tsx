@@ -8,6 +8,8 @@ if (Platform.OS === 'ios') {
 }
 let titleFont = 'Salsa-Regular';
 
+export const selectionColor = '#246fb0';
+
 export default StyleSheet.create({
     appBar: {
         backgroundColor: 'white',
@@ -45,7 +47,7 @@ export default StyleSheet.create({
         alignItems: 'center',
         paddingTop: 15,
         paddingBottom: 15,
-        paddingHorizontal: 10
+        paddingHorizontal: 10,
     },
     content: {
         flex: 1,
@@ -55,6 +57,7 @@ export default StyleSheet.create({
         paddingTop: 10,
         paddingHorizontal: 10,
         marginHorizontal: 'auto',
+        marginBottom: 10,
     },
     home_buttons: {
         height: 120,

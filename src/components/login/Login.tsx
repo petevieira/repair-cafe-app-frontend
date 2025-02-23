@@ -14,11 +14,11 @@ const Login = ({navigation}) => {
     const {
         authToken, setAuthToken,
         isLoggedIn, setIsLoggedIn,
+        isAdmin, setIsAdmin,
         showLoader, setShowLoader,
         snackbarMsg, setSnackbarMsg
     } = useAuth();
     const [email, setEmail] = useState("");
-    const [emailIsInvalid, setEmailIsInvalid] = useState(false);
     const [password, setPassword] = useState("");
     const [enableEmail, setEnableEmail] = useState(true);
     const [showPasswordInput, setShowPasswordInput] = useState(false);
@@ -47,21 +47,23 @@ const Login = ({navigation}) => {
             if (email !== '' && emailIsValid()) {
                 setShowLoader(true);
                 try {
-                    const response = await UserRequests.userIsAdmin(email);
-                    if (!response.status) {
-                        throw new Error("Unknown error");
+                    const emailIsRegistered = await UserRequests.emailIsRegistered(email);
+                    if (!emailIsRegistered) {
+                        setSnackbarMsg("Email not found.");
+                        setShowPasswordInput(false);
+                        return;
                     }
                     setShowPasswordInput(true);
                     // Checking here maybe b/c it's a race condition for it to load first?
-                    setShowLoader(false);
                 } catch (error) {
                     console.error(error);
-                    setShowLoader(false);
                     setSnackbarMsg(error.message);
+                } finally {
+                    setShowLoader(false);
                 }
             }
         } else {
-            signInAdmin();
+            signIn();
         }
     };
 
@@ -71,23 +73,22 @@ const Login = ({navigation}) => {
         setShowPasswordInput(false);
     }
 
-    const signInAdmin = async () => {
-        setShowLoader(true);
+    const signIn = async () => {
         try {
-            const response = await UserRequests.signInAdmin(email, password);
+            setShowLoader(true);
+            const { token, user } = await UserRequests.signIn(email, password);
             // Add auth token to state
-            setAuthToken(response.data.token);
+            setAuthToken(token);
             setIsLoggedIn(true);
+            setIsAdmin(user.role === 'admin');
             // Store authentication items
-            const ok = await AsyncStorageHelpers.storeAuth(
-                { user: response.data.user, token: response.data.token }
-            );
+            await AsyncStorageHelpers.storeAuth({ user, token });
             navigation.navigate("Repairs");
-            setShowLoader(false);
         } catch (error) {
             console.error(error);
-            setShowLoader(false);
             setSnackbarMsg(error.message);
+        } finally {
+            setShowLoader(false);
         }
     };
 
@@ -116,64 +117,58 @@ const Login = ({navigation}) => {
     // Component's view
     return (
         <ScrollView
-        contentContainerStyle={styles.topScrollView}
-        style={{backgroundColor: '#f2f2f2'}}
+            contentContainerStyle={styles.topScrollView}
+            style={{backgroundColor: '#f2f2f2'}}
         >
-        <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
-        <View
-        style={styles.container}
-        >
-        <View
-        style={styles.content}>
-        <TextInput
-        label="Admin Email"
-        mode={enableEmail ? "outlined" : "outlined (disabled)"}
-        autoCorrect={false}
-        style={styles.short_text_input}
-        value={email}
-        inputMode={"email"}
-        autoFocus={true}
-        editable={enableEmail}
-        onPress={() => {setEnableEmail(true)}}
-        onFocus={() => {
-            setEmailsBlurred(false);
-            setEnableEmail(true);
-        }}
-        onBlur={() => {
-            setEmailsValid(emailIsValid());
-            setEmailsBlurred(true);
-        }}
-        ref={emailInputRef}
-        onChangeText={email => setEmail(email.trim().toLowerCase())}
-        />
-        <HelperText type="error" visible={emailsBlurred && !emailsValid}>
-        Please enter a valid email.
-        </HelperText>
-        {showPasswordInput &&
-            <>
-            <TextInput
-            label="Admin Password"
-            mode="outlined"
-            secureTextEntry={true}
-            autoCorrect={false}
-            style={styles.short_text_input}
-            value={password}
-            ref={pwdInputRef}
-            onChangeText={
-                password => setPassword(password.trim().toLowerCase())
-            }
-            />
-            </>
-        }
-        <SubmitButton
-        onPress={() => {handleSubmit()}}
-        />
-        </View>
-        </View>
-
-        </KeyboardAvoidingView>
+            <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
+                <View style={styles.container}>
+                    <View style={styles.content}>
+                        <TextInput
+                            label="Email"
+                            mode={enableEmail ? "outlined" : "outlined (disabled)"}
+                            autoCorrect={false}
+                            style={styles.short_text_input}
+                            value={email}
+                            inputMode={"email"}
+                            autoFocus={true}
+                            editable={enableEmail}
+                            onPress={() => {setEnableEmail(true)}}
+                            onFocus={() => {
+                                setEmailsBlurred(false);
+                                setEnableEmail(true);
+                            }}
+                            onBlur={() => {
+                                setEmailsValid(emailIsValid());
+                                setEmailsBlurred(true);
+                            }}
+                            ref={emailInputRef}
+                            onChangeText={email => setEmail(email.trim().toLowerCase())}
+                        />
+                        <HelperText type="error" visible={emailsBlurred && !emailsValid}>
+                            Please enter a valid email.
+                        </HelperText>
+                        {showPasswordInput &&
+                        <>
+                            <TextInput
+                                label="Password"
+                                mode="outlined"
+                                secureTextEntry={true}
+                                autoCorrect={false}
+                                style={styles.short_text_input}
+                                value={password}
+                                ref={pwdInputRef}
+                                onChangeText={
+                                    password => setPassword(password.trim().toLowerCase())
+                                }
+                                />
+                        </>
+                        }
+                        <SubmitButton
+                            onPress={() => {handleSubmit()}}
+                        />
+                    </View>
+                </View>
+            </KeyboardAvoidingView>
         </ScrollView>
     );
 

@@ -21,6 +21,8 @@ export type RootStackParamList = {
     "Volunteer Login": undefined;
     "Add/Edit Volunteer": { volunteer: Volunteer };
     "About": undefined;
+    "Events": undefined;
+    "Add/Edit Event": { event: Event };
 };
 
 // Type for navigation prop
@@ -62,7 +64,7 @@ const RootNavigation = () => {
             <Loader/>
             <Portal>
                 <Snackbar
-                    duration={2000}
+                    duration={5000}
                     style={styles.snackbar}
                     visible={!!snackbarMsg}
                     onDismiss={() => {

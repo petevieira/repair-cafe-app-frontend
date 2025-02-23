@@ -39,7 +39,10 @@ export const Tab = ({ name, text, handlePress, screenName, routeName }) => {
 };
 
 export default function BottomTabs(props) {
-    const { isLoggedIn, setIsLoggedIn } = useAuth();
+    const {
+        isLoggedIn, setIsLoggedIn,
+        isAdmin, setIsAdmin,
+    } = useAuth();
     const navigation = useNavigation();
     let routeName = props.routeName;
 
@@ -47,45 +50,55 @@ export default function BottomTabs(props) {
     }, [isLoggedIn]);
 
     return (
-        <>
         <View
-        style={{
-            backgroundColor: "#96db73",
-            flexDirection: "row",
-            justifyContent: "space-evenly",
-            height: 70,
-            alignItems: "center",
-        }}
+            style={{
+                backgroundColor: "#96db73",
+                flexDirection: "row",
+                justifyContent: "space-evenly",
+                height: 70,
+                alignItems: "center",
+            }}
         >
         { !isLoggedIn &&
             <Tab
-            text={"Login"}
-            name={"sign-in-alt"}
-            style={styles.bottomTab}
-            handlePress={async () => {
-                navigation.navigate("Volunteer Login")}
-            }
-            routeName={routeName}
-            screenName={"Volunteer Login"}
+                text={"Login"}
+                name={"sign-in-alt"}
+                style={styles.bottomTab}
+                handlePress={async () => {
+                    navigation.navigate("Volunteer Login")}
+                }
+                routeName={routeName}
+                screenName={"Volunteer Login"}
             />
         }
-        <Tab
-        text="Repairs"
-        name="tools"
-        style={styles.bottomTab}
-        handlePress={() => navigation.navigate("Repairs")}
-        screenName="Repairs"
-        routeName={routeName}
-        />
-        <Tab
-        text="Volunteers"
-        name="users"
-        style={styles.bottomTab}
-        handlePress={() => navigation.navigate("Volunteers")}
-        screenName="Volunteers"
-        routeName={routeName}
-        />
+        { isLoggedIn && isAdmin &&
+            <Tab
+                text={"Events"}
+                name={"calendar-day"}
+                style={styles.bottomTab}
+                handlePress={async () => {
+                    navigation.navigate("Events");
+                }}
+                routeName={routeName}
+                screenName={"Events"}
+            />
+        }
+            <Tab
+                text="Repairs"
+                name="tools"
+                style={styles.bottomTab}
+                handlePress={() => navigation.navigate("Repairs")}
+                screenName="Repairs"
+                routeName={routeName}
+            />
+            <Tab
+                text="Volunteers"
+                name="users"
+                style={styles.bottomTab}
+                handlePress={() => navigation.navigate("Volunteers")}
+                screenName="Volunteers"
+                routeName={routeName}
+            />
         </View>
-        </>
     );
 }

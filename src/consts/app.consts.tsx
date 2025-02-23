@@ -7,4 +7,12 @@ const Config = {
     OFFLINE: false,
 }
 
-export { StorageConsts, Config };
+const Regex = {
+    SIMPLE_DATE: /^\d{4}-\d{2}-\d{2}$/,
+}
+
+export {
+    StorageConsts,
+    Config,
+    Regex,
+};

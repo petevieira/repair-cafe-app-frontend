@@ -1,24 +1,34 @@
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
-import { TextInput, Text } from "react-native-paper";
+import { TextInput } from "react-native-paper";
 import styles from 'globals/Styles'
 
 const EventDatePicker = ({ eventDate, setEventDate }) => {
-    const [year, setYear] = useState(!!eventDate ? eventDate.substring(0, 4) : "");
-    const [month, setMonth] = useState(!!eventDate ? eventDate.substring(5, 7) : "");
-    const [day, setDay] = useState(!!eventDate ? eventDate.substring(8, 10) : "");
+    console.debug("EventDatePicker eventDate: ", eventDate);
+    const initialDate = eventDate ? new Date(eventDate) : new Date();
+    initialDate.setUTCHours(0, 0, 0, 0);
+    console.debug("EventDatePicker initialDate: ", initialDate);
+    const [year, setYear] = useState(initialDate.getUTCFullYear().toString());
+    const [month, setMonth] = useState((initialDate.getUTCMonth() + 1).toString().padStart(2, '0'));
+    const [day, setDay] = useState(initialDate.getUTCDate().toString().padStart(2, '0'));
     const [yearValid, setYearValid] = useState(true);
     const [dayValid, setDayValid] = useState(true);
     const [monthValid, setMonthValid] = useState(true);
     const margin = 10;
     let yearInputRef = React.createRef();
 
+    const setDate = (year: string, month: string, day: string) => {
+        let date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        date.setUTCHours(0, 0, 0, 0);
+        setEventDate(date);
+    }
+
     const validateYear = (newYear: string) => {
         // Ensure 4 digits and doesn't start with 0
         const yearRegex = /^[1|2][0-9][0-9][0-9]$/;
         if (newYear !== "") {
             setYearValid(yearRegex.test(newYear));
-            setEventDate(`${newYear}-${month}-${day}`);
+            setDate(newYear, month, day);
         }
     }
 
@@ -31,7 +41,7 @@ const EventDatePicker = ({ eventDate, setEventDate }) => {
         // Regex for month validation
         const monthRegex = /^(0[1-9]|1[0-2])$/;
         setMonthValid(monthRegex.test(newMonth));
-        setEventDate(`${year}-${newMonth}-${day}`);
+        setDate(year, newMonth, day);
     }
 
     const validateDay = (newDay: string) => {
@@ -66,7 +76,7 @@ const EventDatePicker = ({ eventDate, setEventDate }) => {
         }
         if (valid) {
             // Set event date
-            setEventDate(`${year}-${month}-${newDay}`);
+            setDate(year, month, newDay);
         }
     }
 

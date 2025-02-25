@@ -1,4 +1,4 @@
-class Event {
+export class Event {
     _id: string;
     date: Date;
 
@@ -10,5 +10,3 @@ class Event {
         this.date = date;
     }
 };
-
-export default Event;

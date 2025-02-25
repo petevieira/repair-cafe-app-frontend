@@ -6,7 +6,7 @@ import { format } from "date-fns";
 
 import styles from 'globals/Styles'
 import { getEvents, deleteEventById } from 'requests/event-requests';
-import Event from 'models/Event';
+import { Event as RepairEvent } from 'models/Event';
 import { useAuth } from 'contexts/auth-context';
 import { NavigationProp } from 'globals/RootNavigation';
 import appColors from 'globals/colors';
@@ -16,6 +16,7 @@ const Events = () => {
     const {
         authToken, setAuthToken,
         isLoggedIn, setIsLoggedIn,
+        isAdmin, setIsAdmin,
         showLoader, setShowLoader,
         snackbarMsg, setSnackbarMsg,
         eventDate, setEventDate,
@@ -44,23 +45,15 @@ const Events = () => {
 
     const addEventPressed = () => {
         navigation.navigate('Add/Edit Event', {
-            event: new Event()
+            event: {
+                _id: null,
+                date: (new Date()).toISOString(),
+            }
         });
     }
 
-    const goToEventPressed = (event: Event) => {
+    const goToEventPressed = (event: RepairEvent) => {
 
-    }
-
-    const deleteEventPressed = async (event) => {
-        try {
-            await deleteEventById(event._id);
-            setSnackbarMsg("Event deleted.");
-            fetchEvents();
-        } catch (error) {
-            console.error(error);
-            setSnackbarMsg(error.message);
-        }
     }
 
     const toSimpleDate = (date: string | null): string => {
@@ -71,13 +64,21 @@ const Events = () => {
     }
 
 
-    const editEventPressed = (event) => {
-        if (!isLoggedIn) {
+    const editEventPressed = (event: RepairEvent) => {
+        if (!isLoggedIn || !isAdmin) {
             return;
         }
+        console.debug("editing event ", event);
         navigation.navigate('Add/Edit Event', {
-            event: event
+            event: {
+                ...event,
+                date: typeof event.date === "string" ? event.date : (new Date(event.date)).toISOString(),
+            }
         });
+    }
+
+    const reverseSort = () => {
+        setEvents([...events].reverse());
     }
 
     useFocusEffect(
@@ -95,22 +96,19 @@ const Events = () => {
                 <View style={styles.content}>
                     <DataTable>
                         <DataTable.Header>
-                            <DataTable.Title style={{flex: 1, justifyContent: 'center'}}>#</DataTable.Title>
-                            <DataTable.Title style={{flex:10}}>Date (YYYY-MM-DD)</DataTable.Title>
-                            <DataTable.Title style={{flex: 1, justifyContent: 'center'}}>{""}</DataTable.Title>
+                            <DataTable.Title
+                                style={{flex:10}}
+                                onPress={() => reverseSort()}
+                            >▲/▼ Date (YYYY-MM-DD)</DataTable.Title>
                             <DataTable.Title style={{flex: 1, justifyContent: 'center'}}>{""}</DataTable.Title>
                         </DataTable.Header>
 
-                    {events.map((event, idx) => (
+                    {events.map((event) => (
                         <DataTable.Row
                             key={event._id}
+                            onPress={() => editEventPressed(event)}
                         >
-                            <DataTable.Cell style={{flex: 1, justifyContent: 'center'}}>{idx+1}</DataTable.Cell>
                             <DataTable.Cell style={{flex: 10}}>{toSimpleDate(event.date)}</DataTable.Cell>
-                            <DataTable.Cell
-                                style={{flex: 1, justifyContent: 'center'}}
-                                onPress={isLoggedIn ? (() => editEventPressed(event)) : undefined}
-                            >{"\u270e"}</DataTable.Cell>
                             <DataTable.Cell
                                 style={{flex: 1, justifyContent: 'center'}}
                                 onPress={isLoggedIn ? (() => goToEventPressed(event)) : undefined}

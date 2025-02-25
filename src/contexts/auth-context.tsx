@@ -3,6 +3,7 @@ import axios from "axios";
 import AsyncStorage from "globals/async-storage-helpers";
 import { jwtDecode } from "jwt-decode";
 import UserRequests from "requests/user-requests";
+import { navigate } from "globals/navigation-ref";
 
 // Track the Axios Interceptor ID globally
 let globalInterceptor: any;
@@ -149,12 +150,18 @@ const AuthProvider = ({ children }) => {
         }
     };
 
-    const logOut = async () => {
+    /**
+     * @description Logs the user out by removing the auth token from AsyncStorage
+     * and setting the auth token to null.
+     * @returns {Promise<void>}
+     */
+    const logOut = async (): Promise<void> => {
         console.log("Logging out user...");
         await AsyncStorage.storeAuth({ user: null, token: null });
         setAuthToken(null);
         setIsLoggedIn(false);
-        // navigate("Volunteer Login");
+        setIsAdmin(false);
+        navigate('Volunteer Login');
     }
 
     const loadEventDate = async () => {

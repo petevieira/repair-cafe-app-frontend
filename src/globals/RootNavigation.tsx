@@ -12,6 +12,7 @@ import styles from 'globals/Styles';
 import Nav from 'globals/Nav';
 import Item from 'models/Item';
 import Volunteer from 'models/Volunteer';
+import { Event as RepairEvent } from 'models/Event';
 
 // Define the type for your app's screen names and params
 export type RootStackParamList = {
@@ -22,7 +23,7 @@ export type RootStackParamList = {
     "Add/Edit Volunteer": { volunteer: Volunteer };
     "About": undefined;
     "Events": undefined;
-    "Add/Edit Event": { event: Event };
+    "Add/Edit Event": { event: Omit<RepairEvent, 'date'> & { date: string | null } };
 };
 
 // Type for navigation prop

@@ -5,6 +5,7 @@ import { Button, Dialog, Portal, TextInput, HelperText, Text } from 'react-nativ
 import { DropDown as PaperDropDown }  from "react-native-paper-dropdown";
 import HTMLView from 'react-native-htmlview';
 import { Dropdown } from 'react-native-element-dropdown';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 import Nav from "globals/Nav"
 import SubmitButton from "globals/SubmitButton"
@@ -768,16 +769,17 @@ const AddEditRepair = ({route, navigation}) => {
                             onPress={() => {
                                 setShowDeleteConfirmationDialog(true);
                             }}
+                            icon={() => <FontAwesome5 name="trash-alt" size={18} color="white" />}
                         >
-                            <FontAwesome5 name="trash-alt" size={18} color="white" />
                         </SubmitButton>
                     }
                         <SubmitButton
-                            text="✓"
+                            icon={() => <FontAwesome5 name="save" size={24} color="white" iconStyle="solid" />}
                             style={{
                                 flex: 1,
                                 marginHorizontal: 5
                             }}
+                            rippleColor="#285882"
                             onPress={() => {
                                 saveItem()
                             }}

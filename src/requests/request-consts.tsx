@@ -36,7 +36,7 @@ const Volunteers = {
 
 const Events = {
     CREATE_EVENT:                  `${API_URL}/events/create-event`,
-    DELETE_EVENT:                  `${API_URL}/events/delete-event`,
+    DELETE_EVENT_BY_ID:            `${API_URL}/events/delete-event-by-id`,
     UPDATE_EVENT:                  `${API_URL}/events/update-event`,
     GET_EVENT_BY_ID:               `${API_URL}/events/get-event-by-id`,
     GET_EVENTS:                    `${API_URL}/events/get-events`,

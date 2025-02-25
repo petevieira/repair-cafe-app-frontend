@@ -8,20 +8,21 @@ import { Button, Text, Dialog, Portal
 import SubmitButton from "globals/SubmitButton"
 // Styles
 import styles from 'globals/Styles'
-import Event from 'models/Event';
+import { Event as RepairEvent } from 'models/Event';
 import {
     createEvent, updateEvent, getEventById, deleteEventById
 } from 'requests/event-requests';
 import { useAuth } from 'contexts/auth-context';
 import EventDatePicker from 'globals/EventDatePicker';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 const AddEditEvent = ({route, navigation}) => {
     const paramEvent = route.params.event;
+    console.debug("paramEvent: ", paramEvent);
 
     // State variables
-    const [id, setId] = useState("");
-    const [event, setEvent] = useState(new Event());
-    const [eventDate, setEventDate] = useState(paramEvent.date);
+    const [event, setEvent] = useState(new RepairEvent());
+    const [eventDate, setEventDate] = useState(new Date(paramEvent.date).setUTCHours(0, 0, 0, 0));
     const {
         authToken, setAuthToken,
         isLoggedIn, setIsLoggedIn,
@@ -30,7 +31,7 @@ const AddEditEvent = ({route, navigation}) => {
     } = useAuth();
     const [showDeleteConfirmationDialog, setShowDeleteConfirmationDialog] = useState(false);
 
-    const eventOkToSave = (event: Event): boolean => {
+    const eventOkToSave = (event: RepairEvent): boolean => {
         let msg = "";
         if (!event.date) {
             msg = "Please set the event date.";
@@ -43,17 +44,20 @@ const AddEditEvent = ({route, navigation}) => {
         return true;
     }
 
-    const addOrSaveEvent = async (event: Event) => {
+    const addOrSaveEvent = async (event: RepairEvent) => {
+        console.debug("event: ", event);
+        console.debug("eventDate: ", eventDate);
         if (!eventOkToSave(event)) {
             return;
         }
         setShowLoader(true);
         try {
             if (!!event._id) {
-                const updatedEvent = await updateEvent(event.date);
+                const updatedEvent = await updateEvent(event);
                 console.debug("Updated event: ", updatedEvent);
                 setSnackbarMsg("Event updated.");
             } else {
+                console.debug("Creating event: ", event);
                 const createdEvent = await createEvent(event.date);
                 console.debug("Created event: ", createdEvent);
                 setSnackbarMsg("New event added.")
@@ -67,7 +71,7 @@ const AddEditEvent = ({route, navigation}) => {
         }
     }
 
-    const deleteEvent = async (event: Event) => {
+    const deleteEvent = async (event: RepairEvent) => {
         if (!event._id) {
             setSnackbarMsg("Event can't be deleted. It's not in the database.");
             return;
@@ -75,8 +79,8 @@ const AddEditEvent = ({route, navigation}) => {
 
         try {
             setShowLoader(true);
-            const response = await deleteEventById(event._id);
-            setSnackbarMsg("Event deleted.");
+            const deletedEvent = await deleteEventById(event._id);
+            setSnackbarMsg(`${deletedEvent.date.toUTCString()} Event was deleted.`);
             setTimeout(() => {
                 navigation.navigate('Events');
             }, 500);
@@ -143,8 +147,8 @@ const AddEditEvent = ({route, navigation}) => {
                                 flex: 1,
                                 marginHorizontal: 5,
                             }}
-                            text="⌫"
-                            rippleColor="rgba(168,37,33,0.4)"
+                            icon={() => <FontAwesome5 name="trash" size={24} color="white" />}
+                            rippleColor="#974045"
                             onPress={() => {
                                 setShowDeleteConfirmationDialog(true);
                             }}
@@ -156,7 +160,8 @@ const AddEditEvent = ({route, navigation}) => {
                                 marginHorizontal: 5,
                                 color: 'white',
                             }}
-                            text="✓"
+                            icon={() => <FontAwesome5 name="save" size={24} color="white" />}
+                            rippleColor="#285882"
                             onPress={() => {
                                 addOrSaveEvent(event);
                             }}

@@ -1,13 +1,15 @@
 import { useCallback, useState, useEffect, useContext, useRef } from 'react';
 import { View, ScrollView, Platform, KeyboardAvoidingView } from 'react-native';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation, useFocusEffect, useIsFocused } from '@react-navigation/native';
 import { HelperText, TextInput } from 'react-native-paper';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 import SubmitButton from "globals/SubmitButton"
 import styles from 'globals/Styles'
 import UserRequests from 'requests/user-requests';
 import { useAuth } from 'contexts/auth-context';
 import AsyncStorageHelpers from 'globals/async-storage-helpers';
+import { Regex } from 'consts/app.consts';
 
 const Login = ({navigation}) => {
     // State variables
@@ -20,12 +22,12 @@ const Login = ({navigation}) => {
     } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [enableEmail, setEnableEmail] = useState(true);
     const [showPasswordInput, setShowPasswordInput] = useState(false);
     const [emailsValid, setEmailsValid] = useState(false);
     const [emailsBlurred, setEmailsBlurred] = useState(false);
-    let emailInputRef = useRef()
-    let pwdInputRef = useRef();
+    let emailInputRef = useRef(null)
+    let passwordInputRef = useRef(null);
+    const isFocused = useIsFocused();
 
     /**
      * Validates the user's email they entered in the email field.
@@ -33,8 +35,7 @@ const Login = ({navigation}) => {
      */
     const emailIsValid = () => {
         // Email regular expression that must find a match
-        const reg = /^[a-zA-Z0-9.!#$%&'’*+\/=?^_`{|}~-]{1,64}@([a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{1,63}$/;
-        return (reg.test(email) || email === '');
+        return (Regex.EMAIL.test(email) || email === '');
     };
 
     const handleSubmit = async () => {
@@ -93,18 +94,20 @@ const Login = ({navigation}) => {
     };
 
     useEffect(() => {
-        if (!!showPasswordInput && !!pwdInputRef.current) {
-            pwdInputRef.current.focus();
+        if (!!showPasswordInput && !!passwordInputRef.current) {
+            passwordInputRef.current.focus();
         }
     }, [showPasswordInput]);
 
     useEffect(() => {
         if (isLoggedIn) {
-            navigation.navigate('Repairs');
+            if (isFocused) { // Only navigate if the screen is focused
+                navigation.navigate('Repairs');
+            }
         } else {
-            emailInputRef.current.focus();
+            emailInputRef.current?.focus();
         }
-    }, [isLoggedIn]);
+    }, [isLoggedIn, isFocused, navigation]);
 
     useFocusEffect(
         useCallback(() => {
@@ -125,17 +128,15 @@ const Login = ({navigation}) => {
                     <View style={styles.content}>
                         <TextInput
                             label="Email"
-                            mode={enableEmail ? "outlined" : "outlined (disabled)"}
+                            mode="outlined"
                             autoCorrect={false}
                             style={styles.short_text_input}
                             value={email}
+                            returnKeyType="done"
                             inputMode={"email"}
                             autoFocus={true}
-                            editable={enableEmail}
-                            onPress={() => {setEnableEmail(true)}}
                             onFocus={() => {
                                 setEmailsBlurred(false);
-                                setEnableEmail(true);
                             }}
                             onBlur={() => {
                                 setEmailsValid(emailIsValid());
@@ -154,9 +155,10 @@ const Login = ({navigation}) => {
                                 mode="outlined"
                                 secureTextEntry={true}
                                 autoCorrect={false}
+                                returnKeyType="done"
                                 style={styles.short_text_input}
                                 value={password}
-                                ref={pwdInputRef}
+                                ref={passwordInputRef}
                                 onChangeText={
                                     password => setPassword(password.trim().toLowerCase())
                                 }
@@ -165,6 +167,7 @@ const Login = ({navigation}) => {
                         }
                         <SubmitButton
                             onPress={() => {handleSubmit()}}
+                            icon={() => <FontAwesome5 name="sign-in-alt" size={24} color="white" />}
                         />
                     </View>
                 </View>

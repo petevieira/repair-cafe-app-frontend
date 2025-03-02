@@ -5,8 +5,8 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { format } from "date-fns";
 
 import styles from 'globals/Styles'
-import { getEvents, deleteEventById } from 'requests/event-requests';
-import { Event as RepairEvent } from 'models/Event';
+import { getEvents, deleteEventById } from 'requests/repair-event-requests';
+import { Event as RepairEvent } from 'models/RepairEvent';
 import { useAuth } from 'contexts/auth-context';
 import { NavigationProp } from 'globals/RootNavigation';
 import appColors from 'globals/colors';
@@ -44,10 +44,14 @@ const Events = () => {
     }
 
     const addEventPressed = () => {
+        const now = new Date();
+        const gmtMidnight = new Date(
+            Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)
+        );
         navigation.navigate('Add/Edit Event', {
             event: {
                 _id: null,
-                date: (new Date()).toISOString(),
+                date: gmtMidnight.toISOString(),
             }
         });
     }

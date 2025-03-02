@@ -5,7 +5,7 @@ import SubmitButton from 'globals/SubmitButton';
 import Nav from 'globals/Nav';
 // Styles
 import styles from 'globals/Styles';
-import Item from 'models/Item';
+import Item from 'models/Repair';
 import { useNavigation } from '@react-navigation/native';
 
 const Home = () => {

@@ -8,10 +8,10 @@ import { Button, Text, Dialog, Portal
 import SubmitButton from "globals/SubmitButton"
 // Styles
 import styles from 'globals/Styles'
-import { Event as RepairEvent } from 'models/Event';
+import RepairEvent from 'models/RepairEvent';
 import {
     createEvent, updateEvent, getEventById, deleteEventById
-} from 'requests/event-requests';
+} from 'requests/repair-event-requests';
 import { useAuth } from 'contexts/auth-context';
 import EventDatePicker from 'globals/EventDatePicker';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
@@ -22,7 +22,7 @@ const AddEditEvent = ({route, navigation}) => {
 
     // State variables
     const [event, setEvent] = useState(new RepairEvent());
-    const [eventDate, setEventDate] = useState(new Date(paramEvent.date).setUTCHours(0, 0, 0, 0));
+    const [eventDate, setEventDate] = useState(new Date(paramEvent.date));
     const {
         authToken, setAuthToken,
         isLoggedIn, setIsLoggedIn,
@@ -50,8 +50,8 @@ const AddEditEvent = ({route, navigation}) => {
         if (!eventOkToSave(event)) {
             return;
         }
-        setShowLoader(true);
         try {
+            setShowLoader(true);
             if (!!event._id) {
                 const updatedEvent = await updateEvent(event);
                 console.debug("Updated event: ", updatedEvent);
@@ -92,32 +92,20 @@ const AddEditEvent = ({route, navigation}) => {
         }
     }
 
-    const getExistingEvent = async (id: string) => {
-        try {
-            setShowLoader(true);
-            const event = await getEventById(id);
-            setEvent(event);
-            setEventDate(event.date);
-        } catch (error) {
-            console.error(error);
-            setSnackbarMsg(error.message);
-        } finally {
-            setShowLoader(false);
-        }
-    }
-
-
     useEffect(() => {
-        if (!!paramEvent?._id) {
-            getExistingEvent(paramEvent._id);
-        } else {
+        if (!!paramEvent) {
+            console.log("Setting paramevent: ", paramEvent);
             setEvent(paramEvent);
         }
-    }, []);
+    }, [paramEvent]);
 
     useEffect(() => {
-        if (!!eventDate) {
-            setEvent({...event, date: eventDate});
+        if (!!eventDate && event._id) {
+            console.log("Setting eventDate: ", eventDate, event);
+            setEvent(prevEvent => ({
+                ...prevEvent,
+                date: eventDate
+            }))
         }
     }, [eventDate]);
 
@@ -140,7 +128,7 @@ const AddEditEvent = ({route, navigation}) => {
                         justifyContent: 'space-between',
                         gap: 10,
                     }}>
-                    { !!event._id &&
+                    { event?._id &&
                         <SubmitButton
                             style={{
                                 ...styles.deleteButton,
@@ -154,6 +142,7 @@ const AddEditEvent = ({route, navigation}) => {
                             }}
                         />
                     }
+                    { event &&
                         <SubmitButton
                             style={{
                                 flex: 1,
@@ -165,8 +154,8 @@ const AddEditEvent = ({route, navigation}) => {
                             onPress={() => {
                                 addOrSaveEvent(event);
                             }}
-                        >
-                        </SubmitButton>
+                        />
+                    }
                     </View>
                 </View>
 
@@ -178,7 +167,7 @@ const AddEditEvent = ({route, navigation}) => {
                     >
                         <Dialog.Title>Alert</Dialog.Title>
                         <Dialog.Content>
-                            <Text>Are you sure you want to delete {eventDate} event</Text>
+                            <Text>Are you sure you want to delete event on {new Date(eventDate).toISOString().split('T')[0]}?</Text>
                         </Dialog.Content>
                         <Dialog.Actions>
                             <Button onPress={() => {setShowDeleteConfirmationDialog(false)}}>Cancel</Button>

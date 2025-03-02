@@ -1,27 +1,45 @@
 import { API_URL } from '@env';
 
-const USERS_PREFIX      = `${API_URL}/users`;
-const ITEMS_PREFIX      = `${API_URL}/items`;
-const VOLUNTEERS_PREFIX = `${API_URL}/volunteers`;
-const TEXT_PREFIX       = `${API_URL}/text`;
+const REPAIRS_PREFIX       = `${API_URL}/repairs`;
+const REPAIR_EVENTS_PREFIX = `${API_URL}/repair-events`;
+const SUBSCRIBERS_PREFIX   = `${API_URL}/subscribers`;
+const TEXT_PREFIX          = `${API_URL}/text`;
+const USERS_PREFIX         = `${API_URL}/users`;
+const VOLUNTEERS_PREFIX    = `${API_URL}/volunteers`;
+
+const Repairs = {
+    ADD_BASIC_REPAIR:                `${REPAIRS_PREFIX}/add-basic-repair`,
+    ADD_FULL_REPAIR:                 `${REPAIRS_PREFIX}/add-full-repair`,
+    DELETE_REPAIR:                   `${REPAIRS_PREFIX}/delete-repair`,
+    UPDATE_REPAIR:                   `${REPAIRS_PREFIX}/update-repair`,
+    GET_REPAIR:                      `${REPAIRS_PREFIX}/get-repair`,
+    GET_REPAIRS_BASIC:               `${REPAIRS_PREFIX}/get-repairs-basic`,
+    FIND_OWNER_BY_EMAIL:             `${REPAIRS_PREFIX}/find-owner-by-email`,
+    FIND_INCOMPLETE_REPAIRS_BY_OWNER:`${REPAIRS_PREFIX}/find-incomplete-repairs-by-owner`,
+};
+
+const RepairEvents = {
+    CREATE_EVENT:                  `${REPAIR_EVENTS_PREFIX}/create-event`,
+    DELETE_EVENT_BY_ID:            `${REPAIR_EVENTS_PREFIX}/delete-event-by-id`,
+    UPDATE_EVENT:                  `${REPAIR_EVENTS_PREFIX}/update-event`,
+    GET_EVENT_BY_ID:               `${REPAIR_EVENTS_PREFIX}/get-event-by-id`,
+    GET_EVENTS:                    `${REPAIR_EVENTS_PREFIX}/get-events`,
+    GET_MOST_RECENT_EVENT:         `${REPAIR_EVENTS_PREFIX}/get-most-recent-event`,
+};
+
+const Subscribers = {
+    SUBSCRIBE_EMAIL_TO_NEWSLETTER:     `${SUBSCRIBERS_PREFIX}/add-subscriber`,
+    UNSUBSCRIBE_EMAIL_FROM_NEWSLETTER: `${SUBSCRIBERS_PREFIX}/delete-subscriber`,
+};
+
+const Text = {
+    GET_TEXT:                      `${TEXT_PREFIX}/get-text`,
+};
 
 const Users = {
     EMAIL_IS_REGISTERED:           `${USERS_PREFIX}/email-is-registered`,
     SIGN_IN:                       `${USERS_PREFIX}/sign-in`,
     USER_IS_ADMIN:                 `${USERS_PREFIX}/user-is-admin`,
-};
-
-const Items = {
-    ADD_BASIC_ITEM:                `${ITEMS_PREFIX}/add-basic-item`,
-    ADD_FULL_ITEM:                 `${ITEMS_PREFIX}/add-full-item`,
-    DELETE_ITEM:                   `${ITEMS_PREFIX}/delete-item`,
-    UPDATE_ITEM:                   `${ITEMS_PREFIX}/update-item`,
-    GET_ITEM:                      `${ITEMS_PREFIX}/get-item`,
-    GET_ITEMS_BASIC:               `${ITEMS_PREFIX}/get-items-basic`,
-    FIND_OWNER_BY_EMAIL:           `${ITEMS_PREFIX}/find-owner-by-email`,
-    FIND_INCOMPLETE_ITEMS_BY_OWNER:`${ITEMS_PREFIX}/find-incomplete-items-by-owner`,
-    FIND_PREVIOUS_EVENT_DATE:      `${ITEMS_PREFIX}/find-previous-event-date`,
-    FIND_NEXT_EVENT_DATE:          `${ITEMS_PREFIX}/find-next-event-date`,
 };
 
 const Volunteers = {
@@ -34,22 +52,4 @@ const Volunteers = {
     FIND_VOLUNTEER_BY_EMAIL:       `${VOLUNTEERS_PREFIX}/find-volunteer-by-email`,
 };
 
-const Events = {
-    CREATE_EVENT:                  `${API_URL}/events/create-event`,
-    DELETE_EVENT_BY_ID:            `${API_URL}/events/delete-event-by-id`,
-    UPDATE_EVENT:                  `${API_URL}/events/update-event`,
-    GET_EVENT_BY_ID:               `${API_URL}/events/get-event-by-id`,
-    GET_EVENTS:                    `${API_URL}/events/get-events`,
-    GET_MOST_RECENT_EVENT:         `${API_URL}/events/get-most-recent-event`,
-};
-
-const Text = {
-    GET_TEXT:                      `${TEXT_PREFIX}/get-text`,
-};
-
-const Subscribers = {
-    SUBSCRIBE_EMAIL_TO_NEWSLETTER: `${API_URL}/subscribers/add-subscriber`,
-    UNSUBSCRIBE_EMAIL_FROM_NEWSLETTER: `${API_URL}/subscribers/delete-subscriber`,
-};
-
-export default { Users, Items, Volunteers, Events, Text, Subscribers };
+export default { Repairs, RepairEvents, Subscribers, Text, Users, Volunteers };

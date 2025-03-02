@@ -5,35 +5,36 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { format } from "date-fns";
 
 import styles from 'globals/Styles'
-import { getItemsByDate, findPreviousEventDate, findNextEventDate } from 'requests/item-requests';
-import Item from 'models/Item';
+import { getRepairsByDate } from 'requests/repair-requests';
+import { getMostRecentEvent } from 'requests/repair-event-requests';
+import Repair from 'models/Repair';
 import { useAuth } from 'contexts/auth-context';
 import { NavigationProp } from 'globals/RootNavigation';
 import appColors from 'globals/colors';
 
 const Repairs = () => {
-    const [items, setItems] = useState([]);
+    const [repairs, setRepairs] = useState([]);
     const {
         authToken, setAuthToken,
         isLoggedIn, setIsLoggedIn,
         showLoader, setShowLoader,
         snackbarMsg, setSnackbarMsg,
-        eventDate, setEventDate,
+        appEvent, setAppEvent,
         timeZone, setTimeZone,
     } = useAuth();
     const [repairsRetrieved, setRepairsRetrieved] = useState(false);
     const navigation = useNavigation<NavigationProp>();
 
     // Today's date
-    const todaysDate = format(new Date(), "MMMM do, yyyy");
+    const todaysDate = new Date().toISOString().split('T')[0];
 
-    const getItems = async (isoDate: string) => {
+    const getRepairs = async (isoDate: string) => {
         console.debug("date: ", isoDate);
         // Convert date string to Date object
         try {
             setShowLoader(true);
-            const items = await getItemsByDate(isoDate);
-            setItems(items);
+            const tempRepairs = await getRepairsByDate(isoDate);
+            setRepairs(tempRepairs);
         } catch (error) {
             console.error(error);
             setSnackbarMsg(error.message);
@@ -43,23 +44,23 @@ const Repairs = () => {
         setRepairsRetrieved(true);
     }
 
-    const addItemPressed = () => {
+    const addRepairPressed = () => {
         navigation.navigate('Add/Edit Repair', {
-            item: new Item()
+            repair: new Repair()
         });
     }
 
-    const itemPressed = (item) => {
+    const repairPressed = (repair: Repair) => {
         if (!isLoggedIn) {
             return;
         }
         navigation.navigate('Add/Edit Repair', {
-            item: item
+            repair: repair
         });
     }
 
     const goToPreviousEvent = async () => {
-        let date = new Date(eventDate);
+        let date = new Date(appEvent.date);
         date = new Date(date.setUTCDate(date.getUTCDate() - 1));
         date.setUTCHours(23, 59, 59, 999);
         const previousDate = await findPreviousEventDate(date.toISOString());
@@ -68,19 +69,19 @@ const Repairs = () => {
             return;
         }
         console.debug("Previous event date: ", previousDate);
-        setEventDate(format(previousDate, "MMMM do, yyyy"));
-        getItems(previousDate.toISOString());
+        setAppEvent({ ...appEvent, date: format(previousDate, "MMMM do, yyyy") });
+        getRepairs(previousDate.toISOString());
     }
 
     const goToNextEvent = async () => {
-        if (new Date(eventDate).toISOString().slice(0, 10)
+        if (new Date(appEvent.date).toISOString().slice(0, 10)
             === new Date().toISOString().slice(0, 10)
         ) {
             setSnackbarMsg("Can't go to future events");
             return;
         }
 
-        let date = new Date(eventDate);
+        let date = new Date(appEvent.date);
         date.setDate(date.getDate() + 1);
         date.setHours(0, 0, 0, 0);
         const nextDate = await findNextEventDate(date.toISOString());
@@ -89,14 +90,14 @@ const Repairs = () => {
             return;
         }
         console.debug("Next event date: ", nextDate);
-        setEventDate(format(nextDate, "MMMM do, yyyy"));
-        getItems(nextDate.toISOString());
+        setAppEvent({ ...appEvent, date: format(nextDate, "MMMM do, yyyy") });
+        getRepairs(nextDate.toISOString());
     }
 
     useFocusEffect(
         useCallback(() => {
-            getItems(todaysDate);
-        },[])
+            getRepairs(appEvent.date);
+        },[appEvent])
     );
 
     return (
@@ -113,13 +114,15 @@ const Repairs = () => {
                             onPress={() => goToPreviousEvent()}
                         >{"◄"}</Text>
                         <View style={{flexDirection: "column", alignItems: "center"}}>
-                            <Text style={{textAlign: "center"}}>🗓️ ({eventDate})</Text>
+                            { appEvent?.date &&
+                                <Text style={{textAlign: "center"}}>🗓️ ({(new Date(appEvent.date)).toISOString().split('T')[0]})</Text>
+                            }
                             <Text style={{textAlign: "center"}}>🌐 ({timeZone})</Text>
                         </View>
-                    { (new Date(eventDate).toISOString().slice(0, 10))
+                    { appEvent?.date && (new Date(appEvent.date).toISOString().slice(0, 10))
                         < (new Date().toISOString().slice(0, 10)) ?
                         <Text
-                            style={{ opacity: eventDate === todaysDate ? 0 : 100, height: 0}}
+                            style={{ opacity: (new Date(appEvent.date)).toISOString().split('T')[0] === todaysDate ? 0 : 100, height: 0}}
                             onPress={() => goToNextEvent()}
                         >{"►"}</Text>
                         : <Text style={{height: 0}}>{""}</Text>
@@ -136,22 +139,22 @@ const Repairs = () => {
                             <DataTable.Title style={{flex: 4}}>Status</DataTable.Title>
                         </DataTable.Header>
 
-                    {items.map((item, idx) => (
+                    {repairs.map((repair, idx) => (
                         <DataTable.Row
-                            key={item._id}
-                            onPress={isLoggedIn ? (() => itemPressed(item)) : undefined}
-                            style={{backgroundColor: ["In Queue", "In Progress"].indexOf(item.repairStatus) >= 0 ? appColors.bgGray : appColors.bgGreen}}
+                            key={repair._id}
+                            onPress={isLoggedIn ? (() => repairPressed(repair)) : undefined}
+                            style={{backgroundColor: ["In Queue", "In Progress"].indexOf(repair.repairStatus) >= 0 ? appColors.bgGray : appColors.bgGreen}}
                         >
-                            <DataTable.Cell style={{flex: 1}}>{item.isFollowUpRepair ? "\u270E" : ""}</DataTable.Cell>
+                            <DataTable.Cell style={{flex: 1}}>{repair.isFollowUpRepair ? "\u270E" : ""}</DataTable.Cell>
                             <DataTable.Cell style={{flex: 1}}>{idx+1}</DataTable.Cell>
-                            <DataTable.Cell style={{flex: 3}}>{item.product}</DataTable.Cell>
-                            <DataTable.Cell style={{flex: 4}}>{item.ownersFirstName} {item.ownersLastName}</DataTable.Cell>
-                            <DataTable.Cell style={{flex: 3}}>{item.repairerFirstName} {item.repairerLastName}</DataTable.Cell>
-                            <DataTable.Cell style={{flex: 4}}>{item.repairStatus}</DataTable.Cell>
+                            <DataTable.Cell style={{flex: 3}}>{repair.product}</DataTable.Cell>
+                            <DataTable.Cell style={{flex: 4}}>{repair.ownersFirstName} {repair.ownersLastName}</DataTable.Cell>
+                            <DataTable.Cell style={{flex: 3}}>{repair.repairerFirstName} {repair.repairerLastName}</DataTable.Cell>
+                            <DataTable.Cell style={{flex: 4}}>{repair.repairStatus}</DataTable.Cell>
                         </DataTable.Row>
                     ))}
                     </DataTable>
-                { repairsRetrieved && items.length <= 0 &&
+                { repairsRetrieved && repairs.length <= 0 &&
                     <Text
                         style={{
                             padding: 10,
@@ -166,7 +169,7 @@ const Repairs = () => {
                 icon="plus"
                 style={styles.fab}
                 animated={false}
-                onPress={addItemPressed}
+                onPress={addRepairPressed}
                 />
             }
         </>

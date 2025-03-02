@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect, useContext, useRef } from 'react';
-import { View, ScrollView, Platform, KeyboardAvoidingView } from 'react-native';
+import { View, ScrollView, Platform, KeyboardAvoidingView, Keyboard } from 'react-native';
 import { useNavigation, useFocusEffect, useIsFocused } from '@react-navigation/native';
 import { HelperText, TextInput } from 'react-native-paper';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
@@ -10,6 +10,7 @@ import UserRequests from 'requests/user-requests';
 import { useAuth } from 'contexts/auth-context';
 import AsyncStorageHelpers from 'globals/async-storage-helpers';
 import { Regex } from 'consts/app.consts';
+import { TEST_EMAIL, TEST_PASSWORD, DEBUG } from '@env';
 
 const Login = ({navigation}) => {
     // State variables
@@ -39,6 +40,7 @@ const Login = ({navigation}) => {
     };
 
     const handleSubmit = async () => {
+        Keyboard.dismiss();
         if (!showPasswordInput) {
             if (email === '') {
                 setEmailsValid(false);
@@ -75,8 +77,12 @@ const Login = ({navigation}) => {
     }
 
     const signIn = async () => {
+        if (!email) {
+            return;
+        }
         try {
             setShowLoader(true);
+            console.debug("Signing in with email: ", email);
             const { token, user } = await UserRequests.signIn(email, password);
             // Add auth token to state
             setAuthToken(token);
@@ -92,6 +98,17 @@ const Login = ({navigation}) => {
             setShowLoader(false);
         }
     };
+
+    if (DEBUG) {
+        // Auto sign-in
+        useEffect(() => {
+            signIn();
+        }, [password]);
+        // Auto password
+        useEffect(() => {
+            setPassword(TEST_PASSWORD);
+        }, [email]);
+    }
 
     useEffect(() => {
         if (!!showPasswordInput && !!passwordInputRef.current) {
@@ -111,6 +128,10 @@ const Login = ({navigation}) => {
 
     useFocusEffect(
         useCallback(() => {
+            if (DEBUG) {
+                setShowPasswordInput(true);
+                setEmail(TEST_EMAIL);
+            }
             return () => {
                 clearContent();
             }
@@ -144,6 +165,7 @@ const Login = ({navigation}) => {
                             }}
                             ref={emailInputRef}
                             onChangeText={email => setEmail(email.trim().toLowerCase())}
+                            onSubmitEditing={handleSubmit}
                         />
                         <HelperText type="error" visible={emailsBlurred && !emailsValid}>
                             Please enter a valid email.
@@ -160,8 +182,9 @@ const Login = ({navigation}) => {
                                 value={password}
                                 ref={passwordInputRef}
                                 onChangeText={
-                                    password => setPassword(password.trim().toLowerCase())
+                                    password => setPassword(password.trim())
                                 }
+                                onSubmitEditing={handleSubmit}
                                 />
                         </>
                         }

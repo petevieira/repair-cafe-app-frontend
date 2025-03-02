@@ -1,4 +1,4 @@
-class Item {
+class Repair {
     _id: string;
     acceptsWaiver: boolean;
     ownersFirstName: string;
@@ -17,6 +17,7 @@ class Item {
     weight: string;
     cost: string;
     isFollowUpRepair: boolean;
+    eventId: string;
 
     constructor(
         id: string = "",
@@ -36,7 +37,8 @@ class Item {
         repairBarrier: string = "TBD",
         weight: string = "",
         cost: string = "",
-        isFollowUpRepair: boolean = false
+        isFollowUpRepair: boolean = false,
+        eventId: string = ""
     ) {
         this._id = id;
         this.acceptsWaiver = acceptsWaiver;
@@ -56,7 +58,8 @@ class Item {
         this.weight = weight;
         this.cost = cost;
         this.isFollowUpRepair = isFollowUpRepair;
+        this.eventId = eventId;
     }
 };
 
-export default Item;
+export default Repair;

@@ -1,4 +1,4 @@
-export class Event {
+class RepairEvent {
     _id: string;
     date: Date;
 
@@ -10,3 +10,5 @@ export class Event {
         this.date = date;
     }
 };
+
+export default RepairEvent;

@@ -1,23 +1,23 @@
 /**
- * @description Logic for requests that go to <api>/repairs/* routes
- */
+* @description Logic for requests that go to <api>/repairs/* routes
+*/
 
 import axios from 'axios';
 import Api from 'requests/request-consts';
-import { Event as RepairEvent } from 'models/Event';
+import RepairEvent from 'models/RepairEvent';
 
 /**
- * Get an event by its MongoDB document ID
- * @param {string} id - MongoDB document ID of the event
- * @returns Promise which resolves to the event, or rejects
- */
+* Get an event by its MongoDB document ID
+* @param {string} id - MongoDB document ID of the event
+* @returns Promise which resolves to the event, or rejects
+*/
 export const getEventById = async (id: string): Promise<RepairEvent> => {
     if (!id) {
         console.error("Can't get item. 'id' not defined");
         return null;
     }
 
-    const res = await axios.post(Api.Events.GET_EVENT_BY_ID, { id: id });
+    const res = await axios.post(Api.RepairEvents.GET_EVENT_BY_ID, { id: id });
     if (!res.status || !res.data?.event) {
         throw new Error(res.data?.message);
     }
@@ -26,11 +26,11 @@ export const getEventById = async (id: string): Promise<RepairEvent> => {
 };
 
 /**
- * Get all events
- * @returns Promise which resolves to the array of events, or rejects
- */
+* Get all events
+* @returns Promise which resolves to the array of events, or rejects
+*/
 export const getEvents = async (): Promise<[RepairEvent]> => {
-    const res = await axios.get(Api.Events.GET_EVENTS);
+    const res = await axios.get(Api.RepairEvents.GET_EVENTS);
     if (!res.status || !res.data || res.data?.events === undefined) {
         throw new Error(res.data?.message);
     }
@@ -38,10 +38,10 @@ export const getEvents = async (): Promise<[RepairEvent]> => {
 }
 
 /**
- * Create a new event
- * @param {string} date - Date of the event (YYYY-MM-DD)
- * @return Promise which resolves to the created event, or rejects
- */
+* Create a new event
+* @param {string} date - Date of the event (YYYY-MM-DD)
+* @return Promise which resolves to the created event, or rejects
+*/
 export const createEvent = async (date: Date): Promise<RepairEvent> => {
     if (!date) {
         console.error("Can't find previous event date. 'date' not defined");
@@ -54,12 +54,12 @@ export const createEvent = async (date: Date): Promise<RepairEvent> => {
         throw new Error("Invalid date format");
     }
 
-    const res = await axios.post(Api.Events.CREATE_EVENT, { date: date });
+    const res = await axios.post(Api.RepairEvents.CREATE_EVENT, { date: date });
     if (!res.status) {
         throw new Error(res.data?.message);
     }
 
-    if (!res.data?.event) {
+    if (!res.data?.createdEvent) {
         throw new Error("Event creation failed");
     }
 
@@ -72,7 +72,7 @@ export const deleteEventById = async (id: string): Promise<RepairEvent> => {
         return null;
     }
 
-    const res = await axios.delete(Api.Events.DELETE_EVENT_BY_ID + `/${id}`);
+    const res = await axios.delete(Api.RepairEvents.DELETE_EVENT_BY_ID + `/${id}`);
 
     if (!res.status || !res.data?.deletedEvent) {
         throw new Error(res.data?.message);
@@ -92,7 +92,7 @@ export const updateEvent = async (event: RepairEvent): Promise<RepairEvent> => {
         throw new Error("Can't update event. 'event.date' not defined");
     }
 
-    const res = await axios.post(Api.Events.UPDATE_EVENT, { event });
+    const res = await axios.post(Api.RepairEvents.UPDATE_EVENT, { event });
     if (!res.status) {
         throw new Error(res.data?.message);
     }
@@ -104,14 +104,26 @@ export const updateEvent = async (event: RepairEvent): Promise<RepairEvent> => {
 }
 
 export const getMostRecentEvent = async (): Promise<RepairEvent> => {
-  const res = await axios.put(Api.Events.GET_MOST_RECENT_EVENT);
-  if (!res.status) {
-    throw new Error(res.data?.message);
-  }
-  if (!res.data?.item) {
-    throw new Error("No event found");
-  }
-  return res.data.mostRecentEvent;
+    const todayGmtMidnight = toGmtMidnight(new Date());
+
+    const res = await axios.post(
+        Api.RepairEvents.GET_MOST_RECENT_EVENT,
+        { todaysDate: todayGmtMidnight.toISOString() }
+    );
+
+    if (!res.status) {
+        throw new Error(res.data?.message);
+    }
+    if (!res.data?.mostRecentEvent) {
+        throw new Error("Most recent event not found");
+    }
+    return res.data.mostRecentEvent;
+}
+
+const toGmtMidnight = (date: Date): Date => {
+    return new Date(
+        Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0)
+    );
 }
 
 export const isoToYyyyMmDd = (isoDate: Date): string => {

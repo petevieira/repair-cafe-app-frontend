@@ -25,7 +25,7 @@ const Volunteers = () => {
 
     const addVolunteer = () => {
         const volunteer: Volunteer = {
-            id: -1,
+            _id: "-1",
             firstName: "",
             lastName: "",
             email: "",

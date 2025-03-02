@@ -10,13 +10,13 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import Nav from "globals/Nav"
 import SubmitButton from "globals/SubmitButton"
 import styles from 'globals/Styles'
-import Item from 'models/Item';
+import Repair from 'models/Repair';
 import CheckBox from "globals/CheckBox"
 import { useAuth } from 'contexts/auth-context';
 import { getTodaysVolunteers } from 'requests/volunteer-requests';
 import {
-    addFullItem, getItem, updateItem, deleteItem, findOwnerByEmail, findIncompleteItemsByOwner
-} from 'requests/item-requests';
+    addFullRepair, getRepair, updateRepair, deleteRepair, findOwnerByEmail, findIncompleteRepairsByOwner
+} from 'requests/repair-requests';
 import {
     subscribeEmailToNewsletter,
     unsubscribeEmailFromNewsletter,
@@ -42,11 +42,11 @@ const ordsRepairBarrierList = RepairBarrierValues.map((el, idx) => {
 const MiscCategoryIdx = 17;
 
 const AddEditRepair = ({route, navigation}) => {
-    const [itemDetails, setItemDetails] = useState(new Item());
+    const [repairDetails, setRepairDetails] = useState(new Repair());
     const [waiverBoxChecked, setWaiverBoxChecked] = useState(false);
     const [pageTitle, setPageTitle] = useState("");
     const [termsModalVisible, setTermsModalVisible] = useState(false);
-    const [showAddItemBtn, setShowAddItemBtn] = useState(false);
+    const [showAddRepairBtn, setShowAddRepairBtn] = useState(false);
     const [repairerList, setRepairerList] = useState([]);
     const [volunteers, setVolunteers] = useState([]);
     const [repairerIdx, setRepairerIdx] = useState(-1);
@@ -58,46 +58,47 @@ const AddEditRepair = ({route, navigation}) => {
     const [productCategoryIdx, setProductCategoryIdx] = useState(MiscCategoryIdx)
     const [productCategoryFocused, setProductCategoryFocused] = useState(false);
     const [showDeleteConfirmationDialog, setShowDeleteConfirmationDialog] = useState(false);
-    const [previousIncompleteItems, setPreviousIncompleteItems] = useState([]);
-    const [selectedPreviousItemIdx, setSelectedPreviousItemIdx] = useState(null);
-    const [showPreviousItemsDropdown, setShowPreviousItemsDropdown] = useState(false);
+    const [previousIncompleteRepairs, setPreviousIncompleteRepairs] = useState([]);
+    const [selectedPreviousRepairIdx, setSelectedPreviousRepairIdx] = useState(null);
+    const [showPreviousRepairsDropdown, setShowPreviousRepairsDropdown] = useState(false);
     const [subscribedToNewsletter, setSubscribedToNewsletter] = useState(false);
-    let previousItemsList = [];
+    let previousRepairsList = [];
     const {
         authToken, setAuthToken,
         isLoggedIn, setIsLoggedIn,
         showLoader, setShowLoader,
-        snackbarMsg, setSnackbarMsg
+        snackbarMsg, setSnackbarMsg,
+        appEvent, setAppEvent,
     } = useAuth();
 
     let emailInputRef = useRef<string>(null)
 
-    const paramItem = route.params.item;
+    const paramRepair = route.params.repair;
 
     const isNumeric = (str: string): boolean => {
         return !isNaN(parseFloat(str)) && (parseFloat(str) > 0);
     }
 
-    const itemOkToSave = (item): boolean => {
+    const repairOkToSave = (repair: Repair): boolean => {
         let msg = "";
         if (!waiverBoxChecked) {
             msg = "Please agree to the terms";
-        } else if (!item.ownersEmail) {
+        } else if (!repair.ownersEmail) {
             msg = "Please enter the owner's email";
-        } else if (!emailIsValid(item.ownersEmail)) {
+        } else if (!emailIsValid(repair.ownersEmail)) {
             msg = "Please enter a valid email";
-        } else if (!item.ownersFirstName) {
+        } else if (!repair.ownersFirstName) {
             msg = "Please enter the owner's first name";
-        } else if (!item.product) {
+        } else if (!repair.product) {
             msg = "Please enter the product";
-        } else if (!item.type) {
+        } else if (!repair.type) {
             msg = "Please select a product category";
-        } else if (!item.symptoms) {
+        } else if (!repair.symptoms) {
             msg = "Please enter symptoms";
-        } else if (!isNumeric(item.weight)) {
+        } else if (!isNumeric(repair.weight)) {
             msg = "Please enter a valid weight";
-        } else if (!isNumeric(item.cost)) {
-            console.debug("cost: ", item.cost);
+        } else if (!isNumeric(repair.cost)) {
+            console.debug("cost: ", repair.cost);
             msg = "Please enter a valid cost";
         }
         if (msg !== '') {
@@ -107,21 +108,27 @@ const AddEditRepair = ({route, navigation}) => {
         return true;
     }
 
-    const saveItem = async () => {
-        if (!itemOkToSave(itemDetails)) {
+    const saveRepair = async () => {
+        if (!appEvent._id) {
+            setSnackbarMsg("Event not found. Please try again.");
+            return;
+        }
+        console.debug("saving repair: ", repairDetails);
+        repairDetails.eventId = appEvent._id;
+        if (!repairOkToSave(repairDetails)) {
             return
         }
 
         try {
             setShowLoader(true);
-            if (!!itemDetails._id) {
-                console.debug("Updating item: ", itemDetails);
-                await updateItem(itemDetails);
-                setSnackbarMsg("Item updated.");
+            if (!!repairDetails._id) {
+                console.debug("Updating repair: ", repairDetails);
+                await updateRepair(repairDetails);
+                setSnackbarMsg("Repair updated.");
             } else {
-                console.debug("Adding item: ", itemDetails);
-                await addFullItem(itemDetails);
-                setSnackbarMsg("Item added.");
+                console.debug("Adding repair: ", repairDetails);
+                await addFullRepair(repairDetails);
+                setSnackbarMsg("Repair added.");
             }
             navigation.navigate('Repairs');
         } catch (error) {
@@ -132,16 +139,16 @@ const AddEditRepair = ({route, navigation}) => {
         }
     }
 
-    const deleteCurrentItem = async () => {
-        if (!itemDetails._id) {
-            setSnackbarMsg("Item can't be deleted. It doesn't have an _id.");
+    const deleteCurrentRepair = async () => {
+        if (!repairDetails._id) {
+            setSnackbarMsg("Repair can't be deleted. It doesn't have an _id.");
             return;
         }
         setShowLoader(false);
         try {
-            const response = await deleteItem(itemDetails._id);
+            const response = await deleteRepair(repairDetails._id);
             setShowLoader(false);
-            setSnackbarMsg("Item deleted.");
+            setSnackbarMsg("Repair deleted.");
             setTimeout(() => {
                 navigation.navigate('Repairs');
             }, 500);
@@ -152,16 +159,16 @@ const AddEditRepair = ({route, navigation}) => {
         }
     }
 
-    const setTitle = (item: Item) => {
-        if (!!item?.ownersFirstName) {
-            setPageTitle(`${item.ownersFirstName}'s ${item.type}`);
+    const setTitle = (repair: Repair) => {
+        if (!!repair?.ownersFirstName) {
+            setPageTitle(`${repair.ownersFirstName}'s ${repair.type}`);
         } else {
-            setPageTitle("New Item");
+            setPageTitle("New Repair");
         }
     }
 
-    const isNewItem = (item) => {
-        return !item || !item._id;
+    const isNewRepair = (repair: Repair) => {
+        return !repair || !repair._id;
     }
 
     const getVolunteers = async () => {
@@ -179,36 +186,36 @@ const AddEditRepair = ({route, navigation}) => {
         }
     }
 
-    const initStatus = (item) => {
-        item.repairStatus = RepairStatusValues[0];
+    const initStatus = (repair: Repair) => {
+        repair.repairStatus = RepairStatusValues[0];
         setStatusIdx(0);
-        return item;
+        return repair;
     }
 
-    const getFullItem = async (item) => {
+    const getFullRepair = async (repair: Repair) => {
         setShowLoader(true);
-        if (isNewItem(item)) {
-            setPageTitle("New Item");
-            item = initStatus(item);
-            setItemDetails(item);
-            setWaiverBoxChecked(item.acceptsWaiver);
+        if (isNewRepair(repair)) {
+            setPageTitle("New Repair");
+            repair = initStatus(repair);
+            setRepairDetails(repair);
+            setWaiverBoxChecked(repair.acceptsWaiver);
             setShowLoader(false);
             return;
         }
 
         try {
-            const response = await getItem(item._id);
-            let fullItem = response.data.item;
-            setTitle(fullItem);
-            if (!fullItem.repairStatus) {
-                fullItem = initStatus(fullItem);
+            const response = await getRepair(repair._id);
+            let fullRepair = response.data.repair;
+            setTitle(fullRepair);
+            if (!fullRepair.repairStatus) {
+                fullRepair = initStatus(fullRepair);
             }
-            if (!fullItem.type) {
-                fullItem.type = ordsProductCategoryList[MiscCategoryIdx].label;
+            if (!fullRepair.type) {
+                fullRepair.type = ordsProductCategoryList[MiscCategoryIdx].label;
                 setProductCategoryIdx(MiscCategoryIdx);
             }
-            setItemDetails(fullItem);
-            setWaiverBoxChecked(response.data.item.acceptsWaiver);
+            setRepairDetails(fullRepair);
+            setWaiverBoxChecked(response.data.repair.acceptsWaiver);
             setShowLoader(false);
         } catch (error) {
             console.error(error);
@@ -218,13 +225,13 @@ const AddEditRepair = ({route, navigation}) => {
     };
 
     const onEmailBlur = async () => {
-        if (!!itemDetails._id || !emailIsValid(itemDetails.ownersEmail)) {
+        if (!!repairDetails._id || !emailIsValid(repairDetails.ownersEmail)) {
             return;
         }
 
         try {
             setShowLoader(true);
-            const owner = await findOwnerByEmail(itemDetails.ownersEmail);
+            const owner = await findOwnerByEmail(repairDetails.ownersEmail);
 
             setSubscribedToNewsletter(owner.subscribedToNewsletter);
 
@@ -233,8 +240,8 @@ const AddEditRepair = ({route, navigation}) => {
                 return;
             }
 
-            setItemDetails({
-                ...itemDetails,
+            setRepairDetails({
+                ...repairDetails,
                 ownersFirstName: owner.firstName,
                 ownersLastName: owner.lastName
             });
@@ -248,7 +255,7 @@ const AddEditRepair = ({route, navigation}) => {
     }
 
     const onSubscribeToggled = async (checked: boolean) => {
-        if (!itemDetails.ownersEmail) {
+        if (!repairDetails.ownersEmail) {
             setSnackbarMsg("Please enter the owner's email first.");
             // Reset checkbox
             setSubscribedToNewsletter(!checked);
@@ -258,10 +265,10 @@ const AddEditRepair = ({route, navigation}) => {
         try {
             setShowLoader(true);
             if (checked) {
-                await subscribeEmailToNewsletter(itemDetails.ownersEmail);
+                await subscribeEmailToNewsletter(repairDetails.ownersEmail);
                 setSnackbarMsg("Owner subscribed to newsletter.");
             } else {
-                await unsubscribeEmailFromNewsletter(itemDetails.ownersEmail);
+                await unsubscribeEmailFromNewsletter(repairDetails.ownersEmail);
                 setSnackbarMsg("Owner unsubscribed from newsletter.");
             }
         } catch (error) {
@@ -281,22 +288,22 @@ const AddEditRepair = ({route, navigation}) => {
     const onFollowUpRepairToggled = async (checked: boolean) => {
         console.debug("Checked: ", checked);
         if (checked) {
-            if (!itemDetails.ownersEmail) {
+            if (!repairDetails.ownersEmail) {
                 setSnackbarMsg("Please enter the owner's email first.");
                 return;
             }
             try {
                 setShowLoader(true);
-                previousItemsList = await findIncompleteItemsByOwner(itemDetails.ownersEmail);
-                console.debug("Previous items: ", previousItemsList);
-                let previousItemsDisplayList = [];
-                previousItemsList.forEach((i, idx) => {
-                    previousItemsDisplayList.push({
+                previousRepairsList = await findIncompleteRepairsByOwner(repairDetails.ownersEmail);
+                console.debug("Previous repairs: ", previousRepairsList);
+                let previousRepairsDisplayList = [];
+                previousRepairsList.forEach((i, idx) => {
+                    previousRepairsDisplayList.push({
                         label: `${i.type} - ${i.product} - ${i.symptoms}`,
                         value: idx
                     });
                 });
-                setPreviousIncompleteItems(previousItemsDisplayList);
+                setPreviousIncompleteRepairs(previousRepairsDisplayList);
             } catch (error) {
                 console.error(error);
                 setSnackbarMsg(error.message);
@@ -304,35 +311,35 @@ const AddEditRepair = ({route, navigation}) => {
                 setShowLoader(false);
             }
         } else {
-            setPreviousIncompleteItems([]);
+            setPreviousIncompleteRepairs([]);
         }
     }
 
-    const fillItemFieldsFromPreviousItem = async (idx) => {
-        console.debug("fillItemFieldsFromPreviousItem: ", idx);
+    const fillRepairFieldsFromPreviousRepair = async (idx) => {
+        console.debug("fillRepairFieldsFromPreviousRepair: ", idx);
         if (idx === null) {
             return;
         }
-        const prevItem = previousItemsList[idx];
-        setItemDetails({
-            ...itemDetails,
-            product: prevItem.product,
-            type: prevItem.type,
-            brand: prevItem.brand,
-            model: prevItem.model,
-            symptoms: prevItem.symptoms,
-            repairerFirstName: prevItem.repairerFirstName,
-            repairerLastName: prevItem.repairerLastName,
-            repairNotes: prevItem.repairNotes,
+        const prevRepair = previousRepairsList[idx];
+        setRepairDetails({
+            ...repairDetails,
+            product: prevRepair.product,
+            type: prevRepair.type,
+            brand: prevRepair.brand,
+            model: prevRepair.model,
+            symptoms: prevRepair.symptoms,
+            repairerFirstName: prevRepair.repairerFirstName,
+            repairerLastName: prevRepair.repairerLastName,
+            repairNotes: prevRepair.repairNotes,
             repairStatus: "In Queue",
-            weight: prevItem.weight,
-            cost: prevItem.cost,
+            weight: prevRepair.weight,
+            cost: prevRepair.cost,
             isFollowUpRepair: true
         });
     }
 
     useEffect(() => {
-        if (isNewItem(paramItem)) {
+        if (isNewRepair(paramRepair)) {
             if (emailInputRef.current) {
                 emailInputRef.current?.focus();
             }
@@ -341,73 +348,73 @@ const AddEditRepair = ({route, navigation}) => {
     }, []);
 
     useEffect(() => {
-        getFullItem(paramItem);
+        getFullRepair(paramRepair);
     }, []);
 
     useEffect(() => {
         if (statusIdx >= 0) {
-            setItemDetails({...itemDetails, repairStatus: ordsRepairStatusList[statusIdx].label})
+            setRepairDetails({...repairDetails, repairStatus: ordsRepairStatusList[statusIdx].label})
         }
     }, [statusIdx]);
 
     useEffect(() => {
         if (barrierIdx >= 0) {
-            setItemDetails({...itemDetails, repairBarrier: ordsRepairBarrierList[barrierIdx].label})
+            setRepairDetails({...repairDetails, repairBarrier: ordsRepairBarrierList[barrierIdx].label})
         }
     }, [barrierIdx]);
 
     useEffect(() => {
         if (productCategoryIdx >= 0) {
-            setItemDetails({...itemDetails, type: ordsProductCategoryList[productCategoryIdx].label});
+            setRepairDetails({...repairDetails, type: ordsProductCategoryList[productCategoryIdx].label});
         }
     }, [productCategoryIdx]);
 
     useEffect(() => {
         if (repairerIdx >= 0) {
-            setItemDetails({
-                ...itemDetails,
+            setRepairDetails({
+                ...repairDetails,
                 repairerFirstName: volunteers[repairerIdx].firstName,
                 repairerLastName: volunteers[repairerIdx].lastName
             });
         }
         return () => {
-            setItemDetails(new Item());
+            setRepairDetails(new Repair());
         }
     }, [repairerIdx]);
 
     useEffect(() => {
         ordsRepairStatusList.forEach((s, idx) => {
-            if (s.label === itemDetails.repairStatus) {
+            if (s.label === repairDetails.repairStatus) {
                 setStatusIdx(idx);
             }
             return () => {
                 setStatusIdx(-1);
             }
         });
-    }, [itemDetails]);
+    }, [repairDetails]);
 
     useEffect(() => {
         ordsRepairBarrierList.forEach((s, idx) => {
-            if (s.label === itemDetails.repairBarrier) {
+            if (s.label === repairDetails.repairBarrier) {
                 setBarrierIdx(idx);
             }
             return () => {
                 setBarrierIdx(-1);
             }
         });
-    }, [itemDetails]);
+    }, [repairDetails]);
 
     useEffect(() => {
         volunteers.forEach((v, idx) => {
-            if (v.firstName.toLowerCase() === itemDetails.repairerFirstName.toLowerCase()
-                && v.lastName.toLowerCase() === itemDetails.repairerLastName.toLowerCase()
+            if (v.firstName.toLowerCase() === repairDetails.repairerFirstName.toLowerCase()
+                && v.lastName.toLowerCase() === repairDetails.repairerLastName.toLowerCase()
         ) {
             setRepairerIdx(idx);
         }});
         return () => {
             setRepairerIdx(-1);
         }
-    }, [volunteers, itemDetails]);
+    }, [volunteers, repairDetails]);
 
     // Component's view
     return (
@@ -439,11 +446,11 @@ const AddEditRepair = ({route, navigation}) => {
                         mode="outlined"
                         autoCorrect={false}
                         style={styles.short_text_input}
-                        value={itemDetails.ownersEmail ?? ""}
+                        value={repairDetails.ownersEmail ?? ""}
                         onBlur={onEmailBlur}
                         ref={emailInputRef}
-                        onChangeText={newEmail => setItemDetails(
-                            { ...itemDetails, ownersEmail: newEmail.trim() }
+                        onChangeText={newEmail => setRepairDetails(
+                            { ...repairDetails, ownersEmail: newEmail.trim() }
                         )}
                     />
                     <TextInput
@@ -455,9 +462,9 @@ const AddEditRepair = ({route, navigation}) => {
                         mode="outlined"
                         autoCorrect={false}
                         style={styles.short_text_input}
-                        value={itemDetails.ownersFirstName ?? ""}
-                        onChangeText={newFirstName => setItemDetails(
-                            {...itemDetails, ownersFirstName: newFirstName.trim()}
+                        value={repairDetails.ownersFirstName ?? ""}
+                        onChangeText={newFirstName => setRepairDetails(
+                            {...repairDetails, ownersFirstName: newFirstName.trim()}
                         )}
                     />
                     {/* <TextInput
@@ -468,16 +475,16 @@ const AddEditRepair = ({route, navigation}) => {
                         mode="outlined"
                         autoCorrect={false}
                         style={styles.short_text_input}
-                        value={itemDetails.ownersLastName ?? ""}
-                        onChangeText={newLastName => setItemDetails(
-                            {...itemDetails, ownersLastName: newLastName}
+                        value={repairDetails.ownersLastName ?? ""}
+                        onChangeText={newLastName => setRepairDetails(
+                            {...repairDetails, ownersLastName: newLastName}
                         )}
                     /> */}
                     <View
                         style={{
                             flexDirection: 'row',
                             justifyContent: 'flex-start',
-                            alignItems: 'center',
+                            alignRepairs: 'center',
                         }}
                     >
                         <CheckBox
@@ -489,31 +496,31 @@ const AddEditRepair = ({route, navigation}) => {
                                     {"?"}
                                 </Text>
                             }
-                            status={itemDetails.isFollowUpRepair ? 'checked' : 'unchecked'}
+                            status={repairDetails.isFollowUpRepair ? 'checked' : 'unchecked'}
                             onPress={() => {
-                                setItemDetails({
-                                    ...itemDetails,
-                                    isFollowUpRepair: !itemDetails.isFollowUpRepair
+                                setRepairDetails({
+                                    ...repairDetails,
+                                    isFollowUpRepair: !repairDetails.isFollowUpRepair
                                 });
-                                onFollowUpRepairToggled(!itemDetails.isFollowUpRepair);
+                                onFollowUpRepairToggled(!repairDetails.isFollowUpRepair);
                             }}
                         />
                     </View>
-                { previousIncompleteItems.length > 0 &&
+                { previousIncompleteRepairs.length > 0 &&
                     <View style={{marginTop: 10, width: '100%'}}>
                         <PaperDropDown
                             label={"Previous Repairs"}
                             mode="outlined"
-                            visible={showPreviousItemsDropdown}
-                            showDropDown={() => setShowPreviousItemsDropdown(true)}
-                            onDismiss={() => setShowPreviousItemsDropdown(false)}
-                            value={selectedPreviousItemIdx}
-                            setValue={setSelectedPreviousItemIdx}
-                            list={previousIncompleteItems}
+                            visible={showPreviousRepairsDropdown}
+                            showDropDown={() => setShowPreviousRepairsDropdown(true)}
+                            onDismiss={() => setShowPreviousRepairsDropdown(false)}
+                            value={selectedPreviousRepairIdx}
+                            setValue={setSelectedPreviousRepairIdx}
+                            list={previousIncompleteRepairs}
                             dropdownPosition={"top"}
                             renderRightIcon={false}
                             onChange={v => {
-                                fillItemFieldsFromPreviousItem(v);
+                                fillRepairFieldsFromPreviousRepair(v);
                             }}
                         />
                     </View>
@@ -527,9 +534,9 @@ const AddEditRepair = ({route, navigation}) => {
                         mode="outlined"
                         autoCorrect={false}
                         style={styles.short_text_input}
-                        value={itemDetails.product ?? ""}
-                        onChangeText={newProduct => setItemDetails(
-                            {...itemDetails, product: newProduct}
+                        value={repairDetails.product ?? ""}
+                        onChangeText={newProduct => setRepairDetails(
+                            {...repairDetails, product: newProduct}
                         )}
                         placeholder="Vacuum / Toaster / Pants / ..."
                         placeholderTextColor={'#717171'}
@@ -568,9 +575,9 @@ const AddEditRepair = ({route, navigation}) => {
                         mode="outlined"
                         autoCorrect={false}
                         style={styles.short_text_input}
-                        value={itemDetails.brand ?? ""}
-                        onChangeText={newBrand => setItemDetails(
-                            {...itemDetails, brand: newBrand}
+                        value={repairDetails.brand ?? ""}
+                        onChangeText={newBrand => setRepairDetails(
+                            {...repairDetails, brand: newBrand}
                         )}
                         placeholder="Sony / Philips / Unknown / n.a."
                         placeholderTextColor={'#717171'}
@@ -580,8 +587,8 @@ const AddEditRepair = ({route, navigation}) => {
                         mode="outlined"
                         autoCorrect={false}
                         style={styles.short_text_input}
-                        value={itemDetails.model ?? ""}
-                        onChangeText={newModel => setItemDetails({...itemDetails, model: newModel})}
+                        value={repairDetails.model ?? ""}
+                        onChangeText={newModel => setRepairDetails({...repairDetails, model: newModel})}
                         placeholder="Senseo HD 7850 / iPhone 15 / ..."
                         placeholderTextColor={'#717171'}
                     />
@@ -594,9 +601,9 @@ const AddEditRepair = ({route, navigation}) => {
                         mode="outlined"
                         autoCorrect={false}
                         style={styles.short_text_input}
-                        value={itemDetails.symptoms ?? ""}
-                        onChangeText={newSymptoms => setItemDetails(
-                            {...itemDetails, symptoms: newSymptoms}
+                        value={repairDetails.symptoms ?? ""}
+                        onChangeText={newSymptoms => setRepairDetails(
+                            {...repairDetails, symptoms: newSymptoms}
                         )}
                         placeholder="Doesn't turn on / no sound / won't heat / ..."
                         placeholderTextColor={'#717171'}
@@ -611,9 +618,9 @@ const AddEditRepair = ({route, navigation}) => {
                         mode="outlined"
                         autoCorrect={false}
                         style={styles.short_text_input}
-                        value={itemDetails.weight ? itemDetails.weight.toString() : ""}
-                        onChangeText={newWeight => setItemDetails(
-                            {...itemDetails, weight: newWeight}
+                        value={repairDetails.weight ? repairDetails.weight.toString() : ""}
+                        onChangeText={newWeight => setRepairDetails(
+                            {...repairDetails, weight: newWeight}
                         )}
                     />
                     <TextInput
@@ -626,9 +633,9 @@ const AddEditRepair = ({route, navigation}) => {
                         inputMode={"decimal"}
                         autoCorrect={false}
                         style={styles.short_text_input}
-                        value={itemDetails.cost ? itemDetails.cost.toString() : ""}
-                        onChangeText={newCost => setItemDetails(
-                            {...itemDetails, cost: newCost}
+                        value={repairDetails.cost ? repairDetails.cost.toString() : ""}
+                        onChangeText={newCost => setRepairDetails(
+                            {...repairDetails, cost: newCost}
                         )}
                     />
                     <TextInput
@@ -636,8 +643,8 @@ const AddEditRepair = ({route, navigation}) => {
                         mode="outlined"
                         autoCorrect={false}
                         style={styles.short_text_input}
-                        value={itemDetails.repairNotes ?? ""}
-                        onChangeText={newNotes => setItemDetails({...itemDetails, repairNotes: newNotes})}
+                        value={repairDetails.repairNotes ?? ""}
+                        onChangeText={newNotes => setRepairDetails({...repairDetails, repairNotes: newNotes})}
                         placeholder="Fuse was blown. Replaced. / Soldered severed wire / ..."
                         placeholderTextColor={'#717171'}
                     />
@@ -718,7 +725,7 @@ const AddEditRepair = ({route, navigation}) => {
                         style={{
                             flexDirection: 'row',
                             justifyContent: 'flex-start',
-                            alignItems: 'center',
+                            alignRepairs: 'center',
                         }}
                     >
                         <CheckBox
@@ -736,7 +743,7 @@ const AddEditRepair = ({route, navigation}) => {
                     <CheckBox
                         style={{alignSelf: 'center'}}
                         label={
-                            <Text>{"Item owner agrees to the "}
+                            <Text>{"Repair owner agrees to the "}
                             <Text style={{color: "blue"}}
                             onPress={() => {
                                 setTermsModalVisible(true);
@@ -748,7 +755,7 @@ const AddEditRepair = ({route, navigation}) => {
                         }
                         status={waiverBoxChecked ? 'checked' : 'unchecked'}
                         onPress={() => {
-                            setItemDetails({...itemDetails, acceptsWaiver: !waiverBoxChecked});
+                            setRepairDetails({...repairDetails, acceptsWaiver: !waiverBoxChecked});
                             setWaiverBoxChecked(!waiverBoxChecked);
                         }}
                     />
@@ -759,7 +766,7 @@ const AddEditRepair = ({route, navigation}) => {
                             gap: 10,
                         }}
                     >
-                    { !!itemDetails._id &&
+                    { !!repairDetails._id &&
                         <SubmitButton
                             style={{
                                 ...styles.deleteButton,
@@ -781,7 +788,7 @@ const AddEditRepair = ({route, navigation}) => {
                             }}
                             rippleColor="#285882"
                             onPress={() => {
-                                saveItem()
+                                saveRepair()
                             }}
                         />
                     </View>
@@ -823,13 +830,13 @@ const AddEditRepair = ({route, navigation}) => {
                     >
                         <Dialog.Title>Alert</Dialog.Title>
                         <Dialog.Content>
-                            <Text>Are you sure you want to delete {itemDetails.ownersFirstName} {itemDetails.ownersLastName}'s {itemDetails.type}</Text>
+                            <Text>Are you sure you want to delete {repairDetails.ownersFirstName} {repairDetails.ownersLastName}'s {repairDetails.type}</Text>
                         </Dialog.Content>
                         <Dialog.Actions>
                             <Button onPress={() => {setShowDeleteConfirmationDialog(false)}}>Cancel</Button>
                             <Button
                                 onPress={() => {
-                                    deleteCurrentItem(itemDetails);
+                                    deleteCurrentRepair(repairDetails);
                                     setShowDeleteConfirmationDialog(false);
                                 }}
                                 labelStyle={{color: 'red'}}

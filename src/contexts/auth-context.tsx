@@ -4,6 +4,8 @@ import AsyncStorage from "globals/async-storage-helpers";
 import { jwtDecode } from "jwt-decode";
 import UserRequests from "requests/user-requests";
 import { navigate } from "globals/navigation-ref";
+import RepairEvent from "models/RepairEvent";
+import { getMostRecentEvent } from "requests/repair-event-requests";
 
 // Track the Axios Interceptor ID globally
 let globalInterceptor: any;
@@ -25,8 +27,8 @@ const AuthContext = createContext({
     isAdmin: false,
     setIsAdmin: (isAdmin: boolean) => { isAdmin: isAdmin },
     // Event-related state
-    eventDate: "",
-    setEventDate: (date: string) => { eventDate: date },
+    appEvent: new RepairEvent(),
+    setAppEvent: (event: RepairEvent) => { appEvent: event },
     timeZone: "",
     setTimeZone: (zone: string) => { timeZone: zone },
 });
@@ -43,8 +45,7 @@ const AuthProvider = ({ children }) => {
     const [showLoader, setShowLoader] = useState(false);
     const [snackbarMsg, setSnackbarMsg] = useState('');
     const [isAdmin, setIsAdmin] = useState(false);
-
-    const [eventDate, setEventDate] = useState("");
+    const [appEvent, setAppEvent] = useState(new RepairEvent());
     const [timeZone, setTimeZone] = useState("");
 
     const value = {
@@ -53,7 +54,7 @@ const AuthProvider = ({ children }) => {
         showLoader, setShowLoader,
         snackbarMsg, setSnackbarMsg,
         isAdmin, setIsAdmin,
-        eventDate, setEventDate,
+        appEvent, setAppEvent,
         timeZone, setTimeZone,
     };
 
@@ -165,13 +166,17 @@ const AuthProvider = ({ children }) => {
     }
 
     const loadEventDate = async () => {
-        const now = new Date();
-        const eventDate = now.toISOString().split('T')[0]; // Extracts YYYY-MM-DD
+        try {
+            const mostRecentEvent = await getMostRecentEvent();
+            console.debug("Most recent event: ", mostRecentEvent);
+            setAppEvent(mostRecentEvent);
+        } catch (error) {
+            console.error("Error fetching most recent event: ", error);
+            setSnackbarMsg(error.message || "Error fetching most recent event.");
+        }
 
         // Get the device's time zone
         const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-        setEventDate(eventDate);
         setTimeZone(timeZone);
     };
 

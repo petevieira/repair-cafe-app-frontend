@@ -5,12 +5,13 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { format } from "date-fns";
 
 import styles from 'globals/Styles'
-import { getRepairsByDate } from 'requests/repair-requests';
+import { getRepairsByEvent } from 'requests/repair-requests';
 import { getMostRecentEvent } from 'requests/repair-event-requests';
 import Repair from 'models/Repair';
 import { useAuth } from 'contexts/auth-context';
 import { NavigationProp } from 'globals/RootNavigation';
 import appColors from 'globals/colors';
+import EventHeader from 'globals/EventHeader';
 
 const Repairs = () => {
     const [repairs, setRepairs] = useState([]);
@@ -28,12 +29,10 @@ const Repairs = () => {
     // Today's date
     const todaysDate = new Date().toISOString().split('T')[0];
 
-    const getRepairs = async (isoDate: string) => {
-        console.debug("date: ", isoDate);
-        // Convert date string to Date object
+    const getRepairs = async () => {
         try {
             setShowLoader(true);
-            const tempRepairs = await getRepairsByDate(isoDate);
+            const tempRepairs = await getRepairsByEvent(appEvent._id);
             setRepairs(tempRepairs);
         } catch (error) {
             console.error(error);
@@ -59,44 +58,9 @@ const Repairs = () => {
         });
     }
 
-    const goToPreviousEvent = async () => {
-        let date = new Date(appEvent.date);
-        date = new Date(date.setUTCDate(date.getUTCDate() - 1));
-        date.setUTCHours(23, 59, 59, 999);
-        const previousDate = await findPreviousEventDate(date.toISOString());
-        if (!previousDate) {
-            setSnackbarMsg("No previous events");
-            return;
-        }
-        console.debug("Previous event date: ", previousDate);
-        setAppEvent({ ...appEvent, date: format(previousDate, "MMMM do, yyyy") });
-        getRepairs(previousDate.toISOString());
-    }
-
-    const goToNextEvent = async () => {
-        if (new Date(appEvent.date).toISOString().slice(0, 10)
-            === new Date().toISOString().slice(0, 10)
-        ) {
-            setSnackbarMsg("Can't go to future events");
-            return;
-        }
-
-        let date = new Date(appEvent.date);
-        date.setDate(date.getDate() + 1);
-        date.setHours(0, 0, 0, 0);
-        const nextDate = await findNextEventDate(date.toISOString());
-        if (!nextDate) {
-            setSnackbarMsg("No future events");
-            return;
-        }
-        console.debug("Next event date: ", nextDate);
-        setAppEvent({ ...appEvent, date: format(nextDate, "MMMM do, yyyy") });
-        getRepairs(nextDate.toISOString());
-    }
-
     useFocusEffect(
         useCallback(() => {
-            getRepairs(appEvent.date);
+            getRepairs();
         },[appEvent])
     );
 
@@ -107,28 +71,7 @@ const Repairs = () => {
                 style={{backgroundColor: appColors.bgGray}}
             >
                 <View style={styles.content}>
-                    {/* Left and right arrows on either side of the date */}
-                    <View style={{flexDirection: "row", justifyContent: "space-between"}}>
-                        <Text
-                            style={{}}
-                            onPress={() => goToPreviousEvent()}
-                        >{"◄"}</Text>
-                        <View style={{flexDirection: "column", alignItems: "center"}}>
-                            { appEvent?.date &&
-                                <Text style={{textAlign: "center"}}>🗓️ ({(new Date(appEvent.date)).toISOString().split('T')[0]})</Text>
-                            }
-                            <Text style={{textAlign: "center"}}>🌐 ({timeZone})</Text>
-                        </View>
-                    { appEvent?.date && (new Date(appEvent.date).toISOString().slice(0, 10))
-                        < (new Date().toISOString().slice(0, 10)) ?
-                        <Text
-                            style={{ opacity: (new Date(appEvent.date)).toISOString().split('T')[0] === todaysDate ? 0 : 100, height: 0}}
-                            onPress={() => goToNextEvent()}
-                        >{"►"}</Text>
-                        : <Text style={{height: 0}}>{""}</Text>
-                    }
-                    </View>
-
+                    <EventHeader/>
                     <DataTable>
                         <DataTable.Header>
                             <DataTable.Title style={{flex: 1}}>{"\u21BA"}</DataTable.Title>
@@ -148,7 +91,7 @@ const Repairs = () => {
                             <DataTable.Cell style={{flex: 1}}>{repair.isFollowUpRepair ? "\u270E" : ""}</DataTable.Cell>
                             <DataTable.Cell style={{flex: 1}}>{idx+1}</DataTable.Cell>
                             <DataTable.Cell style={{flex: 3}}>{repair.product}</DataTable.Cell>
-                            <DataTable.Cell style={{flex: 4}}>{repair.ownersFirstName} {repair.ownersLastName}</DataTable.Cell>
+                            <DataTable.Cell style={{flex: 4}}>{repair.ownersFirstName} {repair.ownersLastName ? repair.ownersLastName.charAt(0).toUpperCase() : ""}</DataTable.Cell>
                             <DataTable.Cell style={{flex: 3}}>{repair.repairerFirstName} {repair.repairerLastName}</DataTable.Cell>
                             <DataTable.Cell style={{flex: 4}}>{repair.repairStatus}</DataTable.Cell>
                         </DataTable.Row>

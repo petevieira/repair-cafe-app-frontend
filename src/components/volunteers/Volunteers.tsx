@@ -8,6 +8,8 @@ import styles from 'globals/Styles'
 import { getTodaysVolunteers } from 'requests/volunteer-requests';
 import Volunteer from 'models/Volunteer';
 import { useAuth } from 'contexts/auth-context';
+import EventHeader from 'globals/EventHeader';
+import { NavigationProp } from 'globals/RootNavigation';
 
 const Volunteers = () => {
     const [volunteers, setVolunteers] = useState([]);
@@ -15,22 +17,19 @@ const Volunteers = () => {
         authToken, setAuthToken,
         isLoggedIn, setIsLoggedIn,
         showLoader, setShowLoader,
-        snackbarMsg, setSnackbarMsg
+        snackbarMsg, setSnackbarMsg,
+        appEvent, setAppEvent,
+        timeZone, setTimeZone,
     } = useAuth();
     const [volunteersRetrieved, setVolunteersRetrieved] = useState(false);
-    const navigation = useNavigation();
+    const navigation = useNavigation<NavigationProp>();
 
     // Today's date
     const todaysDate = format(new Date(), "MMMM do, yyyy");
 
     const addVolunteer = () => {
-        const volunteer: Volunteer = {
-            _id: "-1",
-            firstName: "",
-            lastName: "",
-            email: "",
-            acceptsWaiver: false
-        };
+        let volunteer = new Volunteer();
+        volunteer.eventId = appEvent._id
         navigation.navigate('Add/Edit Volunteer', {
             volunteer: volunteer
         });
@@ -64,38 +63,38 @@ const Volunteers = () => {
 
     return (
         <>
-        <ScrollView
-        contentContainerStyle={styles.topScrollView}
-        style={{backgroundColor: '#f2f2f2'}}
-        >
-        <View style={styles.content}>
-        <Text style={{textAlign: "center"}}>({todaysDate})</Text>
-        <DataTable>
-        <DataTable.Header style={{minWidth: 320}}>
-        <DataTable.Title>First</DataTable.Title>
-        <DataTable.Title>Last</DataTable.Title>
-        </DataTable.Header>
-
-        {volunteers.map((volunteer) => (
-            <DataTable.Row key={volunteer._id}
-            onPress={(!isLoggedIn ? undefined : () => {volunteerPressed(volunteer)})}
+            <ScrollView
+                contentContainerStyle={styles.topScrollView}
+                style={{backgroundColor: '#f2f2f2'}}
             >
-            <DataTable.Cell>{volunteer.firstName}</DataTable.Cell>
-            <DataTable.Cell>{volunteer.lastName}</DataTable.Cell>
-            </DataTable.Row>
-        ))}
-        </DataTable>
+                <View style={styles.content}>
+                    <EventHeader/>
+                    <DataTable>
+                        <DataTable.Header style={{minWidth: 320}}>
+                            <DataTable.Title>First</DataTable.Title>
+                            <DataTable.Title>Last</DataTable.Title>
+                        </DataTable.Header>
 
-        { volunteersRetrieved && volunteers.length <= 0 &&
-            <Text
-            style={{
-                padding: 10,
-                alignSelf: 'center'
-            }}>{"No volunteers yet today"}
-            </Text>
-        }
-        </View>
-        </ScrollView>
+                    {volunteers.map((volunteer) => (
+                        <DataTable.Row key={volunteer._id}
+                            onPress={(!isLoggedIn ? undefined : () => {volunteerPressed(volunteer)})}
+                        >
+                            <DataTable.Cell>{volunteer.firstName}</DataTable.Cell>
+                            <DataTable.Cell>{volunteer.lastName}</DataTable.Cell>
+                        </DataTable.Row>
+                    ))}
+                    </DataTable>
+
+                { volunteersRetrieved && volunteers.length <= 0 &&
+                    <Text
+                        style={{
+                            padding: 10,
+                            alignSelf: 'center'
+                        }}>{"No volunteers yet today"}
+                    </Text>
+                }
+                </View>
+            </ScrollView>
         { isLoggedIn &&
             <FAB
             icon="plus"

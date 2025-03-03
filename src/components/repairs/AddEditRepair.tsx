@@ -467,9 +467,9 @@ const AddEditRepair = ({route, navigation}) => {
                             {...repairDetails, ownersFirstName: newFirstName.trim()}
                         )}
                     />
-                    {/* <TextInput
+                    <TextInput
                         label={
-                            <Text style={{color: '#717171'}}>{"Owner's last name "}
+                            <Text style={{color: '#717171'}}>{"Owner's last initial "}
                             </Text>
                         }
                         mode="outlined"
@@ -479,12 +479,12 @@ const AddEditRepair = ({route, navigation}) => {
                         onChangeText={newLastName => setRepairDetails(
                             {...repairDetails, ownersLastName: newLastName}
                         )}
-                    /> */}
+                    />
                     <View
                         style={{
                             flexDirection: 'row',
                             justifyContent: 'flex-start',
-                            alignRepairs: 'center',
+                            alignItems: 'center',
                         }}
                     >
                         <CheckBox
@@ -725,7 +725,7 @@ const AddEditRepair = ({route, navigation}) => {
                         style={{
                             flexDirection: 'row',
                             justifyContent: 'flex-start',
-                            alignRepairs: 'center',
+                            alignItems: 'center',
                         }}
                     >
                         <CheckBox

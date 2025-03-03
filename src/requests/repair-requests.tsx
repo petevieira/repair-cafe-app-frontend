@@ -21,8 +21,12 @@ export const getRepair = async (id: string): Promise<any> => {
  * @param {string} isoDate - Date to get repairs from (YYYY-MM-DDTHH:mm:ss.sssZ)
  * @returns Promise which resolves to the array of repairs, or rejects
  */
-export const getRepairsByDate = async (date: Date): Promise<any> => {
-    const res = await axios.get(Api.Repairs.GET_REPAIRS_BASIC + `/${isoDate}`);
+export const getRepairsByEvent = async (eventId: string): Promise<any> => {
+    console.debug("Retrieving repairs for event ", eventId);
+    if (!eventId) {
+        throw new Error("Can't get repairs. 'eventId' not defined");
+    }
+    const res = await axios.get(Api.Repairs.GET_REPAIRS_BASIC + `/${eventId}`);
     if (!res.status) {
         throw new Error(res.data.message);
     }

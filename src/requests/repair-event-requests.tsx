@@ -120,6 +120,58 @@ export const getMostRecentEvent = async (): Promise<RepairEvent> => {
     return res.data.mostRecentEvent;
 }
 
+export const findPreviousEvent = async (currentEvent: RepairEvent): Promise<RepairEvent> => {
+    if (!currentEvent) {
+        console.error("Can't find previous event date. 'currentEvent' not defined");
+        return null;
+    }
+    // Check date format is correct
+    const currentDateObject = new Date(currentEvent.date);
+    if (isNaN(currentDateObject.getTime())) {
+        throw new Error("Invalid date format");
+    }
+
+    const res = await axios.post(
+        Api.RepairEvents.FIND_PREVIOUS_EVENT,
+        { currentDate: currentDateObject.toISOString() }
+    );
+
+    if (!res.status) {
+        throw new Error(res.data?.message);
+    }
+    if (!res.data?.previousEvent) {
+        throw new Error("Previous event not found");
+    }
+
+    return res.data.previousEvent;
+}
+
+export const findNextEvent = async (currentEvent: RepairEvent): Promise<RepairEvent> => {
+    if (!currentEvent) {
+        console.error("Can't find next event date. 'currentEvent' not defined");
+        return null;
+    }
+    // Check date format is correct
+    const currentDateObject = new Date(currentEvent.date);
+    if (isNaN(currentDateObject.getTime())) {
+        throw new Error("Invalid date format");
+    }
+
+    const res = await axios.post(
+        Api.RepairEvents.FIND_NEXT_EVENT,
+        { currentDate: currentDateObject.toISOString() }
+    );
+
+    if (!res.status) {
+        throw new Error(res.data?.message);
+    }
+    if (!res.data?.nextEvent) {
+        throw new Error("Next event not found");
+    }
+
+    return res.data.nextEvent;
+}
+
 const toGmtMidnight = (date: Date): Date => {
     return new Date(
         Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0)

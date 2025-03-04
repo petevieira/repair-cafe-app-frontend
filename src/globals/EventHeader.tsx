@@ -3,6 +3,7 @@ import { View } from "react-native";
 import { Text } from "react-native-paper";
 import styles from 'globals/Styles'
 import { useAuth } from 'contexts/auth-context';
+import { findPreviousEvent, findNextEvent } from "requests/repair-event-requests";
 
 const EventHeader = ({}) => {
     const {
@@ -15,36 +16,23 @@ const EventHeader = ({}) => {
     const todaysDate = new Date().toISOString().split('T')[0];
 
     const goToPreviousEvent = async () => {
-        let date = new Date(appEvent.date);
-        date = new Date(date.setUTCDate(date.getUTCDate() - 1));
-        date.setUTCHours(23, 59, 59, 999);
-        const previousDate = await findPreviousEventDate(date.toISOString());
-        if (!previousDate) {
-            setSnackbarMsg("No previous events");
-            return;
+        try {
+            const previousEvent = await findPreviousEvent(appEvent);
+            setAppEvent(previousEvent);
+        } catch (error) {
+            console.error(error);
+            setSnackbarMsg(error.message);
         }
-        console.debug("Previous event date: ", previousDate);
-        setAppEvent({ ...appEvent, date: format(previousDate, "MMMM do, yyyy") });
     }
 
     const goToNextEvent = async () => {
-        if (new Date(appEvent.date).toISOString().slice(0, 10)
-            === new Date().toISOString().slice(0, 10)
-        ) {
-            setSnackbarMsg("Can't go to future events");
-            return;
+        try {
+            const nextEvent = await findNextEvent(appEvent);
+            setAppEvent(nextEvent);
+        } catch (error) {
+            console.error(error);
+            setSnackbarMsg(error.message);
         }
-
-        let date = new Date(appEvent.date);
-        date.setDate(date.getDate() + 1);
-        date.setHours(0, 0, 0, 0);
-        const nextDate = await findNextEventDate(date.toISOString());
-        if (!nextDate) {
-            setSnackbarMsg("No future events");
-            return;
-        }
-        console.debug("Next event date: ", nextDate);
-        setAppEvent({ ...appEvent, date: format(nextDate, "MMMM do, yyyy") });
     }
 
     return (

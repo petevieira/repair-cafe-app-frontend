@@ -25,6 +25,8 @@ const RepairEvents = {
     GET_EVENT_BY_ID:               `${REPAIR_EVENTS_PREFIX}/get-event-by-id`,
     GET_EVENTS:                    `${REPAIR_EVENTS_PREFIX}/get-events`,
     GET_MOST_RECENT_EVENT:         `${REPAIR_EVENTS_PREFIX}/get-most-recent-event`,
+    FIND_PREVIOUS_EVENT:           `${REPAIR_EVENTS_PREFIX}/find-previous-event`,
+    FIND_NEXT_EVENT:               `${REPAIR_EVENTS_PREFIX}/find-next-event`,
 };
 
 const Subscribers = {

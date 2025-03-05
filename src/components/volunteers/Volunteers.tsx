@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 import styles from 'globals/Styles'
-import { getTodaysVolunteers } from 'requests/volunteer-requests';
+import { getVolunteersByEvent } from 'requests/volunteer-requests';
 import Volunteer from 'models/Volunteer';
 import { useAuth } from 'contexts/auth-context';
 import EventHeader from 'globals/EventHeader';
@@ -37,23 +37,23 @@ const Volunteers = () => {
     };
 
     const getVolunteers = async () => {
-        setShowLoader(true);
         try {
-            const response = await getTodaysVolunteers();
-            setVolunteers(response.data.volunteers);
-            setShowLoader(false);
+            setShowLoader(true);
+            const volunteers = await getVolunteersByEvent(appEvent._id);
+            setVolunteers(volunteers);
         } catch (error) {
             console.error(error.message);
             setSnackbarMsg(error.message)
+        } finally {
             setShowLoader(false);
+            setVolunteersRetrieved(true);
         }
-        setVolunteersRetrieved(true);
     };
 
     useFocusEffect(
         useCallback(() => {
             getVolunteers();
-        }, [])
+        }, [appEvent])
     );
 
     return (
@@ -66,14 +66,16 @@ const Volunteers = () => {
                     <EventHeader/>
                     <DataTable>
                         <DataTable.Header style={{minWidth: 320}}>
+                            <DataTable.Title>#</DataTable.Title>
                             <DataTable.Title>First</DataTable.Title>
                             <DataTable.Title>Last</DataTable.Title>
                         </DataTable.Header>
 
-                    {volunteers.map((volunteer) => (
+                    {volunteers.map((volunteer, idx) => (
                         <DataTable.Row key={volunteer._id}
                             onPress={(!isLoggedIn ? undefined : () => {volunteerPressed(volunteer)})}
                         >
+                            <DataTable.Cell>{idx + 1}</DataTable.Cell>
                             <DataTable.Cell>{volunteer.firstName}</DataTable.Cell>
                             <DataTable.Cell>{volunteer.lastName}</DataTable.Cell>
                         </DataTable.Row>

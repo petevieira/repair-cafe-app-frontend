@@ -10,7 +10,7 @@ import styles from 'globals/Styles'
 import Repair from 'models/Repair';
 import CheckBox from "globals/CheckBox"
 import { useAuth } from 'contexts/auth-context';
-import { getTodaysVolunteers } from 'requests/volunteer-requests';
+import { getVolunteersByEvent } from 'requests/volunteer-requests';
 import {
     addFullRepair, getRepair, updateRepair, deleteRepair, findOwnerByEmail, findIncompleteRepairsByOwner
 } from 'requests/repair-requests';
@@ -170,13 +170,13 @@ const AddEditRepair = ({route, navigation}) => {
 
     const getVolunteers = async () => {
         try {
-            const response = await getTodaysVolunteers();
+            const tempVolunteers = await getVolunteersByEvent(appEvent._id);
             let list = [];
-            response.data.volunteers.forEach((v, idx) => {
+            tempVolunteers.forEach((v, idx) => {
                 list.push({ label: `${v.firstName} ${v.lastName}`, value: idx});
             });
             setRepairerList(list);
-            setVolunteers(response.data.volunteers);
+            setVolunteers(tempVolunteers);
         } catch (error) {
             console.error(error);
             setSnackbarMsg(error.message);
@@ -342,7 +342,7 @@ const AddEditRepair = ({route, navigation}) => {
             }
         }
         getVolunteers();
-    }, []);
+    }, [appEvent]);
 
     useEffect(() => {
         getFullRepair(paramRepair);

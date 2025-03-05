@@ -51,7 +51,15 @@ const Volunteers = {
     UPDATE_VOLUNTEER:              `${VOLUNTEERS_PREFIX}/update-volunteer`,
     GET_DAYS_VOLUNTEERS:           `${VOLUNTEERS_PREFIX}/get-days-volunteers`,
     GET_PAST_VOLUNTEERS:           `${VOLUNTEERS_PREFIX}/get-past-volunteers`,
+    GET_VOLUNTEERS_BY_EVENT:       `${VOLUNTEERS_PREFIX}/get-volunteers-by-event`,
     FIND_VOLUNTEER_BY_EMAIL:       `${VOLUNTEERS_PREFIX}/find-volunteer-by-email`,
 };
 
-export default { Repairs, RepairEvents, Subscribers, Text, Users, Volunteers };
+export default {
+    Repairs,
+    RepairEvents,
+    Subscribers,
+    Text,
+    Users,
+    Volunteers
+};

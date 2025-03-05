@@ -26,6 +26,46 @@ const Repairs = () => {
         try {
             setShowLoader(true);
             const tempRepairs = await getRepairsByEvent(appEvent._id);
+            // Sort with follow-up repairs first, the In Queue progress, then In Progress, then the rest.
+            tempRepairs.sort((a: Repair, b: Repair) => {
+                if (a.isFollowUpRepair && !b.isFollowUpRepair) {
+                    return -1;
+                }
+                if (!a.isFollowUpRepair && b.isFollowUpRepair) {
+                    return 1;
+                }
+                if (a.repairStatus === "In Queue" && b.repairStatus !== "In Queue") {
+                    return -1;
+                }
+                if (a.repairStatus !== "In Queue" && b.repairStatus === "In Queue") {
+                    return 1;
+                }
+                if (a.repairStatus === "In Progress" && b.repairStatus !== "In Progress") {
+                    return -1;
+                }
+                if (a.repairStatus !== "In Progress" && b.repairStatus === "In Progress") {
+                    return 1;
+                }
+                if (a.repairStatus === "Repairable" && b.repairStatus !== "Repairable") {
+                    return -1;
+                }
+                if (a.repairStatus !== "Repairable" && b.repairStatus === "Repairable") {
+                    return 1;
+                }
+                if (a.repairStatus === "End of life" && b.repairStatus !== "End of life") {
+                    return -1;
+                }
+                if (a.repairStatus !== "End of life" && b.repairStatus === "End of life") {
+                    return 1;
+                }
+                if (a.repairStatus === "Unknown" && b.repairStatus !== "Unknown") {
+                    return -1;
+                }
+                if (a.repairStatus !== "Unknown" && b.repairStatus === "Unknown") {
+                    return 1;
+                }
+                return 0;
+            });
             setRepairs(tempRepairs);
         } catch (error) {
             console.error(error);

@@ -20,6 +20,24 @@ export const getTodaysVolunteers = async () => {
     );
 }
 
+export const getVolunteersByEvent = async (eventId: string) => {
+    try {
+        const res = await axios.get(Api.Volunteers.GET_VOLUNTEERS_BY_EVENT + `/${eventId}`);
+        if (!res.status) {
+            throw new Error(res.data.message);
+        }
+        if (res.data?.volunteers === undefined) {
+            throw new Error("Error getting volunteers by event");
+        }
+
+        return res.data.volunteers;
+    } catch (error) {
+        console.error("Error getting volunteers by event: ", error);
+        throw error;
+    }
+
+}
+
 export const addVolunteer = async (volunteer) => {
     return await axios.post(
         Api.Volunteers.ADD_VOLUNTEER, volunteer,

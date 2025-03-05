@@ -133,10 +133,9 @@ const AddEditEvent = ({route, navigation}) => {
                             style={{
                                 ...styles.deleteButton,
                                 flex: 1,
-                                marginHorizontal: 5,
                             }}
-                            icon={() => <FontAwesome5 name="trash" size={24} color="white" />}
-                            rippleColor="#974045"
+                            icon={() => <FontAwesome5 name="trash-alt" size={24} color="white" />}
+                            rippleColor="rgba(168,37,33,0.4)"
                             onPress={() => {
                                 setShowDeleteConfirmationDialog(true);
                             }}
@@ -146,7 +145,6 @@ const AddEditEvent = ({route, navigation}) => {
                         <SubmitButton
                             style={{
                                 flex: 1,
-                                marginHorizontal: 5,
                                 color: 'white',
                             }}
                             icon={() => <FontAwesome5 name="save" size={24} color="white" />}

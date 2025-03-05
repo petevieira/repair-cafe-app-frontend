@@ -1,6 +1,6 @@
-import { useContext, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { View, ScrollView } from 'react-native';
-import { TextInput, Text, DataTable, FAB } from 'react-native-paper';
+import { Text, DataTable, FAB } from 'react-native-paper';
 import { format } from "date-fns";
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
@@ -14,18 +14,13 @@ import { NavigationProp } from 'globals/RootNavigation';
 const Volunteers = () => {
     const [volunteers, setVolunteers] = useState([]);
     const {
-        authToken, setAuthToken,
-        isLoggedIn, setIsLoggedIn,
-        showLoader, setShowLoader,
-        snackbarMsg, setSnackbarMsg,
-        appEvent, setAppEvent,
-        timeZone, setTimeZone,
+        isLoggedIn,
+        setShowLoader,
+        setSnackbarMsg,
+        appEvent,
     } = useAuth();
     const [volunteersRetrieved, setVolunteersRetrieved] = useState(false);
     const navigation = useNavigation<NavigationProp>();
-
-    // Today's date
-    const todaysDate = format(new Date(), "MMMM do, yyyy");
 
     const addVolunteer = () => {
         let volunteer = new Volunteer();

@@ -2,32 +2,26 @@ import { useState, useCallback } from 'react';
 import { View, ScrollView } from 'react-native';
 import { Text, DataTable, FAB, Portal, Button, Dialog } from 'react-native-paper';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { format } from "date-fns";
 
 import styles from 'globals/Styles'
-import { getEvents, deleteEventById } from 'requests/repair-event-requests';
-import { Event as RepairEvent } from 'models/RepairEvent';
+import { getEvents } from 'requests/repair-event-requests';
+import RepairEvent from 'models/RepairEvent';
 import { useAuth } from 'contexts/auth-context';
 import { NavigationProp } from 'globals/RootNavigation';
 import appColors from 'globals/colors';
+import EventHeader from 'globals/EventHeader';
 
 const Events = () => {
     const [events, setEvents] = useState([]);
     const {
-        authToken, setAuthToken,
-        isLoggedIn, setIsLoggedIn,
-        isAdmin, setIsAdmin,
-        showLoader, setShowLoader,
-        snackbarMsg, setSnackbarMsg,
-        eventDate, setEventDate,
+        isLoggedIn,
+        isAdmin,
+        setShowLoader,
+        setSnackbarMsg,
+        setAppEvent,
     } = useAuth();
     const [eventsRetrieved, setEventsRetrieved] = useState(false);
-    const [showDeleteConfirmationDialog, setShowDeleteConfirmationDialog] = useState(false);
-    const [eventToDelete, setEventToDelete] = useState(null);
     const navigation = useNavigation<NavigationProp>();
-
-    // Today's date
-    const todaysDate = format(new Date(), "MMMM do, yyyy");
 
     const fetchEvents = async () => {
         try {
@@ -57,7 +51,8 @@ const Events = () => {
     }
 
     const goToEventPressed = (event: RepairEvent) => {
-
+        setAppEvent(event);
+        navigation.navigate('Repairs');
     }
 
     const toSimpleDate = (date: string | null): string => {
@@ -98,6 +93,7 @@ const Events = () => {
                 style={{backgroundColor: appColors.bgGray}}
             >
                 <View style={styles.content}>
+                    <EventHeader/>
                     <DataTable>
                         <DataTable.Header>
                             <DataTable.Title

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { View } from "react-native";
 import { TextInput } from "react-native-paper";
 import styles from 'globals/Styles'
@@ -15,7 +15,7 @@ const EventDatePicker = ({ eventDate, setEventDate }) => {
     const [dayValid, setDayValid] = useState(true);
     const [monthValid, setMonthValid] = useState(true);
     const margin = 10;
-    let yearInputRef = React.createRef();
+    let yearInputRef = useRef<React.ElementRef<typeof TextInput> | null>(null);
 
     const setDate = (year: string, month: string, day: string) => {
         let date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
@@ -81,7 +81,7 @@ const EventDatePicker = ({ eventDate, setEventDate }) => {
     }
 
     useEffect(() => {
-        yearInputRef.current.focus();
+        yearInputRef.current?.focus();
     }, []);
 
     return (

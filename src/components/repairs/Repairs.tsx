@@ -2,11 +2,9 @@ import { useState, useCallback } from 'react';
 import { View, ScrollView } from 'react-native';
 import { Text, DataTable, FAB } from 'react-native-paper';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { format } from "date-fns";
 
 import styles from 'globals/Styles'
 import { getRepairsByEvent } from 'requests/repair-requests';
-import { getMostRecentEvent } from 'requests/repair-event-requests';
 import Repair from 'models/Repair';
 import { useAuth } from 'contexts/auth-context';
 import { NavigationProp } from 'globals/RootNavigation';
@@ -16,18 +14,13 @@ import EventHeader from 'globals/EventHeader';
 const Repairs = () => {
     const [repairs, setRepairs] = useState([]);
     const {
-        authToken, setAuthToken,
-        isLoggedIn, setIsLoggedIn,
-        showLoader, setShowLoader,
-        snackbarMsg, setSnackbarMsg,
-        appEvent, setAppEvent,
-        timeZone, setTimeZone,
+        isLoggedIn,
+        setShowLoader,
+        setSnackbarMsg,
+        appEvent,
     } = useAuth();
     const [repairsRetrieved, setRepairsRetrieved] = useState(false);
     const navigation = useNavigation<NavigationProp>();
-
-    // Today's date
-    const todaysDate = new Date().toISOString().split('T')[0];
 
     const getRepairs = async () => {
         try {

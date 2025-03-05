@@ -1,20 +1,15 @@
-import { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
-    View, ScrollView, KeyboardAvoidingView, Platform, Pressable
+    View, ScrollView, KeyboardAvoidingView, Platform, Dimensions,
 } from 'react-native';
-import { Button, TextInput, HelperText, Text, Modal, Dialog, Portal
+import { Button, TextInput, Text, Dialog, Portal
 } from 'react-native-paper';
-import { format } from "date-fns";
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 // Custom Components
-import Nav from "globals/Nav"
 import SubmitButton from "globals/SubmitButton"
 import CheckBox from "globals/CheckBox"
-// Styles
 import styles from 'globals/Styles'
-// Fake data
-import HTMLView from 'react-native-htmlview';
 import Volunteer from 'models/Volunteer';
 import {
     addVolunteer, getVolunteer,
@@ -22,31 +17,29 @@ import {
 } from 'requests/volunteer-requests';
 import { useAuth } from 'contexts/auth-context';
 import Terms from 'globals/Terms';
-import { Dropdown } from 'react-native-element-dropdown';
-import { emailIsValid } from 'lib/helpers';
+import { emailIsValid, eventInThePast, eventInTheFuture } from 'lib/helpers';
 
 const AddEditVolunteer = ({route, navigation}) => {
     const paramVolunteer = route.params.volunteer;
 
     // State variables
-    const [todaysVolunteers, setTodaysVolunteers] = useState([]);
     const [id, setId] = useState("");
     const [waiverBoxChecked, setWaiverBoxChecked] = useState(false);
     const [volunteer, setVolunteer] = useState(new Volunteer());
     const [termsModalVisible, setTermsModalVisible] = useState(false);
     const {
-        authToken, setAuthToken,
-        isLoggedIn, setIsLoggedIn,
-        showLoader, setShowLoader,
-        snackbarMsg, setSnackbarMsg
+        setShowLoader,
+        setSnackbarMsg,
+        appEvent,
     } = useAuth();
     const [showDeleteConfirmationDialog, setShowDeleteConfirmationDialog] = useState(false);
-    const [pastVolunteerIdx, setPastVolunteerIdx] = useState(0)
-    const [pastVolunteersFocused, setPastVolunteersFocused] = useState(false);
-    const [pastVolunteers, setPastVolunteers] = useState([]);
-    let emailInputRef = useRef();
+    const [showSaveConfirmationDialog, setShowSaveConfirmationDialog] = useState(false);
+    const [saveConfirmationDialogMsg, setSaveConfirmationDialogMsg] = useState("");
+    let emailInputRef = useRef<React.ElementRef<typeof TextInput> | null>(null);
+    const screenWidth = Dimensions.get('window').width;
+    const screenHeight = Dimensions.get('window').height;
 
-    const volunteerOkToSave = (volunteer): boolean => {
+    const volunteerOkToSave = (volunteer: Volunteer): boolean => {
         let msg = "";
         if (!volunteer.email) {
             msg = "Please enter your email.";
@@ -67,7 +60,7 @@ const AddEditVolunteer = ({route, navigation}) => {
         return true;
     }
 
-    const addSaveVolunteer = async (volunteer: Volunteer) => {
+    const addSaveVolunteer = async () => {
         if (!volunteerOkToSave(volunteer)) {
             return;
         }
@@ -153,7 +146,7 @@ const AddEditVolunteer = ({route, navigation}) => {
         } else {
             setVolunteer(paramVolunteer);
             setWaiverBoxChecked(paramVolunteer.acceptsWaiver ?? false);
-            emailInputRef.current.focus();
+            emailInputRef.current?.focus();
         }
     }, []);
 
@@ -168,8 +161,8 @@ const AddEditVolunteer = ({route, navigation}) => {
             >
                 <View style={styles.content}>
 
-                <TextInput
-                    label={<><Text style={{color: '#717171'}}>Email</Text><Text style={{color: 'red'}}>*</Text></>}
+                    <TextInput
+                        label={<><Text style={{color: '#717171'}}>Email</Text><Text style={{color: 'red'}}>*</Text></>}
                         mode="outlined"
                         inputMode={"email"}
                         autoComplete={"off"}
@@ -221,12 +214,11 @@ const AddEditVolunteer = ({route, navigation}) => {
                     >
                     { !!volunteer._id &&
                         <SubmitButton
+                            icon={() => <FontAwesome5 name="trash-alt" size={18} color="white" />}
                             style={{
                                 ...styles.deleteButton,
                                 flex: 1,
-                                marginHorizontal: 5,
                             }}
-                            text="⌫"
                             rippleColor="rgba(168,37,33,0.4)"
                             onPress={() => {
                                 setShowDeleteConfirmationDialog(true);
@@ -234,13 +226,31 @@ const AddEditVolunteer = ({route, navigation}) => {
                         />
                     }
                         <SubmitButton
+                            icon={() => <FontAwesome5 name="save" size={24} color="white" iconStyle="solid" />}
                             style={{
                                 flex: 1,
                                 marginHorizontal: 5,
                             }}
-                            text="✓"
+                            rippleColor="#285882"
                             onPress={() => {
-                                addSaveVolunteer(volunteer);
+                                if (eventInThePast(appEvent)) {
+                                    if (volunteer._id) {
+                                        setSaveConfirmationDialogMsg("You are editing a volunteer from a past event. Are you sure you want to save it?");
+                                    } else {
+                                        setSaveConfirmationDialogMsg("You are adding a volunteer to a past event. Are you sure you want to save it?");
+                                    }
+                                    setShowSaveConfirmationDialog(true);
+                                } else if (eventInTheFuture(appEvent)) {
+                                    if (volunteer._id) {
+                                        setSaveConfirmationDialogMsg("You are editing a volunteer from a future event. Are you sure you want to save it?");
+                                    } else {
+                                        setSaveConfirmationDialogMsg("You are adding a volunteer to a future event. Are you sure you want to save it?");
+                                    }
+                                    setShowSaveConfirmationDialog(true);
+                                } else {
+                                    addSaveVolunteer()
+                                }
+                                addSaveVolunteer();
                             }}
                         />
                     </View>
@@ -248,16 +258,16 @@ const AddEditVolunteer = ({route, navigation}) => {
 
             { termsModalVisible &&
                 <View
-                style={{
-                    position: 'absolute',
-                    top: 5,
-                    left: '50%',
-                    transform: [{translateX: '-50%'}],
-                    height: '70vh',
-                    maxWidth: '80vw',
-                    minWidth: 320,
-                    backgroundColor: '#f2f2f2'
-                }}
+                    style={{
+                        position: 'absolute',
+                        top: 5,
+                        left: '50%',
+                        transform: [{translateX: (-0.5 * screenWidth)}],
+                        height: 0.7 * screenHeight,
+                        maxWidth: 0.8 * screenWidth,
+                        minWidth: 320,
+                        backgroundColor: '#f2f2f2'
+                    }}
                 >
                     <Text
                         onPress={() => { setTermsModalVisible(false) }}
@@ -289,11 +299,36 @@ const AddEditVolunteer = ({route, navigation}) => {
                             <Button onPress={() => {setShowDeleteConfirmationDialog(false)}}>Cancel</Button>
                             <Button
                                 onPress={() => {
-                                    deleteCurrentVolunteer(volunteer);
+                                    deleteCurrentVolunteer();
                                     setShowDeleteConfirmationDialog(false);
                                 }}
                                 labelStyle={{color: 'red'}}
                             >Delete</Button>
+                        </Dialog.Actions>
+                    </Dialog>
+                </Portal>
+
+                <Portal>
+                    <Dialog
+                        style={{
+                            minWidth: 320, maxWidth: 738, alignSelf: 'center'
+                        }}
+                        visible={showSaveConfirmationDialog}
+                        onDismiss={() => { setShowSaveConfirmationDialog(false) }}
+                    >
+                        <Dialog.Title style={{color: "red"}}>{"\u26A0 Alert"}</Dialog.Title>
+                        <Dialog.Content>
+                            <Text>{saveConfirmationDialogMsg}</Text>
+                        </Dialog.Content>
+                        <Dialog.Actions>
+                            <Button onPress={() => {setShowSaveConfirmationDialog(false)}}>Cancel</Button>
+                            <Button
+                                onPress={() => {
+                                    addSaveVolunteer();
+                                    setShowSaveConfirmationDialog(false);
+                                }}
+                                labelStyle={{color: 'red'}}
+                            >Save</Button>
                         </Dialog.Actions>
                     </Dialog>
                 </Portal>

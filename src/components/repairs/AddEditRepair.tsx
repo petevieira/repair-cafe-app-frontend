@@ -1,13 +1,10 @@
-import { useState, useEffect, useContext, useRef } from 'react';
-import { useNavigation } from '@react-navigation/native';
-import { View, Platform, KeyboardAvoidingView, ScrollView } from 'react-native';
+import { useState, useEffect, useRef } from 'react';
+import { View, Platform, KeyboardAvoidingView, ScrollView, Dimensions } from 'react-native';
 import { Button, Dialog, Portal, TextInput, HelperText, Text } from 'react-native-paper';
 import { DropDown as PaperDropDown }  from "react-native-paper-dropdown";
-import HTMLView from 'react-native-htmlview';
 import { Dropdown } from 'react-native-element-dropdown';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
-import Nav from "globals/Nav"
 import SubmitButton from "globals/SubmitButton"
 import styles from 'globals/Styles'
 import Repair from 'models/Repair';
@@ -24,8 +21,7 @@ import {
 import { ProductCategoryValues, RepairStatusValues, RepairBarrierValues} from 'globals/ords';
 import Terms from 'globals/Terms';
 import { WEIGHT_UNITS, COST_UNITS } from '@env';
-import { emailIsValid } from 'lib/helpers';
-import { sub } from 'date-fns';
+import { emailIsValid, eventInThePast, eventInTheFuture } from 'lib/helpers';
 
 const ordsProductCategoryList = ProductCategoryValues.map((el, idx) => {
     return { label: `${el.text} (${el.description})`, value: idx };
@@ -46,7 +42,6 @@ const AddEditRepair = ({route, navigation}) => {
     const [waiverBoxChecked, setWaiverBoxChecked] = useState(false);
     const [pageTitle, setPageTitle] = useState("");
     const [termsModalVisible, setTermsModalVisible] = useState(false);
-    const [showAddRepairBtn, setShowAddRepairBtn] = useState(false);
     const [repairerList, setRepairerList] = useState([]);
     const [volunteers, setVolunteers] = useState([]);
     const [repairerIdx, setRepairerIdx] = useState(-1);
@@ -62,14 +57,16 @@ const AddEditRepair = ({route, navigation}) => {
     const [selectedPreviousRepairIdx, setSelectedPreviousRepairIdx] = useState(null);
     const [showPreviousRepairsDropdown, setShowPreviousRepairsDropdown] = useState(false);
     const [subscribedToNewsletter, setSubscribedToNewsletter] = useState(false);
+    const [showSaveConfirmationDialog, setShowSaveConfirmationDialog] = useState(false);
+    const [saveConfirmationDialogMsg, setSaveConfirmationDialogMsg] = useState("");
     let previousRepairsList = [];
     const {
-        authToken, setAuthToken,
-        isLoggedIn, setIsLoggedIn,
-        showLoader, setShowLoader,
-        snackbarMsg, setSnackbarMsg,
-        appEvent, setAppEvent,
+        setShowLoader,
+        setSnackbarMsg,
+        appEvent,
     } = useAuth();
+    const screenWidth = Dimensions.get('window').width;
+    const screenHeight = Dimensions.get('window').height;
 
     let emailInputRef = useRef<string>(null)
 
@@ -768,6 +765,7 @@ const AddEditRepair = ({route, navigation}) => {
                     >
                     { !!repairDetails._id &&
                         <SubmitButton
+                            icon={() => <FontAwesome5 name="trash-alt" size={18} color="white" />}
                             style={{
                                 ...styles.deleteButton,
                                 flex: 1,
@@ -776,7 +774,6 @@ const AddEditRepair = ({route, navigation}) => {
                             onPress={() => {
                                 setShowDeleteConfirmationDialog(true);
                             }}
-                            icon={() => <FontAwesome5 name="trash-alt" size={18} color="white" />}
                         >
                         </SubmitButton>
                     }
@@ -788,7 +785,23 @@ const AddEditRepair = ({route, navigation}) => {
                             }}
                             rippleColor="#285882"
                             onPress={() => {
-                                saveRepair()
+                                if (eventInThePast(appEvent)) {
+                                    if (repairDetails._id) {
+                                        setSaveConfirmationDialogMsg("You are editing a repair from a past event. Are you sure you want to save it?");
+                                    } else {
+                                        setSaveConfirmationDialogMsg("You are adding a repair to a past event. Are you sure you want to save it?");
+                                    }
+                                    setShowSaveConfirmationDialog(true);
+                                } else if (eventInTheFuture(appEvent)) {
+                                    if (repairDetails._id) {
+                                        setSaveConfirmationDialogMsg("You are editing a repair from a future event. Are you sure you want to save it?");
+                                    } else {
+                                        setSaveConfirmationDialogMsg("You are adding a repair to a future event. Are you sure you want to save it?");
+                                    }
+                                    setShowSaveConfirmationDialog(true);
+                                } else {
+                                    saveRepair()
+                                }
                             }}
                         />
                     </View>
@@ -800,9 +813,9 @@ const AddEditRepair = ({route, navigation}) => {
                         position: 'absolute',
                         top: 5,
                         left: '50%',
-                        transform: [{translateX: '-50%'}],
-                        height: '70vh',
-                        maxWidth: '80vw',
+                        transform: [{translateX: (-0.5 * screenWidth)}],
+                        height: 0.7 * screenHeight,
+                        maxWidth: 0.8 * screenWidth,
                         minWidth: 320,
                     }}
                 >
@@ -828,7 +841,7 @@ const AddEditRepair = ({route, navigation}) => {
                         visible={showDeleteConfirmationDialog}
                         onDismiss={() => { setShowDeleteConfirmationDialog(false) }}
                     >
-                        <Dialog.Title>Alert</Dialog.Title>
+                        <Dialog.Title>{"\u26A0 Alert"}</Dialog.Title>
                         <Dialog.Content>
                             <Text>Are you sure you want to delete {repairDetails.ownersFirstName} {repairDetails.ownersLastName}'s {repairDetails.type}</Text>
                         </Dialog.Content>
@@ -836,11 +849,36 @@ const AddEditRepair = ({route, navigation}) => {
                             <Button onPress={() => {setShowDeleteConfirmationDialog(false)}}>Cancel</Button>
                             <Button
                                 onPress={() => {
-                                    deleteCurrentRepair(repairDetails);
+                                    deleteCurrentRepair();
                                     setShowDeleteConfirmationDialog(false);
                                 }}
                                 labelStyle={{color: 'red'}}
                             >Delete</Button>
+                        </Dialog.Actions>
+                    </Dialog>
+                </Portal>
+
+                <Portal>
+                    <Dialog
+                        style={{
+                            minWidth: 320, maxWidth: 738, alignSelf: 'center'
+                        }}
+                        visible={showSaveConfirmationDialog}
+                        onDismiss={() => { setShowSaveConfirmationDialog(false) }}
+                    >
+                        <Dialog.Title style={{color: "red"}}>{"\u26A0 Alert"}</Dialog.Title>
+                        <Dialog.Content>
+                            <Text>{saveConfirmationDialogMsg}</Text>
+                        </Dialog.Content>
+                        <Dialog.Actions>
+                            <Button onPress={() => {setShowSaveConfirmationDialog(false)}}>Cancel</Button>
+                            <Button
+                                onPress={() => {
+                                    saveRepair();
+                                    setShowSaveConfirmationDialog(false);
+                                }}
+                                labelStyle={{color: 'red'}}
+                            >Save</Button>
                         </Dialog.Actions>
                     </Dialog>
                 </Portal>

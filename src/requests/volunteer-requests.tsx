@@ -4,7 +4,6 @@
 
 import axios from 'axios';
 import Api from 'requests/request-consts';
-import AsyncStorageHelpers from 'globals/async-storage-helpers';
 
 /**
  * Checks if the passed in email is registered in the database
@@ -22,16 +21,8 @@ export const getTodaysVolunteers = async () => {
 }
 
 export const addVolunteer = async (volunteer) => {
-    const authToken = await AsyncStorageHelpers.getAuth();
-    if (!authToken) {
-        throw new Error("[addVolunteer] failed to get auth token");
-    }
-
     return await axios.post(
         Api.Volunteers.ADD_VOLUNTEER, volunteer,
-        {
-            headers: {'Authorization': `Bearer ${authToken.token}`}
-        }
     );
 }
 

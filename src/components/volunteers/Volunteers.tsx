@@ -1,36 +1,30 @@
-import { useContext, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { View, ScrollView } from 'react-native';
-import { TextInput, Text, DataTable, FAB } from 'react-native-paper';
+import { Text, DataTable, FAB } from 'react-native-paper';
 import { format } from "date-fns";
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 import styles from 'globals/Styles'
-import { getTodaysVolunteers } from 'requests/volunteer-requests';
+import { getVolunteersByEvent } from 'requests/volunteer-requests';
 import Volunteer from 'models/Volunteer';
 import { useAuth } from 'contexts/auth-context';
+import EventHeader from 'globals/EventHeader';
+import { NavigationProp } from 'globals/RootNavigation';
 
 const Volunteers = () => {
     const [volunteers, setVolunteers] = useState([]);
     const {
-        authToken, setAuthToken,
-        isLoggedIn, setIsLoggedIn,
-        showLoader, setShowLoader,
-        snackbarMsg, setSnackbarMsg
+        isLoggedIn,
+        setShowLoader,
+        setSnackbarMsg,
+        appEvent,
     } = useAuth();
     const [volunteersRetrieved, setVolunteersRetrieved] = useState(false);
-    const navigation = useNavigation();
-
-    // Today's date
-    const todaysDate = format(new Date(), "MMMM do, yyyy");
+    const navigation = useNavigation<NavigationProp>();
 
     const addVolunteer = () => {
-        const volunteer: Volunteer = {
-            id: -1,
-            firstName: "",
-            lastName: "",
-            email: "",
-            acceptsWaiver: false
-        };
+        let volunteer = new Volunteer();
+        volunteer.eventId = appEvent._id
         navigation.navigate('Add/Edit Volunteer', {
             volunteer: volunteer
         });
@@ -43,59 +37,61 @@ const Volunteers = () => {
     };
 
     const getVolunteers = async () => {
-        setShowLoader(true);
         try {
-            const response = await getTodaysVolunteers();
-            setVolunteers(response.data.volunteers);
-            setShowLoader(false);
+            setShowLoader(true);
+            const volunteers = await getVolunteersByEvent(appEvent._id);
+            setVolunteers(volunteers);
         } catch (error) {
             console.error(error.message);
             setSnackbarMsg(error.message)
+        } finally {
             setShowLoader(false);
+            setVolunteersRetrieved(true);
         }
-        setVolunteersRetrieved(true);
     };
 
     useFocusEffect(
         useCallback(() => {
             getVolunteers();
-        }, [])
+        }, [appEvent])
     );
 
     return (
         <>
-        <ScrollView
-        contentContainerStyle={styles.topScrollView}
-        style={{backgroundColor: '#f2f2f2'}}
-        >
-        <View style={styles.content}>
-        <Text style={{textAlign: "center"}}>({todaysDate})</Text>
-        <DataTable>
-        <DataTable.Header style={{minWidth: 320}}>
-        <DataTable.Title>First</DataTable.Title>
-        <DataTable.Title>Last</DataTable.Title>
-        </DataTable.Header>
-
-        {volunteers.map((volunteer) => (
-            <DataTable.Row key={volunteer._id}
-            onPress={(!isLoggedIn ? undefined : () => {volunteerPressed(volunteer)})}
+            <ScrollView
+                contentContainerStyle={styles.topScrollView}
+                style={{backgroundColor: '#f2f2f2'}}
             >
-            <DataTable.Cell>{volunteer.firstName}</DataTable.Cell>
-            <DataTable.Cell>{volunteer.lastName}</DataTable.Cell>
-            </DataTable.Row>
-        ))}
-        </DataTable>
+                <View style={styles.content}>
+                    <EventHeader/>
+                    <DataTable>
+                        <DataTable.Header style={{minWidth: 320}}>
+                            <DataTable.Title>#</DataTable.Title>
+                            <DataTable.Title>First</DataTable.Title>
+                            <DataTable.Title>Last</DataTable.Title>
+                        </DataTable.Header>
 
-        { volunteersRetrieved && volunteers.length <= 0 &&
-            <Text
-            style={{
-                padding: 10,
-                alignSelf: 'center'
-            }}>{"No volunteers yet today"}
-            </Text>
-        }
-        </View>
-        </ScrollView>
+                    {volunteers.map((volunteer, idx) => (
+                        <DataTable.Row key={volunteer._id}
+                            onPress={(!isLoggedIn ? undefined : () => {volunteerPressed(volunteer)})}
+                        >
+                            <DataTable.Cell>{idx + 1}</DataTable.Cell>
+                            <DataTable.Cell>{volunteer.firstName}</DataTable.Cell>
+                            <DataTable.Cell>{volunteer.lastName}</DataTable.Cell>
+                        </DataTable.Row>
+                    ))}
+                    </DataTable>
+
+                { volunteersRetrieved && volunteers.length <= 0 &&
+                    <Text
+                        style={{
+                            padding: 10,
+                            alignSelf: 'center'
+                        }}>{"No volunteers yet today"}
+                    </Text>
+                }
+                </View>
+            </ScrollView>
         { isLoggedIn &&
             <FAB
             icon="plus"

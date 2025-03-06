@@ -7,6 +7,7 @@ import AsyncStorageHelpers from 'globals/async-storage-helpers';
 import { useAuth } from 'contexts/auth-context';
 import { useNavigation } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
+import { NavigationProp } from 'globals/RootNavigation';
 
 const Nav = (props) => {
     const [menuVisible, setMenuVisible] = useState(false);
@@ -15,9 +16,10 @@ const Nav = (props) => {
         authToken, setAuthToken,
         isLoggedIn, setIsLoggedIn,
         showLoader, setShowLoader,
-        snackbarMsg, setSnackbarMsg
+        snackbarMsg, setSnackbarMsg,
+        isAdmin, setIsAdmin,
     } = useAuth();
-    const navigation = useNavigation();
+    const navigation = useNavigation<NavigationProp>();
     let routeName = props.routeName;
 
     const [fontsLoaded, fontError] = useFonts({
@@ -75,59 +77,61 @@ const Nav = (props) => {
 
     return (
         <View
-        style={{
-            alignItems: 'center',
-            flexDirection: 'row',
-            justifyContent: 'space-evenly',
-            backgroundColor: 'white',
-        }}
+            style={{
+                alignItems: 'center',
+                flexDirection: 'row',
+                justifyContent: 'space-evenly',
+                backgroundColor: 'white',
+            }}
         >
-        <View style={styles.appBar}>
-        <View
-        style={{marginRight: 'auto'}}
-        >
-        <Image
-        resizeMethod="scale"
-        resizeMode="contain"
-        style={styles.logo}
-        source={require('./assets/trc-logo-transparent-icon.png')}
-        onPress={() => {
-            navigation.navigate('Repairs');
-        }}
-        />
-        </View>
-        <View style={{alignText: 'center', justifyContent: 'center'}}>
-        <Text style={[styles.appBarTitle, {fontFamily: titleFont}]}>
-        {title}
-        </Text>
-        </View>
-        <View
-        style={{marginLeft: 'auto'}}
-        >
-        <Button
-        width={60}
-        icon={Platform.OS === 'ios' ? 'dots-horizontal' : 'dots-vertical'}
-        onPress={openMenu}
-        style={{width: 60}}
-        />
-        </View>
-        <Menu
-        visible={menuVisible}
-        onDismiss={closeMenu}
-        anchor={menuAnchor}
-        >
-        <Menu.Item
-        title="About"
-        onPress={aboutPressed}
-        />
-        {isLoggedIn &&
-            <Menu.Item
-            title="Log out"
-            onPress={logoutPressed}
-            />
-        }
-        </Menu>
-        </View>
+            <View style={styles.appBar}>
+                <View
+                    style={{marginRight: 'auto'}}
+                >
+                    <Image
+                        resizeMethod="scale"
+                        resizeMode="contain"
+                        style={styles.logo}
+                        source={require('./assets/trc-logo-transparent-icon.png')}
+                        onPress={() => {
+                            navigation.navigate('Repairs');
+                        }}
+                    />
+                </View>
+                <View style={{alignItems: 'center', justifyContent: 'center'}}>
+                    <Text style={[styles.appBarTitle, {fontFamily: titleFont}]}>
+                        {title}
+                    </Text>
+                </View>
+                <View
+                    style={{marginLeft: 'auto'}}
+                >
+                    <Button
+                        icon={Platform.OS === 'ios' ? 'dots-horizontal' : 'dots-vertical'}
+                        onPress={openMenu}
+                        style={{width: 60}}
+                    >
+                        {/* Adding an empty string as children (required) */}
+                        {""}
+                    </Button>
+                </View>
+                <Menu
+                    visible={menuVisible}
+                    onDismiss={closeMenu}
+                    anchor={menuAnchor}
+                >
+                    <Menu.Item
+                        title="About"
+                        onPress={aboutPressed}
+                    />
+                {isLoggedIn &&
+                    <Menu.Item
+                        title="Log out"
+                        onPress={logoutPressed}
+                    />
+                }
+                </Menu>
+            </View>
         </View>
     );
 }

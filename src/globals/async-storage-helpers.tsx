@@ -1,13 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StorageConsts } from 'consts/app.consts';
 
-const storeAuth = async (data) => {
+const storeAuth = async (data: { user: any; token: string }) => {
     try {
         await AsyncStorage.setItem(
             StorageConsts.AUTH,
             JSON.stringify(data)
         );
-        return true;
     } catch (error) {
         console.error(`Error saving ${StorageConsts.AUTH} in AsyncStorage: `, error);
         return Promise.reject(error);

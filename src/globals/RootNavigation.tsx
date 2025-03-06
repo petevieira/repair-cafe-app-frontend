@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { navigationRef } from './navigation-ref';
 import { useAuth } from 'contexts/auth-context';
 import { Portal, Snackbar} from 'react-native-paper';
@@ -10,16 +10,20 @@ import BottomTabs from 'globals/BottomTabs';
 import Loader from 'globals/Loader';
 import styles from 'globals/Styles';
 import Nav from 'globals/Nav';
-import Item from 'models/Item';
+import Repair from 'models/Repair';
 import Volunteer from 'models/Volunteer';
+import RepairEvent from 'models/RepairEvent';
 
 // Define the type for your app's screen names and params
 export type RootStackParamList = {
     "Home": undefined;
-    "Repairs": undefined;
-    "Add/Edit Repair": { item: Item };
     "Volunteer Login": undefined;
+    "Repairs": undefined;
+    "Add/Edit Repair": { repair: Repair };
+    "Volunteers": undefined;
     "Add/Edit Volunteer": { volunteer: Volunteer };
+    "Events": undefined;
+    "Add/Edit Event": { event: Omit<RepairEvent, 'date'> & { date: string | null } };
     "About": undefined;
 };
 
@@ -62,7 +66,7 @@ const RootNavigation = () => {
             <Loader/>
             <Portal>
                 <Snackbar
-                    duration={2000}
+                    duration={5000}
                     style={styles.snackbar}
                     visible={!!snackbarMsg}
                     onDismiss={() => {

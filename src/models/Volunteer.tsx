@@ -4,6 +4,7 @@ class Volunteer {
     lastName: string;
     email: string;
     acceptsWaiver: boolean;
+    eventId: string;
 
     constructor(
         id: string = "",
@@ -11,12 +12,14 @@ class Volunteer {
         lastName: string = "",
         email: string = "",
         acceptsWaiver: boolean = false,
+        eventId: string = ""
     ) {
         this._id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.acceptsWaiver = acceptsWaiver;
+        this.eventId = eventId;
     }
 };
 

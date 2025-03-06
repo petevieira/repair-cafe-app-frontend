@@ -1,163 +1,215 @@
 export const ProductCategoryValues = [
     {
         text: "Aircon/dehumidifier",
-        description: "Home/office appliance that adjusts ambient air quality."
+        description: "Home/office appliance that adjusts ambient air quality"
     },
     {
         text: "Battery/charger/adapter",
-        description: "e.g. mobile phone charger, portable battery."
+        description: "e.g. mobile phone charger, portable battery"
+    },
+    {
+        text: "Blender / Food Processor",
+        description: "e.g. blender, juicer, coffee grinder, stick blender, hand mixer"
+    },
+    {
+        text: "Clock",
+        description: "e.g. battery or plug-in clocks"
     },
     {
         text: "Decorative or safety lights",
-        description: "e.g. bike lights, fairy lights, Christmas lights."
+        description: "e.g. bike lights, fairy lights, Christmas lights"
     },
     {
         text: "Desktop computer",
-        description: "e.g. tower, mini tower, midi tower, desktop."
+        description: "e.g. tower, mini tower, midi tower, desktop"
     },
     {
         text: "Digital compact camera",
-        description: "e.g. smaller electronic cameras."
+        description: "e.g. smaller electronic cameras"
     },
     {
         text: "DSLR/video camera",
-        description: "e.g. larger electronic cameras."
+        description: "e.g. larger electronic cameras"
     },
     {
-        text: "Fan",
-        description: "e.g. cooling fan, fan heater."
+        text: "Fan / Heater",
+        description: "e.g. cooling fan, fan heater"
     },
     {
         text: "Flat screen",
-        description: "TVs and monitors."
+        description: "TVs and monitors"
     },
     {
         text: "Hair & beauty item",
-        description: "e.g. hair straightener, toothbrush, shaver."
+        description: "e.g. hair straightener, toothbrush, shaver"
     },
     {
         text: "Handheld entertainment device",
-        description: "e.g. iPod, Walkman, Gameboy."
+        description: "e.g. iPod, Walkman, Gameboy"
     },
     {
-        text: "Headphones",
-        description: "e.g. over-ear, earpods."
+        text: "Headphones / Earbuds",
+        description: "e.g. over-ear, earpods"
     },
     {
         text: "Hi-Fi integrated",
-        description: "e.g. “Boombox”, stereo."
+        description: "e.g. “Boombox”, stereo"
     },
     {
         text: "Hi-Fi separates",
-        description: "e.g. amplifier, speaker, turntable."
+        description: "e.g. amplifier, speaker, turntable"
+    },
+    {
+        text: "Induction cooktop",
+        description: "Kitchen appliance for cooking"
     },
     {
         text: "Kettle",
-        description: "Kitchen appliance for boiling water."
+        description: "Kitchen appliance for boiling water"
     },
     {
         text: "Lamp",
-        description: "e.g. desk lamp, floor lamp."
+        description: "e.g. desk lamp, floor lamp"
     },
     {
         text: "Laptop",
-        description: "Portable computer."
+        description: "Portable computer"
     },
     {
         text: "Large home electrical",
-        description: "e.g lawnmower, fitness machine."
+        description: "e.g lawnmower, fitness machine"
+    },
+    {
+        text: "Medical device",
+        description: "e.g. blood pressure monitor, thermometer, CPAP machine"
     },
     {
         text: "Misc",
-        description: "Any electronic device that does not fit in another category."
+        description: "Any electronic device that does not fit in another category"
     },
     {
         text: "Mobile",
-        description: "Any hand-held smartphone or other telecommunications device."
+        description: "Any hand-held smartphone or other telecommunications device"
     },
     {
         text: "Musical instrument",
-        description: "Any powered instrument e.g. keyboard, guitar."
+        description: "Any powered instrument e.g. keyboard, guitar"
     },
     {
         text: "Paper shredder",
-        description: "Home/office appliance for shredding documents."
+        description: "Home/office appliance for shredding documents"
     },
     {
         text: "PC accessory",
-        description: "e.g. mouse, keyboard, webcam."
+        description: "e.g. mouse, keyboard, webcam"
     },
     {
         text: "Portable radio",
-        description: "e.g. radio alarm, transistor radio."
+        description: "e.g. radio alarm, transistor radio"
     },
     {
         text: "Power tool",
-        description: "Any powered DIY or gardening tool, e.g. leaf blower, drill."
+        description: "Any powered DIY or gardening tool, e.g. leaf blower, drill"
     },
     {
         text: "Printer/scanner",
-        description: "Any inkjet, laserjet, scanner, copier or combination appliance."
+        description: "Any inkjet, laserjet, scanner, copier or combination appliance"
     },
     {
         text: "Projector",
-        description: "e.g. slide projector, video projector, digital projector."
+        description: "e.g. slide projector, video projector, digital projector"
     },
     {
         text: "Sewing machine",
-        description: "Home appliance for stitching fabric."
+        description: "Home appliance for stitching fabric"
     },
     {
         text: "Small home electrical",
-        description: "e.g. baby monitor, doorbell, multimeter."
+        description: "e.g. baby monitor, doorbell, multimeter"
     },
     {
-        text: "Small kitchen item",
-        description: "e.g. breadmaker, rice cooker, popcorn machine."
+        text: "Rice cooker",
+        description: "Kitchen appliance for cooking rice"
+    },
+    {
+        text: "Breadmaker",
+        description: "Kitchen appliance for baking bread"
+    },
+    {
+        text: "Popcorn machine",
+        description: "Kitchen appliance for making popcorn"
     },
     {
         text: "Tablet",
-        description: "e.g. Kindle, Fire, satnav."
+        description: "e.g. Kindle, Fire, satnav"
     },
     {
         text: "Toaster",
-        description: "Kitchen appliance for browning baked goods."
+        description: "Kitchen appliance for browning baked goods"
     },
     {
         text: "Toy",
-        description: "Any mains or battery powered toy."
+        description: "e.g. battery or plug-in toy"
     },
     {
         text: "TV and gaming-related accessories",
-        description: "e.g. set-top box, DVD player, games controller."
+        description: "e.g. set-top box, DVD player, games controller"
     },
     {
-        text: "Vacuum",
-        description: "Home appliance for sucking dust and dirt."
+        text: "Gaming console",
+        description: "e.g. Playstation, XBox"
     },
     {
-        text: "Watch/clock",
-        description: "Any electronic time-keeping or fitness monitoring device."
+        text: "Corded vacuum",
+        description: "Mains-powered vacuum cleaner"
+    },
+    {
+        text: "Robot vacuum",
+        description: "Automated vacuum cleaner"
+    },
+    {
+        text: "Cordless vacuum",
+        description: "Battery-powered vacuum cleaner"
+    },
+    {
+        text: "Watch",
+        description: "e.g. digital watches, fitness trackers",
     },
     {
         text: "Coffee maker",
-        description: "e.g. Nespresso, electronic filter or espresso machine."
+        description: "e.g. Nespresso, electronic filter or espresso machine"
     },
     {
         text: "Food processor",
-        description: "e.g. multi processor, blender, juicer, coffee grinder, stick blender, hand mixer."
+        description: "e.g. multi processor, blender, juicer, coffee grinder, stick blender, hand mixer"
     },
     {
         text: "Games console",
-        description: "e.g. Playstation, XBox. Note that a small console may be classified as a “Hand-held entertainment device”."
+        description: "e.g. Playstation, XBox. Note that a small console may be classified as a “Hand-held entertainment device”"
     },
     {
         text: "Hair dryer",
-        description: "Appliance for hair drying and styling with warm air."
+        description: "Appliance for hair drying and styling with warm air"
+    },
+    {
+        text: "Curling iron",
+        description: "Appliance for curling hair"
+    },
+    {
+        text: "Straightening iron",
+        description: "Appliance for straightening hair"
+    },
+    {
+        text: "Electric toothbrush",
+        description: "Battery or plug-in toothbrush"
+    },
+    {
+        text: "Shaver",
+        description: "e.g. electric shaver, beard trimmer"
     },
     {
         text: "Iron",
-        description: "e.g. clothes iron, steam iron."
+        description: "e.g. clothes iron, steam iron"
     },
 ];
 

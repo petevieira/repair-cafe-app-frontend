@@ -6,6 +6,8 @@ const appColors = {
     bgGray: "#f2f2f2",
     bgGreen: "#e6ffe6",
     bgRed: "#ffe6e6",
+    textGreen: "#034f03",
+    textPrimary: "#1c1b1f",
 };
 
 export default appColors;

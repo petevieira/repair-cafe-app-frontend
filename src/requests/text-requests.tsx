@@ -1,5 +1,5 @@
 /**
- * @description Logic for requests that go to <api>/repairs/* routes
+ * @description Logic for requests that go to <api>/text/* routes
  */
 
 import axios from 'axios';

@@ -7,12 +7,13 @@ const SubmitButton = (props) => {
 
     const { style, text, ...rest } = props;
     return (
-        <Button {...rest}
-        mode="outlined"
-        style={[styles.submitButton, style]}
-        labelStyle={styles.submitButtonLabel}
+        <Button
+            {...rest}
+            mode="outlined"
+            style={[styles.submitButton, style]}
+            labelStyle={styles.submitButtonLabel}
         >
-        {text || "Submit"}
+            {text}
         </Button>
     )
 };

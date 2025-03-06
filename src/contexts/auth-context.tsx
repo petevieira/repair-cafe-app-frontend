@@ -2,7 +2,10 @@ import { useState, useEffect, createContext, useContext } from "react";
 import axios from "axios";
 import AsyncStorage from "globals/async-storage-helpers";
 import { jwtDecode } from "jwt-decode";
+import UserRequests from "requests/user-requests";
 import { navigate } from "globals/navigation-ref";
+import RepairEvent from "models/RepairEvent";
+import { getMostRecentEvent } from "requests/repair-event-requests";
 
 // Track the Axios Interceptor ID globally
 let globalInterceptor: any;
@@ -20,7 +23,14 @@ const AuthContext = createContext({
     showLoader: false,
     setShowLoader: (showLoader: boolean) => { showLoader: showLoader },
     snackbarMsg: '',
-    setSnackbarMsg: (msg: string) => { snackbarMsg: msg }
+    setSnackbarMsg: (msg: string) => { snackbarMsg: msg },
+    isAdmin: false,
+    setIsAdmin: (isAdmin: boolean) => { isAdmin: isAdmin },
+    // Event-related state
+    appEvent: new RepairEvent(),
+    setAppEvent: (event: RepairEvent) => { appEvent: event },
+    timeZone: "",
+    setTimeZone: (zone: string) => { timeZone: zone },
 });
 
 const useAuth = () => {
@@ -34,12 +44,18 @@ const AuthProvider = ({ children }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [showLoader, setShowLoader] = useState(false);
     const [snackbarMsg, setSnackbarMsg] = useState('');
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [appEvent, setAppEvent] = useState(null);
+    const [timeZone, setTimeZone] = useState("");
 
     const value = {
         authToken, setAuthToken,
         isLoggedIn, setIsLoggedIn,
         showLoader, setShowLoader,
-        snackbarMsg, setSnackbarMsg
+        snackbarMsg, setSnackbarMsg,
+        isAdmin, setIsAdmin,
+        appEvent, setAppEvent,
+        timeZone, setTimeZone,
     };
 
     useEffect(() => {
@@ -85,6 +101,7 @@ const AuthProvider = ({ children }) => {
                 // and return to the sign-in page.
                 let res = error.response;
                 if (res.status === 401 && res.config && !res.config?.__isRetryRequest) {
+                    console.warn("401 Unauthorized - Logging out user.");
                     // 401 Unauthorized - Log user out.
                     await logOut();
                 } else {
@@ -120,32 +137,71 @@ const AuthProvider = ({ children }) => {
         try {
             let data = await AsyncStorage.getAuth();
             if (!data || !data.token || tokenIsExpired(data.token)) {
+                console.log("Token expired or missing - logging out");
                 await logOut();
                 return;
             }
             setAuthToken(data.token);
             setIsLoggedIn(true);
         } catch (error) {
+            console.error("Error loading auth token from AsyncStorage. ", error);
             await logOut();
         }
     };
 
-    const logOut = async () => {
+    const getIsAdmin = async () => {
+        if (!authToken) {
+            setIsAdmin(false);
+            return;
+        }
+        try {
+            const isAdmin = await UserRequests.userIsAdmin();
+            setIsAdmin(isAdmin);
+        } catch (error) {
+            console.error("Error checking if user is admin: ", error);
+            setIsAdmin(false);
+        }
+    }
+
+    /**
+     * @description Logs the user out by removing the auth token from AsyncStorage
+     * and setting the auth token to null.
+     * @returns {Promise<void>}
+     */
+    const logOut = async (): Promise<void> => {
         console.log("Logging out user...");
-        await AsyncStorage.storeAuth('');
+        await AsyncStorage.storeAuth({ user: null, token: null });
         setAuthToken(null);
         setIsLoggedIn(false);
-        // navigate("Volunteer Login");
+        setIsAdmin(false);
+        navigate('Volunteer Login');
     }
+
+    const loadEventDate = async () => {
+        try {
+            const mostRecentEvent = await getMostRecentEvent();
+            console.debug("Most recent event: ", mostRecentEvent);
+            setAppEvent(mostRecentEvent);
+        } catch (error) {
+            console.error("Error fetching most recent event: ", error);
+            setSnackbarMsg(error.message || "Error fetching most recent event.");
+        }
+
+        // Get the device's time zone
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        setTimeZone(timeZone);
+    };
 
     // Call `configurationAxios(authToken)` whenever `authToken` changes
     useEffect(() => {
         configureAxios(authToken);
+        getIsAdmin();
     }, [authToken]);
 
     // Load auth token on app start
     useEffect(() => {
         loadFromAsyncStorage();
+        loadEventDate();
     }, []);
 
     // Return the auth context provider

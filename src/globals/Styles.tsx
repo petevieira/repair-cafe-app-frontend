@@ -1,12 +1,12 @@
-import { StyleSheet, Platform, Dimensions } from "react-native";
-
+import { StyleSheet, Platform, Dimensions, TextStyle } from "react-native";
+import { ImageStyle } from "react-native";
 let mainFont = 'Futura';
-if (Platform.OS === 'ios') {
-    mainFont = 'system font';
-} else if (Platform.OS === 'android') {
+if (Platform.OS === 'ios' || Platform.OS === 'android') {
     mainFont = 'system font';
 }
 let titleFont = 'Salsa-Regular';
+
+export const selectionColor = '#246fb0';
 
 export default StyleSheet.create({
     appBar: {
@@ -28,8 +28,7 @@ export default StyleSheet.create({
         height: 60,
         width: 60,
         marginLeft: 10,
-        flex: 1,
-    },
+    } as ImageStyle,
     itemImage: {
         width: "25%",
         aspectRatio: 1
@@ -45,7 +44,7 @@ export default StyleSheet.create({
         alignItems: 'center',
         paddingTop: 15,
         paddingBottom: 15,
-        paddingHorizontal: 10
+        paddingHorizontal: 10,
     },
     content: {
         flex: 1,
@@ -55,6 +54,7 @@ export default StyleSheet.create({
         paddingTop: 10,
         paddingHorizontal: 10,
         marginHorizontal: 'auto',
+        marginBottom: 10,
     },
     home_buttons: {
         height: 120,
@@ -70,21 +70,20 @@ export default StyleSheet.create({
         marginVertical: 5,
         flex: 1,
         backgroundColor: 'white',
-    },
+    } as TextStyle,
     submitButton: {
         marginTop: 20,
-        // marginHorizontal: 20,
         backgroundColor: '#246fb0',
         borderColor: '#1a5385',
     },
     deleteButton: {
         marginTop: 20,
-        marginHorizontal: 20,
         backgroundColor: '#c34a51',
         borderColor: '#7b0005',
     },
     submitButtonLabel: {
         color: 'white',
+        paddingVertical: 15,
     },
     snackbar: {
         minWidth: 320,
@@ -94,8 +93,8 @@ export default StyleSheet.create({
     modalStyle: {
         backgroundColor: 'white',
         margin: 20,
-        width: '50vw',
-        height: '80vh',
+        width: '50%',
+        height: '80%',
         minWidth: 320,
     },
     loader: {

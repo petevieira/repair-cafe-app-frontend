@@ -7,6 +7,8 @@ import AddEditRepair from 'components/repairs/AddEditRepair';
 import Volunteers from 'components/volunteers/Volunteers';
 import AddEditVolunteer from 'components/volunteers/AddEditVolunteer';
 import About from 'components/About';
+import Events from 'components/events/Events';
+import AddEditEvent from 'components/events/AddEditEvent';
 
 // Instantiate a stack navigator
 const Stack = createNativeStackNavigator();
@@ -23,10 +25,10 @@ const ScreensNav = (props) => {
 
     return (
         <Stack.Navigator
-        initialRouteName="Login"
-        screenOptions={{
-            headerShown: false
-        }}
+            initialRouteName="Volunteer Login"
+            screenOptions={{
+                headerShown: false
+            }}
         >
             {isLoggedIn ? (
                 </* Screens that require authentication */>
@@ -53,6 +55,14 @@ const ScreensNav = (props) => {
                     <Stack.Screen
                         name="Volunteer Login"
                         component={Login}
+                    />
+                    <Stack.Screen
+                        name="Events"
+                        component={Events}
+                    />
+                    <Stack.Screen
+                        name="Add/Edit Event"
+                        component={AddEditEvent}
                     />
                 </>
             ) : (

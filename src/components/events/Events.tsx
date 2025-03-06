@@ -1,0 +1,141 @@
+import { useState, useCallback } from 'react';
+import { View, ScrollView } from 'react-native';
+import { Text, DataTable, FAB, Portal, Button, Dialog } from 'react-native-paper';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+
+import styles from 'globals/Styles'
+import { getEvents } from 'requests/repair-event-requests';
+import RepairEvent from 'models/RepairEvent';
+import { useAuth } from 'contexts/auth-context';
+import { NavigationProp } from 'globals/RootNavigation';
+import appColors from 'globals/colors';
+import EventHeader from 'globals/EventHeader';
+
+const Events = () => {
+    const [events, setEvents] = useState([]);
+    const {
+        isLoggedIn,
+        isAdmin,
+        setShowLoader,
+        setSnackbarMsg,
+        setAppEvent,
+    } = useAuth();
+    const [eventsRetrieved, setEventsRetrieved] = useState(false);
+    const navigation = useNavigation<NavigationProp>();
+
+    const fetchEvents = async () => {
+        try {
+            setShowLoader(true);
+            const fetchedEvents = await getEvents();
+            setEvents(fetchedEvents);
+        } catch (error) {
+            console.error(error);
+            setSnackbarMsg(error.message);
+        } finally {
+            setShowLoader(false);
+        }
+        setEventsRetrieved(true);
+    }
+
+    const addEventPressed = () => {
+        const now = new Date();
+        const gmtMidnight = new Date(
+            Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)
+        );
+        navigation.navigate('Add/Edit Event', {
+            event: {
+                _id: null,
+                date: gmtMidnight.toISOString(),
+            }
+        });
+    }
+
+    const goToEventPressed = (event: RepairEvent) => {
+        setAppEvent(event);
+        navigation.navigate('Repairs');
+    }
+
+    const toSimpleDate = (date: string | null): string => {
+        if (!date) {
+            return "";
+        }
+        return date.split("T")[0];
+    }
+
+
+    const editEventPressed = (event: RepairEvent) => {
+        if (!isLoggedIn || !isAdmin) {
+            return;
+        }
+        console.debug("editing event ", event);
+        navigation.navigate('Add/Edit Event', {
+            event: {
+                ...event,
+                date: typeof event.date === "string" ? event.date : (new Date(event.date)).toISOString(),
+            }
+        });
+    }
+
+    const reverseSort = () => {
+        setEvents([...events].reverse());
+    }
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchEvents();
+        },[])
+    );
+
+    return (
+        <>
+            <ScrollView
+                contentContainerStyle={styles.topScrollView}
+                style={{backgroundColor: appColors.bgGray}}
+            >
+                <View style={styles.content}>
+                    <EventHeader/>
+                    <DataTable>
+                        <DataTable.Header>
+                            <DataTable.Title
+                                style={{flex:10}}
+                                onPress={() => reverseSort()}
+                            >▲/▼ Date (YYYY-MM-DD)</DataTable.Title>
+                            <DataTable.Title style={{flex: 1, justifyContent: 'center'}}>{""}</DataTable.Title>
+                        </DataTable.Header>
+
+                    {events.map((event) => (
+                        <DataTable.Row
+                            key={event._id}
+                            onPress={() => editEventPressed(event)}
+                        >
+                            <DataTable.Cell style={{flex: 10}}>{toSimpleDate(event.date)}</DataTable.Cell>
+                            <DataTable.Cell
+                                style={{flex: 1, justifyContent: 'center'}}
+                                onPress={isLoggedIn ? (() => goToEventPressed(event)) : undefined}
+                            >{"►"}</DataTable.Cell>
+                        </DataTable.Row>
+                    ))}
+                    </DataTable>
+                { eventsRetrieved && events.length <= 0 &&
+                    <Text
+                        style={{
+                            padding: 10,
+                            alignSelf: 'center'
+                        }}>{"No events found"}
+                    </Text>
+                }
+                </View>
+            </ScrollView>
+            { isLoggedIn &&
+                <FAB
+                icon="plus"
+                style={styles.fab}
+                animated={false}
+                onPress={addEventPressed}
+                />
+            }
+        </>
+    )
+};
+
+export default Events;

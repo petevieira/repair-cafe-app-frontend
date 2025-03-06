@@ -1,31 +1,34 @@
 import { useCallback, useState, useEffect, useContext, useRef } from 'react';
-import { View, ScrollView, Platform, KeyboardAvoidingView } from 'react-native';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { View, ScrollView, Platform, KeyboardAvoidingView, Keyboard } from 'react-native';
+import { useNavigation, useFocusEffect, useIsFocused } from '@react-navigation/native';
 import { HelperText, TextInput } from 'react-native-paper';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 import SubmitButton from "globals/SubmitButton"
 import styles from 'globals/Styles'
 import UserRequests from 'requests/user-requests';
 import { useAuth } from 'contexts/auth-context';
 import AsyncStorageHelpers from 'globals/async-storage-helpers';
+import { Regex } from 'consts/app.consts';
+import { TEST_EMAIL, TEST_PASSWORD, DEBUG } from '@env';
 
 const Login = ({navigation}) => {
     // State variables
     const {
         authToken, setAuthToken,
         isLoggedIn, setIsLoggedIn,
+        isAdmin, setIsAdmin,
         showLoader, setShowLoader,
         snackbarMsg, setSnackbarMsg
     } = useAuth();
     const [email, setEmail] = useState("");
-    const [emailIsInvalid, setEmailIsInvalid] = useState(false);
     const [password, setPassword] = useState("");
-    const [enableEmail, setEnableEmail] = useState(true);
     const [showPasswordInput, setShowPasswordInput] = useState(false);
     const [emailsValid, setEmailsValid] = useState(false);
     const [emailsBlurred, setEmailsBlurred] = useState(false);
-    let emailInputRef = useRef()
-    let pwdInputRef = useRef();
+    let emailInputRef = useRef(null)
+    let passwordInputRef = useRef(null);
+    const isFocused = useIsFocused();
 
     /**
      * Validates the user's email they entered in the email field.
@@ -33,11 +36,11 @@ const Login = ({navigation}) => {
      */
     const emailIsValid = () => {
         // Email regular expression that must find a match
-        const reg = /^[a-zA-Z0-9.!#$%&'’*+\/=?^_`{|}~-]{1,64}@([a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{1,63}$/;
-        return (reg.test(email) || email === '');
+        return (Regex.EMAIL.test(email) || email === '');
     };
 
     const handleSubmit = async () => {
+        Keyboard.dismiss();
         if (!showPasswordInput) {
             if (email === '') {
                 setEmailsValid(false);
@@ -47,21 +50,23 @@ const Login = ({navigation}) => {
             if (email !== '' && emailIsValid()) {
                 setShowLoader(true);
                 try {
-                    const response = await UserRequests.userIsAdmin(email);
-                    if (!response.status) {
-                        throw new Error("Unknown error");
+                    const emailIsRegistered = await UserRequests.emailIsRegistered(email);
+                    if (!emailIsRegistered) {
+                        setSnackbarMsg("Email not found.");
+                        setShowPasswordInput(false);
+                        return;
                     }
                     setShowPasswordInput(true);
                     // Checking here maybe b/c it's a race condition for it to load first?
-                    setShowLoader(false);
                 } catch (error) {
                     console.error(error);
-                    setShowLoader(false);
                     setSnackbarMsg(error.message);
+                } finally {
+                    setShowLoader(false);
                 }
             }
         } else {
-            signInAdmin();
+            signIn();
         }
     };
 
@@ -71,42 +76,61 @@ const Login = ({navigation}) => {
         setShowPasswordInput(false);
     }
 
-    const signInAdmin = async () => {
-        setShowLoader(true);
+    const signIn = async () => {
+        if (!email) {
+            return;
+        }
         try {
-            const response = await UserRequests.signInAdmin(email, password);
+            setShowLoader(true);
+            const { token, user } = await UserRequests.signIn(email, password);
             // Add auth token to state
-            setAuthToken(response.data.token);
+            setAuthToken(token);
             setIsLoggedIn(true);
+            setIsAdmin(user.role === 'admin');
             // Store authentication items
-            const ok = await AsyncStorageHelpers.storeAuth(
-                { user: response.data.user, token: response.data.token }
-            );
+            await AsyncStorageHelpers.storeAuth({ user, token });
             navigation.navigate("Repairs");
-            setShowLoader(false);
         } catch (error) {
             console.error(error);
-            setShowLoader(false);
             setSnackbarMsg(error.message);
+        } finally {
+            setShowLoader(false);
         }
     };
 
+    if (DEBUG === "true") {
+        // Auto sign-in
+        useEffect(() => {
+            signIn();
+        }, [password]);
+        // Auto password
+        useEffect(() => {
+            setPassword(TEST_PASSWORD);
+        }, [email]);
+    }
+
     useEffect(() => {
-        if (!!showPasswordInput && !!pwdInputRef.current) {
-            pwdInputRef.current.focus();
+        if (!!showPasswordInput && !!passwordInputRef.current) {
+            passwordInputRef.current.focus();
         }
     }, [showPasswordInput]);
 
     useEffect(() => {
         if (isLoggedIn) {
-            navigation.navigate('Repairs');
+            if (isFocused) { // Only navigate if the screen is focused
+                navigation.navigate('Repairs');
+            }
         } else {
-            emailInputRef.current.focus();
+            emailInputRef.current?.focus();
         }
-    }, [isLoggedIn]);
+    }, [isLoggedIn, isFocused, navigation]);
 
     useFocusEffect(
         useCallback(() => {
+            if (DEBUG === "true") {
+                setShowPasswordInput(true);
+                setEmail(TEST_EMAIL);
+            }
             return () => {
                 clearContent();
             }
@@ -116,64 +140,60 @@ const Login = ({navigation}) => {
     // Component's view
     return (
         <ScrollView
-        contentContainerStyle={styles.topScrollView}
-        style={{backgroundColor: '#f2f2f2'}}
+            contentContainerStyle={styles.topScrollView}
+            style={{backgroundColor: '#f2f2f2'}}
         >
-        <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
-        <View
-        style={styles.container}
-        >
-        <View
-        style={styles.content}>
-        <TextInput
-        label="Admin Email"
-        mode={enableEmail ? "outlined" : "outlined (disabled)"}
-        autoCorrect={false}
-        style={styles.short_text_input}
-        value={email}
-        inputMode={"email"}
-        autoFocus={true}
-        editable={enableEmail}
-        onPress={() => {setEnableEmail(true)}}
-        onFocus={() => {
-            setEmailsBlurred(false);
-            setEnableEmail(true);
-        }}
-        onBlur={() => {
-            setEmailsValid(emailIsValid());
-            setEmailsBlurred(true);
-        }}
-        ref={emailInputRef}
-        onChangeText={email => setEmail(email.trim().toLowerCase())}
-        />
-        <HelperText type="error" visible={emailsBlurred && !emailsValid}>
-        Please enter a valid email.
-        </HelperText>
-        {showPasswordInput &&
-            <>
-            <TextInput
-            label="Admin Password"
-            mode="outlined"
-            secureTextEntry={true}
-            autoCorrect={false}
-            style={styles.short_text_input}
-            value={password}
-            ref={pwdInputRef}
-            onChangeText={
-                password => setPassword(password.trim().toLowerCase())
-            }
-            />
-            </>
-        }
-        <SubmitButton
-        onPress={() => {handleSubmit()}}
-        />
-        </View>
-        </View>
-
-        </KeyboardAvoidingView>
+            <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
+                <View style={styles.container}>
+                    <View style={styles.content}>
+                        <TextInput
+                            label="Email"
+                            mode="outlined"
+                            autoCorrect={false}
+                            style={styles.short_text_input}
+                            value={email}
+                            returnKeyType="done"
+                            inputMode={"email"}
+                            autoFocus={true}
+                            onFocus={() => {
+                                setEmailsBlurred(false);
+                            }}
+                            onBlur={() => {
+                                setEmailsValid(emailIsValid());
+                                setEmailsBlurred(true);
+                            }}
+                            ref={emailInputRef}
+                            onChangeText={email => setEmail(email.trim().toLowerCase())}
+                            onSubmitEditing={handleSubmit}
+                        />
+                        <HelperText type="error" visible={emailsBlurred && !emailsValid}>
+                            Please enter a valid email.
+                        </HelperText>
+                        {showPasswordInput &&
+                        <>
+                            <TextInput
+                                label="Password"
+                                mode="outlined"
+                                secureTextEntry={true}
+                                autoCorrect={false}
+                                returnKeyType="done"
+                                style={styles.short_text_input}
+                                value={password}
+                                ref={passwordInputRef}
+                                onChangeText={
+                                    password => setPassword(password.trim())
+                                }
+                                onSubmitEditing={handleSubmit}
+                                />
+                        </>
+                        }
+                        <SubmitButton
+                            onPress={() => {handleSubmit()}}
+                            icon={() => <FontAwesome5 name="sign-in-alt" size={24} color="white" />}
+                        />
+                    </View>
+                </View>
+            </KeyboardAvoidingView>
         </ScrollView>
     );
 

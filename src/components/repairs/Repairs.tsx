@@ -1,63 +1,107 @@
 import { useState, useCallback } from 'react';
 import { View, ScrollView } from 'react-native';
-import { Text, DataTable, FAB } from 'react-native-paper';
+import { Text, DataTable, FAB, Tooltip } from 'react-native-paper';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { format } from "date-fns";
 
 import styles from 'globals/Styles'
-import { getTodaysItems } from 'requests/item-requests';
-import Item from 'models/Item';
+import { getRepairsByEvent } from 'requests/repair-requests';
+import Repair from 'models/Repair';
 import { useAuth } from 'contexts/auth-context';
 import { NavigationProp } from 'globals/RootNavigation';
 import appColors from 'globals/colors';
+import EventHeader from 'globals/EventHeader';
 
 const Repairs = () => {
-    const [items, setItems] = useState([]);
+    const [repairs, setRepairs] = useState([]);
     const {
-        authToken, setAuthToken,
-        isLoggedIn, setIsLoggedIn,
-        showLoader, setShowLoader,
-        snackbarMsg, setSnackbarMsg
+        isLoggedIn,
+        setShowLoader,
+        setSnackbarMsg,
+        appEvent,
     } = useAuth();
     const [repairsRetrieved, setRepairsRetrieved] = useState(false);
     const navigation = useNavigation<NavigationProp>();
 
-    // Today's date
-    const todaysDate = format(new Date(), "MMMM do, yyyy");
-
-    const getItems = async () => {
-        setShowLoader(true);
+    const getRepairs = async () => {
+        if (!appEvent) {
+            return;
+        }
         try {
-            const response = await getTodaysItems();
-            setItems(response.data.items);
-            setShowLoader(false);
+            setShowLoader(true);
+            const tempRepairs = await getRepairsByEvent(appEvent._id);
+            if (!tempRepairs) {
+                setRepairs([]);
+                return;
+            }
+            // Sort with follow-up repairs first, the In Queue progress, then In Progress, then the rest.
+            tempRepairs.sort((a: Repair, b: Repair) => {
+                if (a.isFollowUpRepair && !b.isFollowUpRepair) {
+                    return -1;
+                }
+                if (!a.isFollowUpRepair && b.isFollowUpRepair) {
+                    return 1;
+                }
+                if (a.repairStatus === "In Queue" && b.repairStatus !== "In Queue") {
+                    return -1;
+                }
+                if (a.repairStatus !== "In Queue" && b.repairStatus === "In Queue") {
+                    return 1;
+                }
+                if (a.repairStatus === "In Progress" && b.repairStatus !== "In Progress") {
+                    return -1;
+                }
+                if (a.repairStatus !== "In Progress" && b.repairStatus === "In Progress") {
+                    return 1;
+                }
+                if (a.repairStatus === "Repairable" && b.repairStatus !== "Repairable") {
+                    return -1;
+                }
+                if (a.repairStatus !== "Repairable" && b.repairStatus === "Repairable") {
+                    return 1;
+                }
+                if (a.repairStatus === "End of life" && b.repairStatus !== "End of life") {
+                    return -1;
+                }
+                if (a.repairStatus !== "End of life" && b.repairStatus === "End of life") {
+                    return 1;
+                }
+                if (a.repairStatus === "Unknown" && b.repairStatus !== "Unknown") {
+                    return -1;
+                }
+                if (a.repairStatus !== "Unknown" && b.repairStatus === "Unknown") {
+                    return 1;
+                }
+                return 0;
+            });
+            setRepairs(tempRepairs);
         } catch (error) {
             console.error(error);
             setSnackbarMsg(error.message);
+        } finally {
             setShowLoader(false);
         }
         setRepairsRetrieved(true);
     }
 
-    const addItemPressed = () => {
+    const addRepairPressed = () => {
         navigation.navigate('Add/Edit Repair', {
-            item: new Item()
+            repair: new Repair()
         });
     }
 
-    const itemPressed = (item) => {
+    const repairPressed = (repair: Repair) => {
         if (!isLoggedIn) {
             return;
         }
         navigation.navigate('Add/Edit Repair', {
-            item: item
+            repair: repair
         });
     }
 
     useFocusEffect(
         useCallback(() => {
-            getItems();
-        },[])
+            getRepairs();
+        },[appEvent])
     );
 
     return (
@@ -67,10 +111,14 @@ const Repairs = () => {
                 style={{backgroundColor: appColors.bgGray}}
             >
                 <View style={styles.content}>
-                    <Text style={{textAlign: "center"}}>({todaysDate})</Text>
+                    <EventHeader/>
                     <DataTable>
                         <DataTable.Header>
-                            <DataTable.Title style={{flex: 1}}>{"\u21BA"}</DataTable.Title>
+                            <DataTable.Title style={{flex: 1}}>
+                                <Tooltip title="Follow-up repair">
+                                    <Text>{"\u21A9"}</Text>
+                                </Tooltip>
+                            </DataTable.Title>
                             <DataTable.Title style={{flex: 1}}>#</DataTable.Title>
                             <DataTable.Title style={{flex: 3}}>Item</DataTable.Title>
                             <DataTable.Title style={{flex: 4}}>Owner</DataTable.Title>
@@ -78,22 +126,29 @@ const Repairs = () => {
                             <DataTable.Title style={{flex: 4}}>Status</DataTable.Title>
                         </DataTable.Header>
 
-                    {items.map((item, idx) => (
+                    {repairs.map((repair, idx) => (
                         <DataTable.Row
-                            key={item._id}
-                            onPress={isLoggedIn ? (() => itemPressed(item)) : undefined}
-                            style={{backgroundColor: ["In Queue", "In Progress"].indexOf(item.repairStatus) >= 0 ? appColors.bgGray : appColors.bgGreen}}
+                            key={repair._id}
+                            onPress={isLoggedIn ? (() => repairPressed(repair)) : undefined}
+                            style={{backgroundColor: ["In Queue", "In Progress"].indexOf(repair.repairStatus) >= 0 ? appColors.bgGray : appColors.bgGreen}}
                         >
-                            <DataTable.Cell style={{flex: 1}}>{item.isFollowUpRepair ? "\u270E" : ""}</DataTable.Cell>
+                            <DataTable.Cell style={{flex: 1}}>
+                                {repair.isFollowUpRepair ? (
+                                    <Tooltip title="Follow-up repair">
+                                        <Text>{"\u21A9"}</Text>
+                                    </Tooltip>
+                                ) : (""
+                                )}
+                            </DataTable.Cell>
                             <DataTable.Cell style={{flex: 1}}>{idx+1}</DataTable.Cell>
-                            <DataTable.Cell style={{flex: 3}}>{item.product}</DataTable.Cell>
-                            <DataTable.Cell style={{flex: 4}}>{item.ownersFirstName} {item.ownersLastName}</DataTable.Cell>
-                            <DataTable.Cell style={{flex: 3}}>{item.repairerFirstName} {item.repairerLastName}</DataTable.Cell>
-                            <DataTable.Cell style={{flex: 4}}>{item.repairStatus}</DataTable.Cell>
+                            <DataTable.Cell style={{flex: 3}}>{repair.product}</DataTable.Cell>
+                            <DataTable.Cell style={{flex: 4}}>{repair.ownersFirstName} {repair.ownersLastName ? repair.ownersLastName.charAt(0).toUpperCase() : ""}</DataTable.Cell>
+                            <DataTable.Cell style={{flex: 3}}>{repair.repairerFirstName} {repair.repairerLastName}</DataTable.Cell>
+                            <DataTable.Cell style={{flex: 4}}>{repair.repairStatus}</DataTable.Cell>
                         </DataTable.Row>
                     ))}
                     </DataTable>
-                { repairsRetrieved && items.length <= 0 &&
+                { repairsRetrieved && repairs.length <= 0 &&
                     <Text
                         style={{
                             padding: 10,
@@ -108,7 +163,7 @@ const Repairs = () => {
                 icon="plus"
                 style={styles.fab}
                 animated={false}
-                onPress={addItemPressed}
+                onPress={addRepairPressed}
                 />
             }
         </>

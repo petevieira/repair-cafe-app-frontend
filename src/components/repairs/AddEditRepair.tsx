@@ -317,13 +317,11 @@ const AddEditRepair = ({route, navigation}) => {
     }
 
     const fillRepairFieldsFromPreviousRepair = async (idx: number): Promise<void> => {
-        console.debug("fillRepairFieldsFromPreviousRepair: ", idx);
         if (idx === null) {
             return;
         }
-        console.debug("Previous repairs list: ", previousRepairsList);
+
         const prevRepair = previousRepairsList[idx];
-        console.debug("Prev repair: ", prevRepair);
         setRepairDetails({
             ...repairDetails,
             product: prevRepair.product,

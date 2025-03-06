@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { View, ScrollView } from 'react-native';
-import { Text, DataTable, FAB } from 'react-native-paper';
+import { Text, DataTable, FAB, Tooltip } from 'react-native-paper';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 import styles from 'globals/Styles'
@@ -114,7 +114,11 @@ const Repairs = () => {
                     <EventHeader/>
                     <DataTable>
                         <DataTable.Header>
-                            <DataTable.Title style={{flex: 1}}>{"\u21A9"}</DataTable.Title>
+                            <DataTable.Title style={{flex: 1}}>
+                                <Tooltip title="Follow-up repair">
+                                    <Text>{"\u21A9"}</Text>
+                                </Tooltip>
+                            </DataTable.Title>
                             <DataTable.Title style={{flex: 1}}>#</DataTable.Title>
                             <DataTable.Title style={{flex: 3}}>Item</DataTable.Title>
                             <DataTable.Title style={{flex: 4}}>Owner</DataTable.Title>
@@ -128,7 +132,14 @@ const Repairs = () => {
                             onPress={isLoggedIn ? (() => repairPressed(repair)) : undefined}
                             style={{backgroundColor: ["In Queue", "In Progress"].indexOf(repair.repairStatus) >= 0 ? appColors.bgGray : appColors.bgGreen}}
                         >
-                            <DataTable.Cell style={{flex: 1}}>{repair.isFollowUpRepair ? "\u21A9" : ""}</DataTable.Cell>
+                            <DataTable.Cell style={{flex: 1}}>
+                                {repair.isFollowUpRepair ? (
+                                    <Tooltip title="Follow-up repair">
+                                        <Text>{"\u21A9"}</Text>
+                                    </Tooltip>
+                                ) : (""
+                                )}
+                            </DataTable.Cell>
                             <DataTable.Cell style={{flex: 1}}>{idx+1}</DataTable.Cell>
                             <DataTable.Cell style={{flex: 3}}>{repair.product}</DataTable.Cell>
                             <DataTable.Cell style={{flex: 4}}>{repair.ownersFirstName} {repair.ownersLastName ? repair.ownersLastName.charAt(0).toUpperCase() : ""}</DataTable.Cell>

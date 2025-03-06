@@ -6,7 +6,7 @@ import axios from 'axios';
 import Api from 'requests/request-consts';
 
 const emailIsRegistered = async (email: string) => {
-    const res = await axios.get(Api.Users.EMAIL_IS_REGISTERED + `/${email}`);
+    const res = await axios.post(Api.Users.EMAIL_IS_REGISTERED, { email });
     if (!res.status) {
         throw new Error(res.data.message);
     }

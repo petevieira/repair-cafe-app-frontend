@@ -1,5 +1,5 @@
 import { StyleSheet, Platform, Dimensions, TextStyle } from "react-native";
-
+import { ImageStyle } from "react-native";
 let mainFont = 'Futura';
 if (Platform.OS === 'ios' || Platform.OS === 'android') {
     mainFont = 'system font';
@@ -28,8 +28,7 @@ export default StyleSheet.create({
         height: 60,
         width: 60,
         marginLeft: 10,
-        flex: 1,
-    },
+    } as ImageStyle,
     itemImage: {
         width: "25%",
         aspectRatio: 1

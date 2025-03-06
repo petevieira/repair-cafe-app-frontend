@@ -45,7 +45,7 @@ const AuthProvider = ({ children }) => {
     const [showLoader, setShowLoader] = useState(false);
     const [snackbarMsg, setSnackbarMsg] = useState('');
     const [isAdmin, setIsAdmin] = useState(false);
-    const [appEvent, setAppEvent] = useState(new RepairEvent());
+    const [appEvent, setAppEvent] = useState(null);
     const [timeZone, setTimeZone] = useState("");
 
     const value = {
@@ -143,13 +143,25 @@ const AuthProvider = ({ children }) => {
             }
             setAuthToken(data.token);
             setIsLoggedIn(true);
-            const isAdmin = await UserRequests.userIsAdmin();
-            setIsAdmin(isAdmin);
         } catch (error) {
             console.error("Error loading auth token from AsyncStorage. ", error);
             await logOut();
         }
     };
+
+    const getIsAdmin = async () => {
+        if (!authToken) {
+            setIsAdmin(false);
+            return;
+        }
+        try {
+            const isAdmin = await UserRequests.userIsAdmin();
+            setIsAdmin(isAdmin);
+        } catch (error) {
+            console.error("Error checking if user is admin: ", error);
+            setIsAdmin(false);
+        }
+    }
 
     /**
      * @description Logs the user out by removing the auth token from AsyncStorage
@@ -183,6 +195,7 @@ const AuthProvider = ({ children }) => {
     // Call `configurationAxios(authToken)` whenever `authToken` changes
     useEffect(() => {
         configureAxios(authToken);
+        getIsAdmin();
     }, [authToken]);
 
     // Load auth token on app start

@@ -22,9 +22,8 @@ export const getRepair = async (id: string): Promise<any> => {
  * @returns Promise which resolves to the array of repairs, or rejects
  */
 export const getRepairsByEvent = async (eventId: string): Promise<any> => {
-    console.debug("Retrieving repairs for event ", eventId);
     if (!eventId) {
-        throw new Error("Can't get repairs. 'eventId' not defined");
+        return;
     }
     const res = await axios.get(Api.Repairs.GET_REPAIRS_BASIC + `/${eventId}`);
     if (!res.status) {
@@ -86,7 +85,7 @@ export const findIncompleteRepairsByOwner = async (email: string): Promise<any> 
     }
 
     const res = await axios.get(Api.Repairs.FIND_INCOMPLETE_REPAIRS_BY_OWNER + `/${email}`);
-    console.debug("res: ", res);
+
     if (!res.status) {
         throw new Error(res.data.message);
     }

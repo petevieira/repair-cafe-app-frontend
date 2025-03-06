@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { View, Platform, KeyboardAvoidingView, ScrollView, Dimensions } from 'react-native';
 import { Button, Dialog, Portal, TextInput, HelperText, Text } from 'react-native-paper';
-import { DropDown as PaperDropDown }  from "react-native-paper-dropdown";
-import { Dropdown } from 'react-native-element-dropdown';
+import DropDown from "react-native-paper-dropdown";
+const PaperDropDown = DropDown;
+import { Dropdown as ElementDropdown } from 'react-native-element-dropdown';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 import SubmitButton from "globals/SubmitButton"
@@ -17,6 +18,7 @@ import {
 import {
     subscribeEmailToNewsletter,
     unsubscribeEmailFromNewsletter,
+    getIsSubscribed,
 } from 'requests/subscriber-requests';
 import { ProductCategoryValues, RepairStatusValues, RepairBarrierValues} from 'globals/ords';
 import Terms from 'globals/Terms';
@@ -54,12 +56,13 @@ const AddEditRepair = ({route, navigation}) => {
     const [productCategoryFocused, setProductCategoryFocused] = useState(false);
     const [showDeleteConfirmationDialog, setShowDeleteConfirmationDialog] = useState(false);
     const [previousIncompleteRepairs, setPreviousIncompleteRepairs] = useState([]);
+    const [previousRepairsFocused, setPreviousRepairsFocused] = useState(false);
     const [selectedPreviousRepairIdx, setSelectedPreviousRepairIdx] = useState(null);
     const [showPreviousRepairsDropdown, setShowPreviousRepairsDropdown] = useState(false);
     const [subscribedToNewsletter, setSubscribedToNewsletter] = useState(false);
     const [showSaveConfirmationDialog, setShowSaveConfirmationDialog] = useState(false);
     const [saveConfirmationDialogMsg, setSaveConfirmationDialogMsg] = useState("");
-    let previousRepairsList = [];
+    const [previousRepairsList, setPrevoiusRepairsList] = useState([]);
     const {
         setShowLoader,
         setSnackbarMsg,
@@ -95,7 +98,6 @@ const AddEditRepair = ({route, navigation}) => {
         } else if (!isNumeric(repair.weight)) {
             msg = "Please enter a valid weight";
         } else if (!isNumeric(repair.cost)) {
-            console.debug("cost: ", repair.cost);
             msg = "Please enter a valid cost";
         }
         if (msg !== '') {
@@ -110,7 +112,7 @@ const AddEditRepair = ({route, navigation}) => {
             setSnackbarMsg("Event not found. Please try again.");
             return;
         }
-        console.debug("saving repair: ", repairDetails);
+
         repairDetails.eventId = appEvent._id;
         if (!repairOkToSave(repairDetails)) {
             return
@@ -119,11 +121,9 @@ const AddEditRepair = ({route, navigation}) => {
         try {
             setShowLoader(true);
             if (!!repairDetails._id) {
-                console.debug("Updating repair: ", repairDetails);
                 await updateRepair(repairDetails);
                 setSnackbarMsg("Repair updated.");
             } else {
-                console.debug("Adding repair: ", repairDetails);
                 await addFullRepair(repairDetails);
                 setSnackbarMsg("Repair added.");
             }
@@ -189,7 +189,7 @@ const AddEditRepair = ({route, navigation}) => {
         return repair;
     }
 
-    const getFullRepair = async (repair: Repair) => {
+    const getFullRepair = async (repair: Repair): Promise<string> => {
         setShowLoader(true);
         if (isNewRepair(repair)) {
             setPageTitle("New Repair");
@@ -213,11 +213,12 @@ const AddEditRepair = ({route, navigation}) => {
             }
             setRepairDetails(fullRepair);
             setWaiverBoxChecked(response.data.repair.acceptsWaiver);
-            setShowLoader(false);
+            return fullRepair.ownersEmail;
         } catch (error) {
             console.error(error);
-            setShowLoader(false);
             setSnackbarMsg(error.message);
+        } finally {
+            setShowLoader(false);
         }
     };
 
@@ -251,7 +252,7 @@ const AddEditRepair = ({route, navigation}) => {
         }
     }
 
-    const onSubscribeToggled = async (checked: boolean) => {
+    const onSubscribeToggled = async (checked: boolean): Promise<void> => {
         if (!repairDetails.ownersEmail) {
             setSnackbarMsg("Please enter the owner's email first.");
             // Reset checkbox
@@ -263,10 +264,10 @@ const AddEditRepair = ({route, navigation}) => {
             setShowLoader(true);
             if (checked) {
                 await subscribeEmailToNewsletter(repairDetails.ownersEmail);
-                setSnackbarMsg("Owner subscribed to newsletter.");
+                setSnackbarMsg(repairDetails.ownersEmail + " subscribed to newsletter.");
             } else {
                 await unsubscribeEmailFromNewsletter(repairDetails.ownersEmail);
-                setSnackbarMsg("Owner unsubscribed from newsletter.");
+                setSnackbarMsg(repairDetails.ownersEmail + " unsubscribed from newsletter.");
             }
         } catch (error) {
             console.error(error);
@@ -282,21 +283,24 @@ const AddEditRepair = ({route, navigation}) => {
      * @param checked - true if the checkbox is checked, false if it's unchecked
      * @returns {Promise<void>}
      */
-    const onFollowUpRepairToggled = async (checked: boolean) => {
-        console.debug("Checked: ", checked);
+    const onFollowUpRepairToggled = async (checked: boolean): Promise<void> => {
         if (checked) {
             if (!repairDetails.ownersEmail) {
+                setRepairDetails({
+                    ...repairDetails,
+                    isFollowUpRepair: false,
+                });
                 setSnackbarMsg("Please enter the owner's email first.");
                 return;
             }
             try {
                 setShowLoader(true);
-                previousRepairsList = await findIncompleteRepairsByOwner(repairDetails.ownersEmail);
-                console.debug("Previous repairs: ", previousRepairsList);
+                const tempPreviousRepairsList = await findIncompleteRepairsByOwner(repairDetails.ownersEmail);
+                setPrevoiusRepairsList(tempPreviousRepairsList);
                 let previousRepairsDisplayList = [];
-                previousRepairsList.forEach((i, idx) => {
+                tempPreviousRepairsList.forEach((i: Repair, idx: number) => {
                     previousRepairsDisplayList.push({
-                        label: `${i.type} - ${i.product} - ${i.symptoms}`,
+                        label: `${i.type} - ${i.product} - ${i.symptoms}asdfasdfasdl;kjsdf asdf asdf asdf sadf`,
                         value: idx
                     });
                 });
@@ -312,12 +316,14 @@ const AddEditRepair = ({route, navigation}) => {
         }
     }
 
-    const fillRepairFieldsFromPreviousRepair = async (idx) => {
+    const fillRepairFieldsFromPreviousRepair = async (idx: number): Promise<void> => {
         console.debug("fillRepairFieldsFromPreviousRepair: ", idx);
         if (idx === null) {
             return;
         }
+        console.debug("Previous repairs list: ", previousRepairsList);
         const prevRepair = previousRepairsList[idx];
+        console.debug("Prev repair: ", prevRepair);
         setRepairDetails({
             ...repairDetails,
             product: prevRepair.product,
@@ -335,6 +341,23 @@ const AddEditRepair = ({route, navigation}) => {
         });
     }
 
+    const getSubscriberStatus = async (email: string) => {
+        if (!email) {
+            return;
+        }
+
+        try {
+            setShowLoader(true);
+            const isSubscribed = await getIsSubscribed(email);
+            setSubscribedToNewsletter(isSubscribed);
+        } catch (error) {
+            console.error(error);
+            setSnackbarMsg(error.message);
+        } finally {
+            setShowLoader(false);
+        }
+    }
+
     useEffect(() => {
         if (isNewRepair(paramRepair)) {
             if (emailInputRef.current) {
@@ -345,7 +368,11 @@ const AddEditRepair = ({route, navigation}) => {
     }, [appEvent]);
 
     useEffect(() => {
-        getFullRepair(paramRepair);
+        const fetchData = async () => {
+            const ownersEmail = await getFullRepair(paramRepair);
+            await getSubscriberStatus(ownersEmail);
+        };
+        fetchData();
     }, []);
 
     useEffect(() => {
@@ -504,20 +531,32 @@ const AddEditRepair = ({route, navigation}) => {
                         />
                     </View>
                 { previousIncompleteRepairs.length > 0 &&
-                    <View style={{marginTop: 10, width: '100%'}}>
-                        <PaperDropDown
-                            label={"Previous Repairs"}
-                            mode="outlined"
+                    <View style={styles.dropdownContainer}>
+                        <View style={[styles.label]}>
+                            <Text style={{color: '#717171'}}>
+                                Previous Repairs
+                            </Text>
+                        </View>
+                        <ElementDropdown
+                            style={[styles.dropdown, previousRepairsFocused && {borderWidth: 1}]}
+                            placeholderStyle={styles.placeholderStyle}
+                            selectedTextStyle={styles.selectedTextStyle}
+                            inputSearchStyle={styles.inputSearchStyle}
+                            itemTextStyle={styles.itemTextStyle}
+                            iconStyle={styles.iconStyle}
+                            data={previousIncompleteRepairs}
                             visible={showPreviousRepairsDropdown}
-                            showDropDown={() => setShowPreviousRepairsDropdown(true)}
-                            onDismiss={() => setShowPreviousRepairsDropdown(false)}
+                            search={false}
+                            maxHeight={300}
+                            labelField="label"
+                            valueField="value"
+                            placeholder="Select Previous Repair"
                             value={selectedPreviousRepairIdx}
-                            setValue={setSelectedPreviousRepairIdx}
-                            list={previousIncompleteRepairs}
-                            dropdownPosition={"top"}
-                            renderRightIcon={false}
+                            onFocus={() => setPreviousRepairsFocused(true)}
+                            onBlur={() => setPreviousRepairsFocused(false)}
                             onChange={v => {
-                                fillRepairFieldsFromPreviousRepair(v);
+                                setSelectedPreviousRepairIdx(v.value);
+                                fillRepairFieldsFromPreviousRepair(v.value);
                             }}
                         />
                     </View>
@@ -545,7 +584,7 @@ const AddEditRepair = ({route, navigation}) => {
                                 <Text style={{color: 'red'}}>*</Text>
                             </Text>
                         </View>
-                        <Dropdown
+                        <ElementDropdown
                             style={[styles.dropdown, productCategoryFocused && {borderWidth: 1}]}
                             placeholderStyle={styles.placeholderStyle}
                             selectedTextStyle={styles.selectedTextStyle}
@@ -654,7 +693,7 @@ const AddEditRepair = ({route, navigation}) => {
                                 <Text style={{color: 'red'}}>*</Text>
                             </Text>
                         </View>
-                        <Dropdown
+                        <ElementDropdown
                             placeholder={"Select repairer"}
                             value={repairerIdx}
                             data={repairerList}
@@ -682,7 +721,7 @@ const AddEditRepair = ({route, navigation}) => {
                                 <Text style={{color: 'red'}}>*</Text>
                             </Text>
                         </View>
-                        <Dropdown
+                        <ElementDropdown
                             placeholder={"Repair Status"}
                             value={statusIdx}
                             data={ordsRepairStatusList}

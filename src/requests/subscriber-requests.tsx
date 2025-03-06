@@ -26,8 +26,33 @@ export const unsubscribeEmailFromNewsletter = async (email: string) => {
         throw new Error("Email not defined");
     }
 
-    const res = await axios.delete(Api.Subscribers.UNSUBSCRIBE_EMAIL_FROM_NEWSLETTER + `/${email}`);
+    const res = await axios.post(
+        Api.Subscribers.UNSUBSCRIBE_EMAIL_FROM_NEWSLETTER,
+        { email }
+    );
+    console.debug("res: ", res);
+
     if (!res.status) {
         throw new Error(res.data.message);
     }
+
+    return true;
+}
+
+export const getIsSubscribed = async (email: string) => {
+    if (!email) {
+        console.error("Can't check if email is subscribed. 'email' not defined");
+        throw new Error("Email not defined");
+    }
+
+    const res = await axios.post(
+        Api.Subscribers.IS_EMAIL_SUBSCRIBED,
+        { email }
+    );
+
+    if (!res.status) {
+        throw new Error(res.data.message);
+    }
+
+    return res.data.isSubscribed;
 }

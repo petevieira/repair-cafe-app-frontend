@@ -32,6 +32,7 @@ const RepairEvents = {
 const Subscribers = {
     SUBSCRIBE_EMAIL_TO_NEWSLETTER:     `${SUBSCRIBERS_PREFIX}/add-subscriber`,
     UNSUBSCRIBE_EMAIL_FROM_NEWSLETTER: `${SUBSCRIBERS_PREFIX}/delete-subscriber`,
+    IS_EMAIL_SUBSCRIBED:               `${SUBSCRIBERS_PREFIX}/is-email-subscribed`,
 };
 
 const Text = {
@@ -41,7 +42,7 @@ const Text = {
 const Users = {
     EMAIL_IS_REGISTERED:           `${USERS_PREFIX}/email-is-registered`,
     SIGN_IN:                       `${USERS_PREFIX}/sign-in`,
-    USER_IS_ADMIN:                 `${USERS_PREFIX}/user-is-admin`,
+    USER_IS_ADMIN:                 `${USERS_PREFIX}/signed-in-user-is-admin`,
 };
 
 const Volunteers = {

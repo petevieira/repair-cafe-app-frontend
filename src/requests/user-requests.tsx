@@ -22,8 +22,6 @@ const signIn = async (email: string, password: string) => {
         { email, password }
     );
 
-    console.debug("signIn response", res);
-
     if (!res.status) {
         throw new Error(res.data.message);
     }
@@ -39,12 +37,15 @@ const signIn = async (email: string, password: string) => {
     return { token: res.data.token, user: res.data.user };
 }
 
-const userIsAdmin = async () => {
-    const res = await axios.post(Api.Users.USER_IS_ADMIN);
+const userIsAdmin = async (): Promise<boolean> => {
+    const res: any = await axios.post(Api.Users.USER_IS_ADMIN);
     if (!res.status) {
         throw new Error(res.data.message);
     }
-    return true;
+    if (res.data?.isAdmin === undefined) {
+        throw new Error("User not found");
+    }
+    return res.data.isAdmin;
 }
 
 export default {

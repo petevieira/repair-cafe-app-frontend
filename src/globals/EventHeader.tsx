@@ -49,7 +49,7 @@ const EventHeader = () => {
             return;
         }
 
-        if (!appEvent?.date || !isLoggedIn) {
+        if (!appEvent?._id || !isLoggedIn) {
             setCanNavigateToPreviousEvent(false);
             return;
         }
@@ -74,7 +74,7 @@ const EventHeader = () => {
             return;
         }
 
-        if (!appEvent?.date || !isLoggedIn) {
+        if (!appEvent?._id || !isLoggedIn) {
             setCanNavigateToNextEvent(false);
             return false;
         }

@@ -23,9 +23,16 @@ const Repairs = () => {
     const navigation = useNavigation<NavigationProp>();
 
     const getRepairs = async () => {
+        if (!appEvent) {
+            return;
+        }
         try {
             setShowLoader(true);
             const tempRepairs = await getRepairsByEvent(appEvent._id);
+            if (!tempRepairs) {
+                setRepairs([]);
+                return;
+            }
             // Sort with follow-up repairs first, the In Queue progress, then In Progress, then the rest.
             tempRepairs.sort((a: Repair, b: Repair) => {
                 if (a.isFollowUpRepair && !b.isFollowUpRepair) {
@@ -107,7 +114,7 @@ const Repairs = () => {
                     <EventHeader/>
                     <DataTable>
                         <DataTable.Header>
-                            <DataTable.Title style={{flex: 1}}>{"\u21BA"}</DataTable.Title>
+                            <DataTable.Title style={{flex: 1}}>{"\u21A9"}</DataTable.Title>
                             <DataTable.Title style={{flex: 1}}>#</DataTable.Title>
                             <DataTable.Title style={{flex: 3}}>Item</DataTable.Title>
                             <DataTable.Title style={{flex: 4}}>Owner</DataTable.Title>
@@ -121,7 +128,7 @@ const Repairs = () => {
                             onPress={isLoggedIn ? (() => repairPressed(repair)) : undefined}
                             style={{backgroundColor: ["In Queue", "In Progress"].indexOf(repair.repairStatus) >= 0 ? appColors.bgGray : appColors.bgGreen}}
                         >
-                            <DataTable.Cell style={{flex: 1}}>{repair.isFollowUpRepair ? "\u270E" : ""}</DataTable.Cell>
+                            <DataTable.Cell style={{flex: 1}}>{repair.isFollowUpRepair ? "\u21A9" : ""}</DataTable.Cell>
                             <DataTable.Cell style={{flex: 1}}>{idx+1}</DataTable.Cell>
                             <DataTable.Cell style={{flex: 3}}>{repair.product}</DataTable.Cell>
                             <DataTable.Cell style={{flex: 4}}>{repair.ownersFirstName} {repair.ownersLastName ? repair.ownersLastName.charAt(0).toUpperCase() : ""}</DataTable.Cell>

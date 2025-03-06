@@ -3,7 +3,7 @@ import { View, Pressable, SafeAreaView } from 'react-native';
 import { Text } from 'react-native-paper';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { useNavigation } from '@react-navigation/native';
-import { NavigationState } from 'react-navigation';
+import { NavigationProp } from 'globals/RootNavigation';
 
 import styles from 'globals/Styles';
 import { useAuth } from 'contexts/auth-context';
@@ -13,7 +13,7 @@ export const Tab = ({ name, text, handlePress, screenName, routeName }) => {
     return (
         <Pressable
         onPress={handlePress}
-        style={{alignText: 'center'}}
+        style={{alignItems: 'center'}}
         >
         <FontAwesome5
         name={name}
@@ -40,10 +40,10 @@ export const Tab = ({ name, text, handlePress, screenName, routeName }) => {
 
 export default function BottomTabs(props) {
     const {
-        isLoggedIn, setIsLoggedIn,
-        isAdmin, setIsAdmin,
+        isLoggedIn,
+        isAdmin,
     } = useAuth();
-    const navigation = useNavigation();
+    const navigation = useNavigation<NavigationProp>();
     let routeName = props.routeName;
 
     useEffect(() => {
@@ -91,6 +91,7 @@ export default function BottomTabs(props) {
                 screenName="Repairs"
                 routeName={routeName}
             />
+        { isLoggedIn &&
             <Tab
                 text="Volunteers"
                 name="users"
@@ -99,6 +100,7 @@ export default function BottomTabs(props) {
                 screenName="Volunteers"
                 routeName={routeName}
             />
+        }
         </View>
     );
 }

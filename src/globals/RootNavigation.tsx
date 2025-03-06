@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { navigationRef } from './navigation-ref';
 import { useAuth } from 'contexts/auth-context';
 import { Portal, Snackbar} from 'react-native-paper';
@@ -17,13 +17,14 @@ import RepairEvent from 'models/RepairEvent';
 // Define the type for your app's screen names and params
 export type RootStackParamList = {
     "Home": undefined;
+    "Volunteer Login": undefined;
     "Repairs": undefined;
     "Add/Edit Repair": { repair: Repair };
-    "Volunteer Login": undefined;
+    "Volunteers": undefined;
     "Add/Edit Volunteer": { volunteer: Volunteer };
-    "About": undefined;
     "Events": undefined;
     "Add/Edit Event": { event: Omit<RepairEvent, 'date'> & { date: string | null } };
+    "About": undefined;
 };
 
 // Type for navigation prop

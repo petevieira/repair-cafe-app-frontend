@@ -25,10 +25,10 @@ const ScreensNav = (props) => {
 
     return (
         <Stack.Navigator
-        initialRouteName="Login"
-        screenOptions={{
-            headerShown: false
-        }}
+            initialRouteName="Volunteer Login"
+            screenOptions={{
+                headerShown: false
+            }}
         >
             {isLoggedIn ? (
                 </* Screens that require authentication */>

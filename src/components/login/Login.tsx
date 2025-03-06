@@ -82,7 +82,6 @@ const Login = ({navigation}) => {
         }
         try {
             setShowLoader(true);
-            console.debug("Signing in with email: ", email);
             const { token, user } = await UserRequests.signIn(email, password);
             // Add auth token to state
             setAuthToken(token);
@@ -99,7 +98,7 @@ const Login = ({navigation}) => {
         }
     };
 
-    if (DEBUG) {
+    if (DEBUG === "true") {
         // Auto sign-in
         useEffect(() => {
             signIn();
@@ -128,7 +127,7 @@ const Login = ({navigation}) => {
 
     useFocusEffect(
         useCallback(() => {
-            if (DEBUG) {
+            if (DEBUG === "true") {
                 setShowPasswordInput(true);
                 setEmail(TEST_EMAIL);
             }

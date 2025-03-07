@@ -22,15 +22,15 @@ const App = () => {
             fonts: configureFonts({config: appFontConfig}),
         }}
         >
-        <StatusBar hidden/>
-        <AuthProvider>
-        <NavigationContainer ref={navigationRef}>
-        <SafeAreaView style={{flex: 0, backgroundColor: 'white'}}/>
-        <SafeAreaView style={{flex: 1, backgroundColor: '#96db73'}}>
-        <RootNavigation/>
-        </SafeAreaView>
-        </NavigationContainer>
-        </AuthProvider>
+            <StatusBar hidden/>
+            <AuthProvider>
+                <NavigationContainer ref={navigationRef}>
+                    <SafeAreaView style={{flex: 0, backgroundColor: 'white'}}/>
+                    <SafeAreaView style={{flex: 1, backgroundColor: '#96db73'}}>
+                        <RootNavigation/>
+                    </SafeAreaView>
+                </NavigationContainer>
+            </AuthProvider>
         </PaperProvider>
     );
 };

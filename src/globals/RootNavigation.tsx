@@ -35,6 +35,11 @@ export type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 // Type for route prop
 export type RouteProps<T extends keyof RootStackParamList> = RouteProp<RootStackParamList, T>;
 
+const TIME_BEFORE_WARMING_UP_MSG_MS = 3000;
+const TIME_BEFORE_SECOND_MSG_MS = 10000;
+const TIME_BEFORE_THIRD_MSG_MS = 20000;
+const TIME_BEFORE_FOURTH_MSG_MS = 30000;
+
 /**
  * A component that wraps the ScreensNav stack navigator in an
  * Authentication provider (which gives the ScreensNav access to the
@@ -48,18 +53,31 @@ const RootNavigation = () => {
     const [routeName, setRouteName] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isSlow, setIsSlow] = useState(false);
+    const [loadingMsg, setLoadingMsg] = useState("");
+    const [loadingSubMsg, setLoadingSubMsg] = useState("");
 
     useEffect(() => {
         const warmUpServer = async (): Promise<void> => {
             setIsSlow(false);
 
-            // After 3 seconds, show a message that the server is slow
-            const timeout = setTimeout(() => setIsSlow(true), 3000);
-            const failSafeTimeout = setTimeout(() => {
-                console.warn("Server warm-up is taking too long.");
-                setIsLoading(false);
-                setSnackbarMsg("Server warm-up will take a minute. Please try again in a bit.");
-            }, 10000);
+            // After N seconds, show a message that the server is slow
+            const firstTimeout = setTimeout(() => {
+                setLoadingMsg("Waking up the server...");
+                setIsSlow(true)
+            }, TIME_BEFORE_WARMING_UP_MSG_MS);
+
+            // After M seconds, show a message that the server is taking too long
+            const secondTimeout = setTimeout(() => {
+                setLoadingSubMsg("Checking for blown fuses...");
+            }, TIME_BEFORE_SECOND_MSG_MS);
+
+            const thirdTimeout = setTimeout(() => {
+                setLoadingSubMsg("Verifying connections...");
+            }, TIME_BEFORE_THIRD_MSG_MS);
+
+            const fourthTimeout = setTimeout(() => {
+                setLoadingSubMsg("Running final tests...");
+            }, TIME_BEFORE_FOURTH_MSG_MS);
 
             try {
                 await RootRequests.checkServerHealth();
@@ -67,7 +85,10 @@ const RootNavigation = () => {
                 console.error(error);
                 setSnackbarMsg(error.message);
             } finally {
-                clearTimeout(timeout);
+                clearTimeout(firstTimeout);
+                clearTimeout(secondTimeout);
+                clearTimeout(thirdTimeout);
+                clearTimeout(fourthTimeout);
                 setIsLoading(false);
             }
         }
@@ -102,14 +123,29 @@ const RootNavigation = () => {
                     animating={isLoading}
                 />
                 {isSlow &&
+                <>
                     <Text
                         style={{
                             fontSize: 20,
                             fontWeight: "bold",
+                            textAlign: "center",
+                            marginTop: 20
                         }}
                     >
-                        {"Waking up the server..."}
-                    </Text>}
+                        {loadingMsg}
+                    </Text>
+                    <Text
+                        style={{
+                            fontSize: 16,
+                            fontWeight: "normal",
+                            textAlign: "center",
+                            marginTop: 20,
+                        }}
+                    >
+                        {loadingSubMsg}
+                    </Text>
+                </>
+                }
             </View>
         );
     }

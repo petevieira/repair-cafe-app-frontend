@@ -52,7 +52,14 @@ const RootNavigation = () => {
     useEffect(() => {
         const warmUpServer = async (): Promise<void> => {
             setIsSlow(false);
+
+            // After 3 seconds, show a message that the server is slow
             const timeout = setTimeout(() => setIsSlow(true), 3000);
+            const failSafeTimeout = setTimeout(() => {
+                console.warn("Server warm-up is taking too long.");
+                setIsLoading(false);
+                setSnackbarMsg("Server warm-up will take a minute. Please try again in a bit.");
+            }, 10000);
 
             try {
                 await RootRequests.checkServerHealth();

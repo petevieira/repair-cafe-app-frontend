@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { navigationRef } from './navigation-ref';
 import { useAuth } from 'contexts/auth-context';
-import { Portal, Snackbar} from 'react-native-paper';
+import { View } from 'react-native';
+import { ActivityIndicator, Portal, Snackbar, Text } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 
@@ -13,6 +14,7 @@ import Nav from 'globals/Nav';
 import Repair from 'models/Repair';
 import Volunteer from 'models/Volunteer';
 import RepairEvent from 'models/RepairEvent';
+import RootRequests from 'requests/root-requests';
 
 // Define the type for your app's screen names and params
 export type RootStackParamList = {
@@ -40,10 +42,36 @@ export type RouteProps<T extends keyof RootStackParamList> = RouteProp<RootStack
  * which is wrapped in a NavigationContainer
  */
 const RootNavigation = () => {
-    const { snackbarMsg, setSnackbarMsg } = useAuth();
+    const {
+        snackbarMsg, setSnackbarMsg,
+    } = useAuth();
     const [routeName, setRouteName] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSlow, setIsSlow] = useState(false);
 
     useEffect(() => {
+        const warmUpServer = async (): Promise<void> => {
+            setIsSlow(false);
+            const timeout = setTimeout(() => setIsSlow(true), 3000);
+
+            try {
+                await RootRequests.checkServerHealth();
+            } catch (error) {
+                console.error(error);
+                setSnackbarMsg(error.message);
+            } finally {
+                clearTimeout(timeout);
+                setIsLoading(false);
+            }
+        }
+
+        warmUpServer();
+    }, []);
+
+    useEffect(() => {
+        if (isLoading) {
+            return;
+        }
         const updateRouteName = () => {
             const currentRoute = navigationRef.getCurrentRoute();
             if (currentRoute) {
@@ -56,8 +84,30 @@ const RootNavigation = () => {
         return () => {
             unsubscribe();
         };
-    }, []);
+    }, [isLoading]);
 
+    // Show a loading spinner while the server is starting up
+    if (isLoading) {
+        return (
+            <View style={styles.loader}>
+                <ActivityIndicator
+                    size="large"
+                    animating={isLoading}
+                />
+                {isSlow &&
+                    <Text
+                        style={{
+                            fontSize: 20,
+                            fontWeight: "bold",
+                        }}
+                    >
+                        {"Waking up the server..."}
+                    </Text>}
+            </View>
+        );
+    }
+
+    // Normal app rendering
     return (
         <>
             <Nav routeName={routeName}/>

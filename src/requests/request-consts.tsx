@@ -7,6 +7,10 @@ const TEXT_PREFIX          = `${API_URL}/text`;
 const USERS_PREFIX         = `${API_URL}/users`;
 const VOLUNTEERS_PREFIX    = `${API_URL}/volunteers`;
 
+const Root = {
+    CHECK_SERVER_HEALTH:             `${API_URL}/`,
+}
+
 const Repairs = {
     ADD_BASIC_REPAIR:                `${REPAIRS_PREFIX}/add-basic-repair`,
     ADD_FULL_REPAIR:                 `${REPAIRS_PREFIX}/add-full-repair`,
@@ -57,6 +61,7 @@ const Volunteers = {
 };
 
 export default {
+    Root,
     Repairs,
     RepairEvents,
     Subscribers,

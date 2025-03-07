@@ -8,12 +8,11 @@ const Loader = () => {
     const { showLoader } = useAuth();
 
     return (showLoader &&
-        <View
-        style={styles.loader}>
-        <ActivityIndicator
-        animating={showLoader}
-        size="large"
-        />
+        <View style={styles.loader}>
+            <ActivityIndicator
+                animating={showLoader}
+                size="large"
+            />
         </View>
     );
 };

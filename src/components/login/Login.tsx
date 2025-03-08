@@ -169,24 +169,23 @@ const Login = ({navigation}) => {
                         <HelperText type="error" visible={emailsBlurred && !emailsValid}>
                             Please enter a valid email.
                         </HelperText>
-                        {showPasswordInput &&
-                        <>
-                            <TextInput
-                                label="Password"
-                                mode="outlined"
-                                secureTextEntry={true}
-                                autoCorrect={false}
-                                returnKeyType="done"
-                                style={styles.short_text_input}
-                                value={password}
-                                ref={passwordInputRef}
-                                onChangeText={
-                                    password => setPassword(password.trim())
-                                }
-                                onSubmitEditing={handleSubmit}
-                                />
-                        </>
-                        }
+                        <TextInput
+                            label="Password"
+                            mode="outlined"
+                            secureTextEntry={true}
+                            autoCorrect={false}
+                            returnKeyType="done"
+                            style={{
+                                ...styles.short_text_input,
+                                display: showPasswordInput ? 'flex' : 'none'
+                            }}
+                            value={password}
+                            ref={passwordInputRef}
+                            onChangeText={
+                                password => setPassword(password.trim())
+                            }
+                            onSubmitEditing={handleSubmit}
+                        />
                         <SubmitButton
                             onPress={() => {handleSubmit()}}
                             icon={() => <FontAwesome5 name="sign-in-alt" size={24} color="white" />}

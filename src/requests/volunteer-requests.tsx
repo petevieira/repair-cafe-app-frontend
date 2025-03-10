@@ -4,48 +4,58 @@
 
 import axios from 'axios';
 import Api from 'requests/request-consts';
+import Volunteer from 'models/Volunteer';
+import { Response, VolunteerData, VolunteersData } from 'types/Response';
 
 /**
- * Checks if the passed in email is registered in the database
- * @param {string} date - Date to get repairs from
- * @returns Promise which resolves to the array of items, or rejects
+ * Get all volunteers associated with the event
+ * @param {string} eventId - The id of the event to get volunteers for
+ * @returns Promise which resolves to a Response with data.volunteers array inside
  */
-export const getTodaysVolunteers = async () => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayIso = today.toISOString();
-
-    return await axios.get(
-        Api.Volunteers.GET_DAYS_VOLUNTEERS + `/${todayIso}`
+export const getVolunteersByEvent = async (eventId: string): Promise<Response<VolunteersData>> => {
+    const res: Response<VolunteersData> = await axios.get(
+        Api.Volunteers.GET_VOLUNTEERS_BY_EVENT + `/${eventId}`
     );
-}
 
-export const getVolunteersByEvent = async (eventId: string) => {
-    try {
-        const res = await axios.get(Api.Volunteers.GET_VOLUNTEERS_BY_EVENT + `/${eventId}`);
-        if (!res.status) {
-            throw new Error(res.data.message);
-        }
-        if (res.data?.volunteers === undefined) {
-            throw new Error("Error getting volunteers by event");
-        }
-
-        return res.data.volunteers;
-    } catch (error) {
-        console.error("Error getting volunteers by event: ", error);
-        throw error;
+    if (!res.status) {
+        throw new Error(res.msg);
     }
 
+    if (res.data?.volunteers === undefined) {
+        throw new Error("Error getting volunteers by event");
+    }
+
+    return res;
 }
 
-export const addVolunteer = async (volunteer) => {
-    return await axios.post(
+/**
+ * Add a volunteer to the database for the current event
+ * @param {Volunteer} volunteer - The volunteer to add
+ * @returns Promise which resolves to the response with data.volunteer inside
+ */
+export const addVolunteer = async (volunteer: Volunteer): Promise<Response<VolunteerData>> => {
+    const response: Response<VolunteerData> = await axios.post(
         Api.Volunteers.ADD_VOLUNTEER, volunteer,
     );
+
+    if (!response.status) {
+        throw new Error(response.msg);
+    }
+
+    if (!response.data.volunteer) {
+        throw new Error("Volunteer not found");
+    }
+
+    return response;
 }
 
-export const updateVolunteer = async (volunteer) => {
-    return await axios.put(
+/**
+ * Update a volunteer in the database
+ * @param {Volunteer} volunteer - The volunteer to update, with the new values
+ * @returns Promise which resolves to the response with data.volunteer inside
+ */
+export const updateVolunteer = async (volunteer: Volunteer): Promise<Response<VolunteerData>> => {
+    const response: Response<VolunteerData> = await axios.put(
         Api.Volunteers.UPDATE_VOLUNTEER,
         {
             id: volunteer._id,
@@ -55,25 +65,74 @@ export const updateVolunteer = async (volunteer) => {
             email: volunteer.email ?? ""
         },
     );
+
+    if (!response.status) {
+        throw new Error(response.msg);
+    }
+
+    if (!response.data.volunteer) {
+        throw new Error("Volunteer not found");
+    }
+
+    return response;
 }
 
-export const getVolunteer = async (id: string) => {
-    return await axios.get(Api.Volunteers.GET_VOLUNTEER + `/${id}`);
+/**
+ * Get a volunteer from the database by _id
+ * @param {string} id - The id of the volunteer to get. Mongo ObjectId string.
+ * @returns Promise which resolves to the response with data.volunteer inside
+ */
+export const getVolunteer = async (id: string): Promise<Response<VolunteerData>> => {
+    const res: Response<VolunteerData> = await axios.get(Api.Volunteers.GET_VOLUNTEER + `/${id}`);
+
+    if (!res.status) {
+        throw new Error(res.msg);
+    }
+
+    if (!res.data.volunteer) {
+        throw new Error("Volunteer not found");
+    }
+
+    return res;
 }
 
-export const deleteVolunteer = async (id: string) => {
+/**
+ * Delete a volunteer from the database by _id
+ * @param {string} id - The id of the volunteer to delete. Mongo ObjectId string.
+ * @returns Promise which resolves to the response with data.volunteer inside
+ */
+export const deleteVolunteer = async (id: string): Promise<Response<VolunteerData>> => {
     if (!id) {
         throw new Error("Can't delete volunteer. 'id' not defined");
     }
 
-    const response = await axios.delete(Api.Volunteers.DELETE_VOLUNTEER + `/${id}`);
+    const response: Response<VolunteerData> =
+        await axios.delete(Api.Volunteers.DELETE_VOLUNTEER + `/${id}`);
+
+    if (!response.status) {
+        throw new Error(response.msg);
+    }
+
+    return response;
 };
 
 export const getPastVolunteers = async () => {
     return await axios.get(Api.Volunteers.GET_PAST_VOLUNTEERS);
 }
 
-export const findVolunteerByEmail = async (email: string) => {
-    return await axios.get(Api.Volunteers.FIND_VOLUNTEER_BY_EMAIL + `/${email}`);
+/**
+ * Find a volunteer by email
+ * @param {string} email - The email of the volunteer to find
+ * @returns Promise which resolves to the response with data.volunteer inside
+ */
+export const findVolunteerByEmail = async (email: string): Promise<Response<VolunteerData>> => {
+    const res: Response<VolunteerData>
+        = await axios.get(Api.Volunteers.FIND_VOLUNTEER_BY_EMAIL + `/${email}`);
+
+    if (!res.status) {
+        throw new Error(res.msg);
+    }
+
+    return res;
 }
 

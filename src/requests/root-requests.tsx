@@ -8,7 +8,7 @@ import Api from 'requests/request-consts';
 const checkServerHealth = async () => {
     const res = await axios.get(Api.Root.CHECK_SERVER_HEALTH);
     if (!res.status) {
-        throw new Error(res.data.message);
+        throw new Error(res.data.msg);
     }
     return true;
 }

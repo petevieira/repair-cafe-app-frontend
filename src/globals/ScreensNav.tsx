@@ -25,13 +25,17 @@ const ScreensNav = (props) => {
 
     return (
         <Stack.Navigator
-            initialRouteName="Volunteer Login"
+            initialRouteName={ isLoggedIn ? "Repairs" : "Volunteer Login" }
             screenOptions={{
                 headerShown: false
             }}
         >
             {isLoggedIn ? (
                 </* Screens that require authentication */>
+                    <Stack.Screen
+                        name="Volunteer Login"
+                        component={Login}
+                    />
                     <Stack.Screen
                         name="Repairs"
                         component={Repairs}
@@ -51,10 +55,6 @@ const ScreensNav = (props) => {
                     <Stack.Screen
                         name="About"
                         component={About}
-                    />
-                    <Stack.Screen
-                        name="Volunteer Login"
-                        component={Login}
                     />
                     <Stack.Screen
                         name="Events"

@@ -11,6 +11,7 @@ import { useAuth } from 'contexts/auth-context';
 import AsyncStorageHelpers from 'globals/async-storage-helpers';
 import { Regex } from 'consts/app.consts';
 import { TEST_EMAIL, TEST_PASSWORD, DEBUG } from '@env';
+import { Response, SignInData } from 'types/Response';
 
 const Login = ({navigation}) => {
     // State variables
@@ -50,12 +51,7 @@ const Login = ({navigation}) => {
             if (email !== '' && emailIsValid()) {
                 setShowLoader(true);
                 try {
-                    const emailIsRegistered = await UserRequests.emailIsRegistered(email);
-                    if (!emailIsRegistered) {
-                        setSnackbarMsg("Email not found.");
-                        setShowPasswordInput(false);
-                        return;
-                    }
+                    void await UserRequests.emailIsRegistered(email);
                     setShowPasswordInput(true);
                     // Checking here maybe b/c it's a race condition for it to load first?
                 } catch (error) {
@@ -82,8 +78,9 @@ const Login = ({navigation}) => {
         }
         try {
             setShowLoader(true);
-            const { token, user } = await UserRequests.signIn(email, password);
+            const res: Response<SignInData> = await UserRequests.signIn(email, password);
             // Add auth token to state
+            const { token, user } = res.data;
             setAuthToken(token);
             setIsLoggedIn(true);
             setIsAdmin(user.role === 'admin');

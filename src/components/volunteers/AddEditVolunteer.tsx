@@ -18,12 +18,19 @@ import {
 import { useAuth } from 'contexts/auth-context';
 import Terms from 'globals/Terms';
 import { emailIsValid, eventInThePast, eventInTheFuture } from 'lib/helpers';
+import { Response, VolunteerData } from 'types/Response';
 
+/**
+ * Component for adding or editing Volunteers
+ * @param {object} props - The props for the component
+ * @param {object} props.route - The route object
+ * @param {object} props.navigation - The navigation object
+ * @returns The component view
+ */
 const AddEditVolunteer = ({route, navigation}) => {
     const paramVolunteer = route.params.volunteer;
 
     // State variables
-    const [id, setId] = useState("");
     const [waiverBoxChecked, setWaiverBoxChecked] = useState(false);
     const [volunteer, setVolunteer] = useState(new Volunteer());
     const [termsModalVisible, setTermsModalVisible] = useState(false);
@@ -60,19 +67,24 @@ const AddEditVolunteer = ({route, navigation}) => {
         return true;
     }
 
-    const addSaveVolunteer = async () => {
+    /**
+     * Add or update a volunteer in the database depending on if the volunteer
+     * has an _id or not.
+     * @returns Promise<void>
+     */
+    const addSaveVolunteer = async (): Promise<void> => {
         if (!volunteerOkToSave(volunteer)) {
             return;
         }
         setShowLoader(true);
         try {
-            let response = null;
             if (!!volunteer._id) {
-                response = await updateVolunteer(volunteer);
-                setSnackbarMsg("Volunteer updated.");
+                const res: Response<VolunteerData> = await updateVolunteer(volunteer);
+                setSnackbarMsg(res.msg);
             } else {
-                response = await addVolunteer(volunteer);
-                setSnackbarMsg("New volunteer added.")
+                volunteer.eventId = appEvent._id;
+                const res: Response<VolunteerData> = await addVolunteer(volunteer);
+                setSnackbarMsg(res.msg);
             }
             setShowLoader(false);
             navigation.navigate("Volunteers");
@@ -83,32 +95,40 @@ const AddEditVolunteer = ({route, navigation}) => {
         }
     }
 
-    const deleteCurrentVolunteer = async () => {
+    /**
+     * Delete the current volunteer from the database
+     * @returns Promise<void>
+     */
+    const deleteCurrentVolunteer = async (): Promise<void> => {
         if (!volunteer._id) {
             setSnackbarMsg("Volunteer can't be deleted. They aren't in the database.");
             return;
         }
         setShowLoader(true);
         try {
-            const response = await deleteVolunteer(volunteer._id);
-            setShowLoader(false);
-            setSnackbarMsg("Volunteer deleted.");
+            const response: Response<VolunteerData> = await deleteVolunteer(volunteer._id);
+            setSnackbarMsg(response.msg);
             setTimeout(() => {
                 navigation.navigate('Volunteers');
             }, 500);
         } catch (error) {
             console.error(error);
-            setShowLoader(false);
             setSnackbarMsg(error.message);
+        } finally {
+            setShowLoader(false);
         }
     }
 
-    const getExistingVolunteer = async (id: string) => {
+    /**
+     * Get the volunteer from the database
+     * @param {string} id - The id of the volunteer to get
+     * @returns Promise<void>
+     */
+    const getExistingVolunteer = async (id: string): Promise<void> => {
         setShowLoader(true);
         try {
-            const response = await getVolunteer(id);
+            const response: Response<VolunteerData> = await getVolunteer(id);
             setVolunteer(response.data.volunteer);
-            setId(response.data.volunteer.id);
             setWaiverBoxChecked(response.data.volunteer.acceptsWaiver);
             setShowLoader(false);
         } catch (error) {
@@ -118,25 +138,31 @@ const AddEditVolunteer = ({route, navigation}) => {
         }
     }
 
-    const onEmailBlur = async () => {
+    /**
+     * Check if the email is valid, and if the volunteer is new, check if the email
+     * is already in the database and fill in the first and last name if it is.
+     * @returns Promise<void>
+     */
+    const onEmailBlur = async (): Promise<void> => {
         if (!!volunteer._id || !emailIsValid(volunteer.email)) {
             return;
         }
         setShowLoader(true);
         try {
-            const response = await findVolunteerByEmail(volunteer.email);
-            if (!!response.data.volunteer) {
-                setVolunteer({
-                    ...volunteer,
-                    firstName: response.data.volunteer.firstName,
-                    lastName: response.data.volunteer.lastName
-                });
+            const response: Response<VolunteerData> = await findVolunteerByEmail(volunteer.email);
+            if (!response.data.volunteer) {
+                return;
             }
-            setShowLoader(false);
+            setVolunteer({
+                ...volunteer,
+                firstName: response.data.volunteer.firstName,
+                lastName: response.data.volunteer.lastName
+            });
         } catch (error) {
             console.error(error);
-            setShowLoader(false);
             setSnackbarMsg(error.message);
+        } finally {
+            setShowLoader(false);
         }
     }
 
@@ -250,7 +276,6 @@ const AddEditVolunteer = ({route, navigation}) => {
                                 } else {
                                     addSaveVolunteer()
                                 }
-                                addSaveVolunteer();
                             }}
                         />
                     </View>

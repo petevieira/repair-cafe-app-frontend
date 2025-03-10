@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { View, ScrollView } from 'react-native';
 import { Text, DataTable, FAB } from 'react-native-paper';
-import { format } from "date-fns";
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 import styles from 'globals/Styles'
@@ -10,7 +9,13 @@ import Volunteer from 'models/Volunteer';
 import { useAuth } from 'contexts/auth-context';
 import EventHeader from 'globals/EventHeader';
 import { NavigationProp } from 'globals/RootNavigation';
+import { Response } from 'types/Response';
 
+/**
+ * Volunteers component
+ * Displays a table of the volunteers signed up for the current event.
+ * @returns
+ */
 const Volunteers = () => {
     const [volunteers, setVolunteers] = useState([]);
     const {
@@ -22,6 +27,9 @@ const Volunteers = () => {
     const [volunteersRetrieved, setVolunteersRetrieved] = useState(false);
     const navigation = useNavigation<NavigationProp>();
 
+    /**
+     * Add a new volunteer
+     */
     const addVolunteer = () => {
         let volunteer = new Volunteer();
         volunteer.eventId = appEvent._id
@@ -30,17 +38,29 @@ const Volunteers = () => {
         });
     }
 
-    const volunteerPressed = (volunteer: Volunteer) => {
+    /**
+     * Navigate to the volunteer add/edit screen
+     * @param {Volunteer} volunteer - the volunteer to edit
+     */
+    const volunteerPressed = (volunteer: Volunteer): void => {
         navigation.navigate('Add/Edit Volunteer', {
             volunteer: volunteer
         });
     };
 
-    const getVolunteers = async () => {
+    /**
+     * Get the volunteers for the current event and set the state
+     * @returns Promise<void>
+     */
+    const getVolunteers = async (): Promise<void> => {
+        if (!appEvent) {
+            return;
+        }
+
         try {
             setShowLoader(true);
-            const volunteers = await getVolunteersByEvent(appEvent._id);
-            setVolunteers(volunteers);
+            const response: Response = await getVolunteersByEvent(appEvent._id);
+            setVolunteers(response.data.volunteers);
         } catch (error) {
             console.error(error.message);
             setSnackbarMsg(error.message)
@@ -50,6 +70,10 @@ const Volunteers = () => {
         }
     };
 
+    /**
+     * Get the volunteers for the current event when the screen is focused
+     * and when the appEvent changes.
+     */
     useFocusEffect(
         useCallback(() => {
             getVolunteers();
@@ -94,10 +118,10 @@ const Volunteers = () => {
             </ScrollView>
         { isLoggedIn &&
             <FAB
-            icon="plus"
-            style={styles.fab}
-            animated={false}
-            onPress={addVolunteer}
+                icon="plus"
+                style={styles.fab}
+                animated={false}
+                onPress={addVolunteer}
             />
         }
         </>

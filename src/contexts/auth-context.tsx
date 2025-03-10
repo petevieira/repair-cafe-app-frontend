@@ -1,11 +1,12 @@
 import { useState, useEffect, createContext, useContext } from "react";
-import axios from "axios";
+import axios, { AxiosResponse, AxiosError } from "axios";
 import AsyncStorage from "globals/async-storage-helpers";
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode, JwtPayload } from "jwt-decode";
 import UserRequests from "requests/user-requests";
 import { navigate } from "globals/navigation-ref";
 import RepairEvent from "models/RepairEvent";
 import { getMostRecentEvent } from "requests/repair-event-requests";
+import { Response, IsAdminData } from "types/Response";
 
 // Track the Axios Interceptor ID globally
 let globalInterceptor: any;
@@ -58,6 +59,11 @@ const AuthProvider = ({ children }) => {
         timeZone, setTimeZone,
     };
 
+    /**
+     * @description Check if the auth token is expired every 5 seconds.
+     * If the token is expired, log the user out, so that they can log back in,
+     * and avoid attempting operations that silently fail.
+     */
     useEffect(() => {
         const interval = setInterval(async () => {
             const data = await AsyncStorage.getAuth();
@@ -72,6 +78,13 @@ const AuthProvider = ({ children }) => {
         return () => clearInterval(interval);
     }, [authToken])
 
+    /**
+     * @description Configure Axios with the auth token.
+     * If the token is missing or expired, remove the auth token from Axios.
+     * Return ok responses with just the data.
+     * Handle 401 Unauthorized errors by logging the user out.
+     * @param {string} token - The authentication bearer token to configure Axios with
+     */
     const configureAxios = (token: string) => {
         axios.defaults.baseURL = "";
 
@@ -88,11 +101,11 @@ const AuthProvider = ({ children }) => {
 
         // Handle expired token or 401 Unauthorized error
         globalInterceptor = axios.interceptors.response.use(
-            async function (response) {
+            function (response: AxiosResponse) {
                 // Response is valid. Return it to final destination.
                 return response.data;
             },
-            async function (error) {
+            function (error) {
                 if (typeof error.response === 'undefined') {
                     return Promise.reject(error);
                 }
@@ -100,10 +113,13 @@ const AuthProvider = ({ children }) => {
                 // If there's an error, remove the auth if unauthorized
                 // and return to the sign-in page.
                 let res = error.response;
-                if (res.status === 401 && res.config && !res.config?.__isRetryRequest) {
-                    console.warn("401 Unauthorized - Logging out user.");
-                    // 401 Unauthorized - Log user out.
-                    await logOut();
+                if (res.status === 401 && res.config) {
+                    if (!res.config?.__isRetryRequest) {
+                        res.config.__isRetryRequest = true;
+                        console.warn("401 Unauthorized - Logging out user.");
+                        logOut();
+                    }
+                    return Promise.reject(error);
                 } else {
                     if (error.response?.data?.msg) {
                         return Promise.reject({
@@ -119,21 +135,30 @@ const AuthProvider = ({ children }) => {
         );
     }
 
-    const tokenIsExpired = (token: string) => {
+    /**
+     * @description Check if the token is expired.
+     * @param {string} token - The authentication token to check
+     * @returns {boolean} - True if the token is expired, false otherwise
+     */
+    const tokenIsExpired = (token: string): boolean => {
         if (!token) {
             return true;
         }
 
         try {
-            const decoded = jwtDecode(token);
+            const decoded: JwtPayload = jwtDecode(token);
             return decoded.exp * 1000 < Date.now();
         } catch (error) {
             return true;
         }
     }
 
-    // Retrieve the auth token from AsyncStorage
-    const loadFromAsyncStorage = async () => {
+    /**
+     * Retrieve the auth token from AsyncStorage and set it in state.
+     * If the token is missing or expired, log the user out.
+     * @returns {Promise<void>}
+     */
+    const loadFromAsyncStorage = async (): Promise<void> => {
         try {
             let data = await AsyncStorage.getAuth();
             if (!data || !data.token || tokenIsExpired(data.token)) {
@@ -149,14 +174,18 @@ const AuthProvider = ({ children }) => {
         }
     };
 
-    const getIsAdmin = async () => {
+    /**
+     * @description Check if the user is an admin by making a request to the server.
+     * @returns {Promise<void>}
+     */
+    const getSetIsAdmin = async (): Promise<void> => {
         if (!authToken) {
             setIsAdmin(false);
             return;
         }
         try {
-            const isAdmin = await UserRequests.userIsAdmin();
-            setIsAdmin(isAdmin);
+            const res: Response<IsAdminData> = await UserRequests.userIsAdmin();
+            setIsAdmin(res.data.isAdmin);
         } catch (error) {
             console.error("Error checking if user is admin: ", error);
             setIsAdmin(false);
@@ -195,7 +224,7 @@ const AuthProvider = ({ children }) => {
     // Call `configurationAxios(authToken)` whenever `authToken` changes
     useEffect(() => {
         configureAxios(authToken);
-        getIsAdmin();
+        getSetIsAdmin();
     }, [authToken]);
 
     // Load auth token on app start

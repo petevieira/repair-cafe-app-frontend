@@ -10,7 +10,13 @@ import { useAuth } from 'contexts/auth-context';
 import { NavigationProp } from 'globals/RootNavigation';
 import appColors from 'globals/colors';
 import EventHeader from 'globals/EventHeader';
+import { Response, RepairsData } from 'types/Response';
 
+/**
+ * Repairs component
+ * Displays a table of the repairs for the current event.
+ * @returns The component view
+ */
 const Repairs = () => {
     const [repairs, setRepairs] = useState([]);
     const {
@@ -22,19 +28,24 @@ const Repairs = () => {
     const [repairsRetrieved, setRepairsRetrieved] = useState(false);
     const navigation = useNavigation<NavigationProp>();
 
-    const getRepairs = async () => {
+    /**
+     * Get the repairs for the current event and set the state
+     * @returns Promise<void>
+     */
+    const getRepairs = async (): Promise<void> => {
         if (!appEvent) {
             return;
         }
         try {
             setShowLoader(true);
-            const tempRepairs = await getRepairsByEvent(appEvent._id);
-            if (!tempRepairs) {
+            const res: Response<RepairsData> = await getRepairsByEvent(appEvent._id);
+            const resRepairs = res.data.repairs;
+            if (resRepairs.length <= 0) {
                 setRepairs([]);
                 return;
             }
             // Sort with follow-up repairs first, the In Queue progress, then In Progress, then the rest.
-            tempRepairs.sort((a: Repair, b: Repair) => {
+            resRepairs.sort((a: Repair, b: Repair) => {
                 if (a.isFollowUpRepair && !b.isFollowUpRepair) {
                     return -1;
                 }
@@ -73,7 +84,7 @@ const Repairs = () => {
                 }
                 return 0;
             });
-            setRepairs(tempRepairs);
+            setRepairs(resRepairs);
         } catch (error) {
             console.error(error);
             setSnackbarMsg(error.message);
@@ -83,13 +94,20 @@ const Repairs = () => {
         setRepairsRetrieved(true);
     }
 
-    const addRepairPressed = () => {
+    /**
+     * Navigate to the Add/Edit Repair screen
+     */
+    const addRepairPressed = (): void => {
         navigation.navigate('Add/Edit Repair', {
             repair: new Repair()
         });
     }
 
-    const repairPressed = (repair: Repair) => {
+    /**
+     * Navigate to the Add/Edit Repair screen
+     * @param {Repair} repair - the repair to edit
+     */
+    const repairPressed = (repair: Repair): void => {
         if (!isLoggedIn) {
             return;
         }
@@ -98,6 +116,10 @@ const Repairs = () => {
         });
     }
 
+    /**
+     * Get the repairs for the current event when the screen is focused
+     * and when the appEvent changes.
+     */
     useFocusEffect(
         useCallback(() => {
             getRepairs();
@@ -141,7 +163,11 @@ const Repairs = () => {
                                 )}
                             </DataTable.Cell>
                             <DataTable.Cell style={{flex: 1}}>{idx+1}</DataTable.Cell>
-                            <DataTable.Cell style={{flex: 3}}>{repair.product}</DataTable.Cell>
+                            <DataTable.Cell style={{flex: 3}}>
+                                <Text style={{flex: 1, flexWrap: 'wrap'}} numberOfLines={0}>
+                                    {repair.product}
+                                </Text>
+                            </DataTable.Cell>
                             <DataTable.Cell style={{flex: 4}}>{repair.ownersFirstName} {repair.ownersLastName ? repair.ownersLastName.charAt(0).toUpperCase() : ""}</DataTable.Cell>
                             <DataTable.Cell style={{flex: 3}}>{repair.repairerFirstName} {repair.repairerLastName}</DataTable.Cell>
                             <DataTable.Cell style={{flex: 4}}>{repair.repairStatus}</DataTable.Cell>

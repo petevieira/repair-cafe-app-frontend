@@ -4,6 +4,7 @@
 
 import axios from 'axios';
 import Api from 'requests/request-consts';
+import { Response, SubscribedData } from 'types/Response';
 
 export const subscribeEmailToNewsletter = async (email: string) => {
     if (!email) {
@@ -16,7 +17,7 @@ export const subscribeEmailToNewsletter = async (email: string) => {
         { email }
     );
     if (!res.status) {
-        throw new Error(res.data.message);
+        throw new Error(res.data.msg);
     }
 }
 
@@ -33,26 +34,31 @@ export const unsubscribeEmailFromNewsletter = async (email: string) => {
     console.debug("res: ", res);
 
     if (!res.status) {
-        throw new Error(res.data.message);
+        throw new Error(res.data.msg);
     }
 
     return true;
 }
 
-export const getIsSubscribed = async (email: string) => {
+/**
+ * Check if the email is subscribed to the newsletter
+ * @param {string} email - The email to check
+ * @returns Promise which resolves to true if subscribed, or rejects
+ */
+export const getIsSubscribed = async (email: string): Promise<Response<SubscribedData>> => {
     if (!email) {
         console.error("Can't check if email is subscribed. 'email' not defined");
         throw new Error("Email not defined");
     }
 
-    const res = await axios.post(
+    const res: Response<SubscribedData> = await axios.post(
         Api.Subscribers.IS_EMAIL_SUBSCRIBED,
         { email }
     );
 
     if (!res.status) {
-        throw new Error(res.data.message);
+        throw new Error(res.msg);
     }
 
-    return res.data.isSubscribed;
+    return res;
 }

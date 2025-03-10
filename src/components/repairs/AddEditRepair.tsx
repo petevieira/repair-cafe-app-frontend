@@ -24,6 +24,7 @@ import { ProductCategoryValues, RepairStatusValues, RepairBarrierValues} from 'g
 import Terms from 'globals/Terms';
 import { WEIGHT_UNITS, COST_UNITS } from '@env';
 import { emailIsValid, eventInThePast, eventInTheFuture } from 'lib/helpers';
+import { Response, RepairData, RepairsData, OwnerData, VolunteersData, SubscribedData } from 'types/Response';
 
 const ordsProductCategoryList = ProductCategoryValues.map((el, idx) => {
     return { label: `${el.text} (${el.description})`, value: idx };
@@ -39,6 +40,12 @@ const ordsRepairBarrierList = RepairBarrierValues.map((el, idx) => {
 
 const MiscCategoryIdx = 17;
 
+/**
+ * Add/Edit Repair component
+ * @param {Object} route - the route object
+ * @param {Object} navigation - the navigation object
+ * @returns The component view
+ */
 const AddEditRepair = ({route, navigation}) => {
     const [repairDetails, setRepairDetails] = useState(new Repair());
     const [waiverBoxChecked, setWaiverBoxChecked] = useState(false);
@@ -75,10 +82,20 @@ const AddEditRepair = ({route, navigation}) => {
 
     const paramRepair = route.params.repair;
 
+    /**
+     * Check if a string is numeric
+     * @param {string} str - the string to check
+     * @returns {boolean} - true if the string is numeric, false otherwise
+     */
     const isNumeric = (str: string): boolean => {
         return !isNaN(parseFloat(str)) && (parseFloat(str) > 0);
     }
 
+    /**
+     * Check if the repair is ready to be saved
+     * @param {Repair} repair - the repair to check
+     * @returns {boolean} - true if the repair is ready to be saved, false otherwise
+     */
     const repairOkToSave = (repair: Repair): boolean => {
         let msg = "";
         if (!waiverBoxChecked) {
@@ -107,7 +124,11 @@ const AddEditRepair = ({route, navigation}) => {
         return true;
     }
 
-    const saveRepair = async () => {
+    /**
+     * Save the repair to the database
+     * @returns {Promise<void>}
+     */
+    const saveRepair = async (): Promise<void> => {
         if (!appEvent._id) {
             setSnackbarMsg("Event not found. Please try again.");
             return;
@@ -121,11 +142,11 @@ const AddEditRepair = ({route, navigation}) => {
         try {
             setShowLoader(true);
             if (!!repairDetails._id) {
-                await updateRepair(repairDetails);
-                setSnackbarMsg("Repair updated.");
+                const res: Response<RepairData> = await updateRepair(repairDetails);
+                setSnackbarMsg(res.msg);
             } else {
-                await addFullRepair(repairDetails);
-                setSnackbarMsg("Repair added.");
+                const res: Response<RepairData> = await addFullRepair(repairDetails);
+                setSnackbarMsg(res.msg);
             }
             navigation.navigate('Repairs');
         } catch (error) {
@@ -136,27 +157,36 @@ const AddEditRepair = ({route, navigation}) => {
         }
     }
 
-    const deleteCurrentRepair = async () => {
+    /**
+     * Delete the current repair from the database
+     * @returns {Promise}
+     */
+    const deleteCurrentRepair = async (): Promise<void> => {
         if (!repairDetails._id) {
             setSnackbarMsg("Repair can't be deleted. It doesn't have an _id.");
             return;
         }
         setShowLoader(false);
         try {
-            const response = await deleteRepair(repairDetails._id);
-            setShowLoader(false);
-            setSnackbarMsg("Repair deleted.");
+            const res: Response<RepairData> = await deleteRepair(repairDetails._id);
+            setSnackbarMsg(res.msg);
             setTimeout(() => {
                 navigation.navigate('Repairs');
             }, 500);
         } catch (error) {
             console.error(error);
-            setShowLoader(false);
             setSnackbarMsg(error.message);
+        } finally {
+            setShowLoader(false);
         }
     }
 
-    const setTitle = (repair: Repair) => {
+    /**
+     * Set the page title based on the repair's owner's first name
+     * @param {Repair} repair - the repair to set the title for
+     * @returns {void}
+     */
+    const setTitle = (repair: Repair): void => {
         if (!!repair?.ownersFirstName) {
             setPageTitle(`${repair.ownersFirstName}'s ${repair.type}`);
         } else {
@@ -164,14 +194,30 @@ const AddEditRepair = ({route, navigation}) => {
         }
     }
 
-    const isNewRepair = (repair: Repair) => {
+    /**
+     * Check if the repair is new
+     * @param {Repair} repair - the repair to check
+     * @returns {boolean} - true if the repair is new, false otherwise
+     */
+    const isNewRepair = (repair: Repair): boolean => {
         return !repair || !repair._id;
     }
 
-    const getVolunteers = async () => {
+    /**
+     * Get the volunteers for the current event
+     * @returns {Promise<void>}
+     */
+    const getVolunteers = async (): Promise<void> => {
         try {
-            const tempVolunteers = await getVolunteersByEvent(appEvent._id);
+            const res: Response<VolunteersData> = await getVolunteersByEvent(appEvent._id);
             let list = [];
+            if (res.data.volunteers.length <= 0) {
+                setRepairerList(list);
+                setVolunteers([]);
+                return;
+            }
+
+            let tempVolunteers = res.data.volunteers;
             tempVolunteers.forEach((v, idx) => {
                 list.push({ label: `${v.firstName} ${v.lastName}`, value: idx});
             });
@@ -183,13 +229,23 @@ const AddEditRepair = ({route, navigation}) => {
         }
     }
 
-    const initStatus = (repair: Repair) => {
+    /**
+     * Initialize the repair status
+     * @param {Repair} repair - the repair to initialize the status for
+     * @returns {Repair} - the repair with the status initialized
+     */
+    const initStatus = (repair: Repair): Repair => {
         repair.repairStatus = RepairStatusValues[0];
         setStatusIdx(0);
         return repair;
     }
 
-    const getFullRepair = async (repair: Repair): Promise<string> => {
+    /**
+     * Get the full repair details
+     * @param {Repair} repair - the repair to get the details for
+     * @returns {Promise<void>}
+     */
+    const getFullRepair = async (repair: Repair): Promise<void> => {
         setShowLoader(true);
         if (isNewRepair(repair)) {
             setPageTitle("New Repair");
@@ -201,8 +257,8 @@ const AddEditRepair = ({route, navigation}) => {
         }
 
         try {
-            const response = await getRepair(repair._id);
-            let fullRepair = response.data.repair;
+            const res: Response<RepairData> = await getRepair(repair._id);
+            let fullRepair = res.data.repair;
             setTitle(fullRepair);
             if (!fullRepair.repairStatus) {
                 fullRepair = initStatus(fullRepair);
@@ -212,8 +268,8 @@ const AddEditRepair = ({route, navigation}) => {
                 setProductCategoryIdx(MiscCategoryIdx);
             }
             setRepairDetails(fullRepair);
-            setWaiverBoxChecked(response.data.repair.acceptsWaiver);
-            return fullRepair.ownersEmail;
+            setWaiverBoxChecked(fullRepair.acceptsWaiver);
+            getSetSubscriberStatus(fullRepair.ownersEmail);
         } catch (error) {
             console.error(error);
             setSnackbarMsg(error.message);
@@ -222,22 +278,27 @@ const AddEditRepair = ({route, navigation}) => {
         }
     };
 
-    const onEmailBlur = async () => {
+    /**
+     * Triggered when the "Owner's email" field loses focus.
+     * If the repair is new and the email is valid, it searches for the owner by email.
+     * If the owner is found, it fills the owner's first and last name.
+     * @returns {Promise<void>}
+     */
+    const onEmailBlur = async (): Promise<void> => {
         if (!!repairDetails._id || !emailIsValid(repairDetails.ownersEmail)) {
             return;
         }
 
         try {
             setShowLoader(true);
-            const owner = await findOwnerByEmail(repairDetails.ownersEmail);
+            const res: Response<OwnerData> = await findOwnerByEmail(repairDetails.ownersEmail);
 
-            setSubscribedToNewsletter(owner.subscribedToNewsletter);
-
-            if (!owner?.firstName) {
-                // Owner not found in the database
+            if (!res.data.owner) {
                 return;
             }
 
+            const owner = res.data.owner;
+            setSubscribedToNewsletter(owner.subscribedToNewsletter);
             setRepairDetails({
                 ...repairDetails,
                 ownersFirstName: owner.firstName,
@@ -252,6 +313,11 @@ const AddEditRepair = ({route, navigation}) => {
         }
     }
 
+    /**
+     * Triggered when the "Subscribe to newsletter?" checkbox is checked or unchecked.
+     * @param {boolean} checked - true if the checkbox is checked, false if it's unchecked
+     * @returns {Promise<void>}
+     */
     const onSubscribeToggled = async (checked: boolean): Promise<void> => {
         if (!repairDetails.ownersEmail) {
             setSnackbarMsg("Please enter the owner's email first.");
@@ -295,16 +361,8 @@ const AddEditRepair = ({route, navigation}) => {
             }
             try {
                 setShowLoader(true);
-                const tempPreviousRepairsList = await findIncompleteRepairsByOwner(repairDetails.ownersEmail);
-                setPrevoiusRepairsList(tempPreviousRepairsList);
-                let previousRepairsDisplayList = [];
-                tempPreviousRepairsList.forEach((i: Repair, idx: number) => {
-                    previousRepairsDisplayList.push({
-                        label: `${i.type} - ${i.product} - ${i.symptoms}asdfasdfasdl;kjsdf asdf asdf asdf sadf`,
-                        value: idx
-                    });
-                });
-                setPreviousIncompleteRepairs(previousRepairsDisplayList);
+                const res: Response<RepairsData> = await findIncompleteRepairsByOwner(repairDetails.ownersEmail);
+                handlePreviousRepairs(res.data.repairs);
             } catch (error) {
                 console.error(error);
                 setSnackbarMsg(error.message);
@@ -316,6 +374,23 @@ const AddEditRepair = ({route, navigation}) => {
         }
     }
 
+    const handlePreviousRepairs = (previousRepairs: Repair[]) => {
+        setPrevoiusRepairsList(previousRepairs);
+        let previousRepairsDisplayList = [];
+        previousRepairs.forEach((i: Repair, idx: number) => {
+            previousRepairsDisplayList.push({
+                label: `${i.type} - ${i.product} - ${i.symptoms}`,
+                value: `${idx}`
+            });
+        });
+        setPreviousIncompleteRepairs(previousRepairsDisplayList);
+    }
+
+    /**
+     * Fill the repair fields with the details of the selected previous repair
+     * @param {number} idx - the index of the selected previous repair
+     * @returns {Promise<void>}
+     */
     const fillRepairFieldsFromPreviousRepair = async (idx: number): Promise<void> => {
         if (idx === null) {
             return;
@@ -339,15 +414,20 @@ const AddEditRepair = ({route, navigation}) => {
         });
     }
 
-    const getSubscriberStatus = async (email: string) => {
+    /**
+     * Get the subscriber status for the given email
+     * @param {string} email - the email to check
+     * @returns {Promise<void>}
+     */
+    const getSetSubscriberStatus = async (email: string): Promise<void> => {
         if (!email) {
             return;
         }
 
         try {
             setShowLoader(true);
-            const isSubscribed = await getIsSubscribed(email);
-            setSubscribedToNewsletter(isSubscribed);
+            const res: Response<SubscribedData> = await getIsSubscribed(email);
+            setSubscribedToNewsletter(res.data.isSubscribed);
         } catch (error) {
             console.error(error);
             setSnackbarMsg(error.message);
@@ -356,6 +436,9 @@ const AddEditRepair = ({route, navigation}) => {
         }
     }
 
+    /**
+     * Fetch the volunteers for the current event when the app event changes.
+     */
     useEffect(() => {
         if (isNewRepair(paramRepair)) {
             if (emailInputRef.current) {
@@ -365,32 +448,54 @@ const AddEditRepair = ({route, navigation}) => {
         getVolunteers();
     }, [appEvent]);
 
+    /**
+     * Fetch the repair details when the component mounts
+     */
     useEffect(() => {
         const fetchData = async () => {
-            const ownersEmail = await getFullRepair(paramRepair);
-            await getSubscriberStatus(ownersEmail);
+            await getFullRepair(paramRepair);
         };
         fetchData();
     }, []);
 
+    /**
+     * Fetch and set whether the owner is subscribed to the newsletter
+     * when the owner's email changes
+     */
+    useEffect(() => {
+        getSetSubscriberStatus(repairDetails.ownersEmail);
+    }, [repairDetails.ownersEmail]);
+
+    /**
+     * Set the repair status when the repair status index changes
+     */
     useEffect(() => {
         if (statusIdx >= 0) {
             setRepairDetails({...repairDetails, repairStatus: ordsRepairStatusList[statusIdx].label})
         }
     }, [statusIdx]);
 
+    /**
+     * Set the repair barrier when the repair barrier index changes
+     */
     useEffect(() => {
         if (barrierIdx >= 0) {
             setRepairDetails({...repairDetails, repairBarrier: ordsRepairBarrierList[barrierIdx].label})
         }
     }, [barrierIdx]);
 
+    /**
+     * Set the product category when the product category index changes
+     */
     useEffect(() => {
         if (productCategoryIdx >= 0) {
             setRepairDetails({...repairDetails, type: ordsProductCategoryList[productCategoryIdx].label});
         }
     }, [productCategoryIdx]);
 
+    /**
+     * Set the repairer info when the repairer index changes
+     */
     useEffect(() => {
         if (repairerIdx >= 0) {
             setRepairDetails({
@@ -404,6 +509,9 @@ const AddEditRepair = ({route, navigation}) => {
         }
     }, [repairerIdx]);
 
+    /**
+     * Set the repair status index when the repair status changes
+     */
     useEffect(() => {
         ordsRepairStatusList.forEach((s, idx) => {
             if (s.label === repairDetails.repairStatus) {
@@ -415,6 +523,9 @@ const AddEditRepair = ({route, navigation}) => {
         });
     }, [repairDetails]);
 
+    /**
+     * Set the repair barrier index when the repair changes
+     */
     useEffect(() => {
         ordsRepairBarrierList.forEach((s, idx) => {
             if (s.label === repairDetails.repairBarrier) {
@@ -426,6 +537,9 @@ const AddEditRepair = ({route, navigation}) => {
         });
     }, [repairDetails]);
 
+    /**
+     * Set the repairer index when the repairer changes
+     */
     useEffect(() => {
         volunteers.forEach((v, idx) => {
             if (v.firstName.toLowerCase() === repairDetails.repairerFirstName.toLowerCase()
@@ -596,7 +710,7 @@ const AddEditRepair = ({route, navigation}) => {
                             valueField="value"
                             placeholder="Select Product Category"
                             searchPlaceholder="Search..."
-                            value={productCategoryIdx}
+                            value={ordsProductCategoryList[productCategoryIdx]}
                             onFocus={() => setProductCategoryFocused(true)}
                             onBlur={() => setProductCategoryFocused(false)}
                             onChange={v => {
@@ -721,7 +835,7 @@ const AddEditRepair = ({route, navigation}) => {
                         </View>
                         <ElementDropdown
                             placeholder={"Repair Status"}
-                            value={statusIdx}
+                            value={ordsRepairStatusList[statusIdx]}
                             data={ordsRepairStatusList}
                             style={[styles.dropdown, showStatusDropdown && {borderWidth: 1}]}
                             placeholderStyle={styles.placeholderStyle}
@@ -750,7 +864,6 @@ const AddEditRepair = ({route, navigation}) => {
                             value={barrierIdx}
                             setValue={setBarrierIdx}
                             list={ordsRepairBarrierList}
-                            dropdownPosition={"top"}
                             renderRightIcon={false}
                         />
                     </View>
@@ -775,7 +888,6 @@ const AddEditRepair = ({route, navigation}) => {
                         />
                     </View>
                     <CheckBox
-                        style={{alignSelf: 'center'}}
                         label={
                             <Text>{"Repair owner agrees to the "}
                             <Text style={{color: "blue"}}

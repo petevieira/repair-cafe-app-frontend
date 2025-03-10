@@ -168,9 +168,21 @@ const Repairs = () => {
                                     {repair.product}
                                 </Text>
                             </DataTable.Cell>
-                            <DataTable.Cell style={{flex: 4}}>{repair.ownersFirstName} {repair.ownersLastName ? repair.ownersLastName.charAt(0).toUpperCase() : ""}</DataTable.Cell>
-                            <DataTable.Cell style={{flex: 3}}>{repair.repairerFirstName} {repair.repairerLastName}</DataTable.Cell>
-                            <DataTable.Cell style={{flex: 4}}>{repair.repairStatus}</DataTable.Cell>
+                            <DataTable.Cell style={{flex: 4}}>
+                                <Text>
+                                    {repair.ownersFirstName} {repair.ownersLastName
+                                        ? repair.ownersLastName.charAt(0).toUpperCase() + "." : ""}
+                                </Text>
+                            </DataTable.Cell>
+                            <DataTable.Cell style={{flex: 3}}>
+                                <Text>
+                                    {repair.repairerFirstName} {repair.repairerLastName
+                                        ? repair.repairerLastName.charAt(0).toUpperCase() + "." : ""}
+                                </Text>
+                            </DataTable.Cell>
+                            <DataTable.Cell style={{flex: 4}}>
+                                {repair.repairStatus}
+                            </DataTable.Cell>
                         </DataTable.Row>
                     ))}
                     </DataTable>

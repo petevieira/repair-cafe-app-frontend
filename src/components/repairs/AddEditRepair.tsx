@@ -89,7 +89,7 @@ const AddEditRepair = ({route, navigation}) => {
      */
     const isNumeric = (str: string): boolean => {
         return !isNaN(parseFloat(str)) && (parseFloat(str) > 0);
-    }
+    };
 
     /**
      * Check if the repair is ready to be saved
@@ -122,7 +122,7 @@ const AddEditRepair = ({route, navigation}) => {
             return false;
         }
         return true;
-    }
+    };
 
     /**
      * Save the repair to the database
@@ -155,7 +155,7 @@ const AddEditRepair = ({route, navigation}) => {
         } finally {
             setShowLoader(false);
         }
-    }
+    };
 
     /**
      * Delete the current repair from the database
@@ -201,13 +201,17 @@ const AddEditRepair = ({route, navigation}) => {
      */
     const isNewRepair = (repair: Repair): boolean => {
         return !repair || !repair._id;
-    }
+    };
 
     /**
      * Get the volunteers for the current event
      * @returns {Promise<void>}
      */
     const getVolunteers = async (): Promise<void> => {
+        if (!appEvent) {
+            return;
+        }
+
         try {
             const res: Response<VolunteersData> = await getVolunteersByEvent(appEvent._id);
             let list = [];
@@ -227,7 +231,7 @@ const AddEditRepair = ({route, navigation}) => {
             console.error(error);
             setSnackbarMsg(error.message);
         }
-    }
+    };
 
     /**
      * Initialize the repair status
@@ -238,7 +242,7 @@ const AddEditRepair = ({route, navigation}) => {
         repair.repairStatus = RepairStatusValues[0];
         setStatusIdx(0);
         return repair;
-    }
+    };
 
     /**
      * Get the full repair details
@@ -311,7 +315,7 @@ const AddEditRepair = ({route, navigation}) => {
         } finally {
             setShowLoader(false);
         }
-    }
+    };
 
     /**
      * Triggered when the "Subscribe to newsletter?" checkbox is checked or unchecked.
@@ -341,7 +345,7 @@ const AddEditRepair = ({route, navigation}) => {
         } finally {
             setShowLoader(false);
         }
-    }
+    };
 
     /**
      * Triggered when the "Follow-up repair?" checkbox is checked or unchecked.
@@ -372,7 +376,7 @@ const AddEditRepair = ({route, navigation}) => {
         } else {
             setPreviousIncompleteRepairs([]);
         }
-    }
+    };
 
     const handlePreviousRepairs = (previousRepairs: Repair[]) => {
         setPrevoiusRepairsList(previousRepairs);
@@ -384,7 +388,7 @@ const AddEditRepair = ({route, navigation}) => {
             });
         });
         setPreviousIncompleteRepairs(previousRepairsDisplayList);
-    }
+    };
 
     /**
      * Fill the repair fields with the details of the selected previous repair
@@ -412,7 +416,7 @@ const AddEditRepair = ({route, navigation}) => {
             cost: prevRepair.cost,
             isFollowUpRepair: true
         });
-    }
+    };
 
     /**
      * Get the subscriber status for the given email
@@ -434,7 +438,7 @@ const AddEditRepair = ({route, navigation}) => {
         } finally {
             setShowLoader(false);
         }
-    }
+    };
 
     /**
      * Fetch the volunteers for the current event when the app event changes.
@@ -655,7 +659,6 @@ const AddEditRepair = ({route, navigation}) => {
                             selectedTextStyle={styles.selectedTextStyle}
                             inputSearchStyle={styles.inputSearchStyle}
                             itemTextStyle={styles.itemTextStyle}
-                            iconStyle={styles.iconStyle}
                             data={previousIncompleteRepairs}
                             visible={showPreviousRepairsDropdown}
                             search={false}
@@ -702,7 +705,6 @@ const AddEditRepair = ({route, navigation}) => {
                             selectedTextStyle={styles.selectedTextStyle}
                             inputSearchStyle={styles.inputSearchStyle}
                             itemTextStyle={styles.itemTextStyle}
-                            iconStyle={styles.iconStyle}
                             data={ordsProductCategoryList}
                             search
                             maxHeight={300}
@@ -814,7 +816,6 @@ const AddEditRepair = ({route, navigation}) => {
                             selectedTextStyle={styles.selectedTextStyle}
                             inputSearchStyle={styles.inputSearchStyle}
                             itemTextStyle={styles.itemTextStyle}
-                            iconStyle={styles.iconStyle}
                             maxHeight={300}
                             labelField="label"
                             valueField="value"
@@ -842,7 +843,6 @@ const AddEditRepair = ({route, navigation}) => {
                             selectedTextStyle={styles.selectedTextStyle}
                             inputSearchStyle={styles.inputSearchStyle}
                             itemTextStyle={styles.itemTextStyle}
-                            iconStyle={styles.iconStyle}
                             maxHeight={300}
                             labelField="label"
                             valueField="value"
@@ -864,7 +864,6 @@ const AddEditRepair = ({route, navigation}) => {
                             value={barrierIdx}
                             setValue={setBarrierIdx}
                             list={ordsRepairBarrierList}
-                            renderRightIcon={false}
                         />
                     </View>
                 }

@@ -1,7 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { View, ScrollView } from 'react-native';
-import { Text, DataTable, FAB, Tooltip } from 'react-native-paper';
+import { Text, DataTable, Icon, FAB, Tooltip } from 'react-native-paper';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import DropDown from "react-native-paper-dropdown";
 
 import styles from 'globals/Styles'
 import { getRepairsByEvent } from 'requests/repair-requests';
@@ -10,7 +11,14 @@ import { useAuth } from 'contexts/auth-context';
 import { NavigationProp } from 'globals/RootNavigation';
 import appColors from 'globals/colors';
 import EventHeader from 'globals/EventHeader';
-import { Response, RepairsData } from 'types/Response';
+import { Response, RepairData, RepairsData, VolunteersData } from 'types/Response';
+import { getVolunteersByEvent } from 'requests/volunteer-requests';
+import { RepairStatusValues } from 'globals/ords';
+import { updateRepair } from 'requests/repair-requests';
+
+const ordsRepairStatusList = RepairStatusValues.map((el, idx) => {
+    return { label: el, value: idx };
+});
 
 /**
  * Repairs component
@@ -26,7 +34,29 @@ const Repairs = () => {
         appEvent,
     } = useAuth();
     const [repairsRetrieved, setRepairsRetrieved] = useState(false);
+    const [repairersList, setRepairerList] = useState([]);
+    const [repairStatuses, setRepairStatuses] = useState<{ [key: string]: number }>({});
+    const [volunteers, setVolunteers] = useState([]);
+    const [showRepairStatusDropDown, setShowRepairStatusDropDown] = useState(false);
     const navigation = useNavigation<NavigationProp>();
+
+    const repairStatusChanged = async (repairId: string, newStatusIndex: number): Promise<void> => {
+        setRepairStatuses((prev => ({
+            ...prev,
+            [repairId]: newStatusIndex,
+        })))
+
+        try {
+            const res: Response<RepairData> = await updateRepair({
+                _id: repairId,
+                repairStatus: RepairStatusValues[newStatusIndex],
+            });
+            setSnackbarMsg(res.msg);
+        } catch (error) {
+            console.error(error);
+            setSnackbarMsg(error.message);
+        }
+    };
 
     /**
      * Get the repairs for the current event and set the state
@@ -44,46 +74,14 @@ const Repairs = () => {
                 setRepairs([]);
                 return;
             }
-            // Sort with follow-up repairs first, the In Queue progress, then In Progress, then the rest.
-            resRepairs.sort((a: Repair, b: Repair) => {
-                if (a.isFollowUpRepair && !b.isFollowUpRepair) {
-                    return -1;
-                }
-                if (!a.isFollowUpRepair && b.isFollowUpRepair) {
-                    return 1;
-                }
-                if (a.repairStatus === "In Queue" && b.repairStatus !== "In Queue") {
-                    return -1;
-                }
-                if (a.repairStatus !== "In Queue" && b.repairStatus === "In Queue") {
-                    return 1;
-                }
-                if (a.repairStatus === "In Progress" && b.repairStatus !== "In Progress") {
-                    return -1;
-                }
-                if (a.repairStatus !== "In Progress" && b.repairStatus === "In Progress") {
-                    return 1;
-                }
-                if (a.repairStatus === "Repairable" && b.repairStatus !== "Repairable") {
-                    return -1;
-                }
-                if (a.repairStatus !== "Repairable" && b.repairStatus === "Repairable") {
-                    return 1;
-                }
-                if (a.repairStatus === "End of life" && b.repairStatus !== "End of life") {
-                    return -1;
-                }
-                if (a.repairStatus !== "End of life" && b.repairStatus === "End of life") {
-                    return 1;
-                }
-                if (a.repairStatus === "Unknown" && b.repairStatus !== "Unknown") {
-                    return -1;
-                }
-                if (a.repairStatus !== "Unknown" && b.repairStatus === "Unknown") {
-                    return 1;
-                }
-                return 0;
-            });
+
+            sortRepairs(resRepairs);
+            const initialRepairStatuses = resRepairs.reduce((acc, theRepair) => {
+                acc[theRepair._id] = RepairStatusValues.indexOf(theRepair.repairStatus);
+                return acc;
+            }, {} as { [key: string]: number });
+
+            setRepairStatuses(initialRepairStatuses);
             setRepairs(resRepairs);
         } catch (error) {
             console.error(error);
@@ -92,7 +90,52 @@ const Repairs = () => {
             setShowLoader(false);
         }
         setRepairsRetrieved(true);
-    }
+    };
+
+    /**
+     * Sort with follow-up repairs first, the In Queue progress, then In Progress, then the rest.
+     */
+    const sortRepairs = (unsortedRepairs: Repair[]): Repair[] => {
+        return unsortedRepairs.sort((a: Repair, b: Repair) => {
+            if (a.isFollowUpRepair && !b.isFollowUpRepair) {
+                return -1;
+            }
+            if (!a.isFollowUpRepair && b.isFollowUpRepair) {
+                return 1;
+            }
+            if (a.repairStatus === "In Queue" && b.repairStatus !== "In Queue") {
+                return -1;
+            }
+            if (a.repairStatus !== "In Queue" && b.repairStatus === "In Queue") {
+                return 1;
+            }
+            if (a.repairStatus === "In Progress" && b.repairStatus !== "In Progress") {
+                return -1;
+            }
+            if (a.repairStatus !== "In Progress" && b.repairStatus === "In Progress") {
+                return 1;
+            }
+            if (a.repairStatus === "Repairable" && b.repairStatus !== "Repairable") {
+                return -1;
+            }
+            if (a.repairStatus !== "Repairable" && b.repairStatus === "Repairable") {
+                return 1;
+            }
+            if (a.repairStatus === "End of life" && b.repairStatus !== "End of life") {
+                return -1;
+            }
+            if (a.repairStatus !== "End of life" && b.repairStatus === "End of life") {
+                return 1;
+            }
+            if (a.repairStatus === "Unknown" && b.repairStatus !== "Unknown") {
+                return -1;
+            }
+            if (a.repairStatus !== "Unknown" && b.repairStatus === "Unknown") {
+                return 1;
+            }
+            return 0;
+        });
+    };
 
     /**
      * Navigate to the Add/Edit Repair screen
@@ -101,7 +144,7 @@ const Repairs = () => {
         navigation.navigate('Add/Edit Repair', {
             repair: new Repair()
         });
-    }
+    };
 
     /**
      * Navigate to the Add/Edit Repair screen
@@ -114,7 +157,33 @@ const Repairs = () => {
         navigation.navigate('Add/Edit Repair', {
             repair: repair
         });
-    }
+    };
+
+    const getVolunteers = async (): Promise<void> => {
+        if (!appEvent) {
+            return;
+        }
+
+        try {
+            const res: Response<VolunteersData> = await getVolunteersByEvent(appEvent._id);
+            let list = [];
+            if (res.data.volunteers.length <= 0) {
+                setRepairerList(list);
+                setVolunteers([]);
+                return;
+            }
+
+            let tempVolunteers = res.data.volunteers;
+            tempVolunteers.forEach((v, idx) => {
+                list.push({ label: `${v.firstName} ${v.lastName}`, value: idx});
+            });
+            setRepairerList(list);
+            setVolunteers(tempVolunteers);
+        } catch (error) {
+            console.error(error);
+            setSnackbarMsg(error.message);
+        }
+    };
 
     /**
      * Get the repairs for the current event when the screen is focused
@@ -181,7 +250,23 @@ const Repairs = () => {
                                 </Text>
                             </DataTable.Cell>
                             <DataTable.Cell style={{flex: 4}}>
-                                {repair.repairStatus}
+                                <View style={{flex: 1}}>
+                                    <DropDown
+                                        label={""}
+                                        mode={"flat"}
+                                        value={repairStatuses[repair._id] ?? 0}
+                                        setValue={(newIndex) => repairStatusChanged(repair._id, newIndex)}
+                                        list={ordsRepairStatusList}
+                                        visible={showRepairStatusDropDown === repair._id}
+                                        showDropDown={() => setShowRepairStatusDropDown(repair._id)}
+                                        onDismiss={() => setShowRepairStatusDropDown(null)}
+                                        theme={{
+                                            colors: {
+                                                background: appColors.bgGray,
+                                            }
+                                        }}
+                                    />
+                                </View>
                             </DataTable.Cell>
                         </DataTable.Row>
                     ))}

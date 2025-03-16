@@ -80,9 +80,13 @@ export const addFullRepair = async (repair: Repair): Promise<Response<RepairData
  * @param {Repair} repair - Repair object to update
  * @returns Promise which resolves to the updated repair, or rejects
  */
-export const updateRepair = async (repair: Repair): Promise<Response<RepairData>> => {
+export const updateRepair = async (updates: any): Promise<Response<RepairData>> => {
+    if (!updates?._id) {
+        throw new Error("Can't update repair. '_id' not defined");
+    }
+
     const res: Response<RepairData>
-        = await axios.put(Api.Repairs.UPDATE_REPAIR, createRepair(repair));
+        = await axios.put(Api.Repairs.UPDATE_REPAIR, updates);
 
     if (!res.status) {
         throw new Error(res.msg);

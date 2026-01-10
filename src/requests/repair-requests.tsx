@@ -2,11 +2,11 @@
  * @description Logic for requests that go to <api>/repairs/* routes
  */
 
-import axios from 'axios';
-import Api from 'requests/request-consts';
-import Repair from 'models/Repair';
-import { WEIGHT_UNITS, COST_UNITS } from '@env';
-import { Response, RepairData, RepairsData, OwnerData } from 'types/Response';
+import axios from "axios";
+import Api from "requests/request-consts";
+import Repair from "models/Repair";
+import { WEIGHT_UNITS, COST_UNITS } from "@env";
+import { Response, RepairData, RepairsData, OwnerData } from "types/Response";
 
 /**
  * Get single repair by id
@@ -14,22 +14,22 @@ import { Response, RepairData, RepairsData, OwnerData } from 'types/Response';
  * @returns Promise which resolves to the array of repairs, or rejects
  */
 export const getRepair = async (id: string): Promise<Response<RepairData>> => {
-    if (!id) {
-        console.error("Can't get repair. 'id' not defined");
-        return null;
-    }
+  if (!id) {
+    console.error("Can't get repair. 'id' not defined");
+    return null;
+  }
 
-    const res: Response<RepairData> = await axios.get(Api.Repairs.GET_REPAIR + `/${id}`);
+  const res: Response<RepairData> = await axios.get(Api.Repairs.GET_REPAIR + `/${id}`);
 
-    if (!res.status) {
-        throw new Error(res.msg);
-    }
+  if (!res.status) {
+    throw new Error(res.msg);
+  }
 
-    if (!res.data.repair) {
-        throw new Error("Repair not found");
-    }
+  if (!res.data.repair) {
+    throw new Error("Repair not found");
+  }
 
-    return res;
+  return res;
 };
 
 /**
@@ -38,22 +38,22 @@ export const getRepair = async (id: string): Promise<Response<RepairData>> => {
  * @returns Promise which resolves to the array of repairs, or rejects
  */
 export const getRepairsByEvent = async (eventId: string): Promise<Response<RepairsData>> => {
-    if (!eventId) {
-        return;
-    }
+  if (!eventId) {
+    return;
+  }
 
-    const res: Response<RepairsData> = await axios.get(Api.Repairs.GET_REPAIRS_BASIC + `/${eventId}`);
+  const res: Response<RepairsData> = await axios.get(Api.Repairs.GET_REPAIRS_BASIC + `/${eventId}`);
 
-    if (!res.status) {
-        throw new Error(res.msg);
-    }
+  if (!res.status) {
+    throw new Error(res.msg);
+  }
 
-    if (!res.data.repairs) {
-        throw new Error("Repairs not found");
-    }
+  if (!res.data.repairs) {
+    throw new Error("Repairs not found");
+  }
 
-    return res;
-}
+  return res;
+};
 
 /**
  * Add a new repair
@@ -61,19 +61,18 @@ export const getRepairsByEvent = async (eventId: string): Promise<Response<Repai
  * @returns Promise which resolves to the new repair, or rejects
  */
 export const addFullRepair = async (repair: Repair): Promise<Response<RepairData>> => {
-    const res: Response<RepairData>
-    = await axios.post(Api.Repairs.ADD_FULL_REPAIR, createRepair(repair));
+  const res: Response<RepairData> = await axios.post(Api.Repairs.ADD_FULL_REPAIR, createRepair(repair));
 
-    if (!res.status) {
-        throw new Error(res.msg);
-    }
+  if (!res.status) {
+    throw new Error(res.msg);
+  }
 
-    if (!res.data.repair) {
-        throw new Error("Repair not found");
-    }
+  if (!res.data.repair) {
+    throw new Error("Repair not found");
+  }
 
-    return res;
-}
+  return res;
+};
 
 /**
  * Update a repair
@@ -81,19 +80,18 @@ export const addFullRepair = async (repair: Repair): Promise<Response<RepairData
  * @returns Promise which resolves to the updated repair, or rejects
  */
 export const updateRepair = async (repair: Repair): Promise<Response<RepairData>> => {
-    const res: Response<RepairData>
-        = await axios.put(Api.Repairs.UPDATE_REPAIR, createRepair(repair));
+  const res: Response<RepairData> = await axios.put(Api.Repairs.UPDATE_REPAIR, createRepair(repair));
 
-    if (!res.status) {
-        throw new Error(res.msg);
-    }
+  if (!res.status) {
+    throw new Error(res.msg);
+  }
 
-    if (!res.data.repair) {
-        throw new Error("Repair not found");
-    }
+  if (!res.data.repair) {
+    throw new Error("Repair not found");
+  }
 
-    return res;
-}
+  return res;
+};
 
 /**
  * Delete a repair
@@ -101,22 +99,21 @@ export const updateRepair = async (repair: Repair): Promise<Response<RepairData>
  * @returns Promise which resolves to the deleted repair, or rejects
  */
 export const deleteRepair = async (id: string): Promise<Response<RepairData>> => {
-    if (!id) {
-        throw new Error("Can't delete repair. 'id' not defined");
-    }
+  if (!id) {
+    throw new Error("Can't delete repair. 'id' not defined");
+  }
 
-    const res: Response<RepairData>
-        = await axios.delete(Api.Repairs.DELETE_REPAIR + `/${id}`);
+  const res: Response<RepairData> = await axios.delete(Api.Repairs.DELETE_REPAIR + `/${id}`);
 
-    if (!res.status) {
-        throw new Error(res.msg);
-    }
+  if (!res.status) {
+    throw new Error(res.msg);
+  }
 
-    if (!res.data.repair) {
-        throw new Error("Repair not found");
-    }
+  if (!res.data) {
+    throw new Error(res.msg);
+  }
 
-    return res;
+  return res;
 };
 
 /**
@@ -125,18 +122,17 @@ export const deleteRepair = async (id: string): Promise<Response<RepairData>> =>
  * @returns Promise which resolves to a response object with data.owner, or rejects
  */
 export const findOwnerByEmail = async (email: string): Promise<Response<OwnerData>> => {
-    if (!email) {
-        throw new Error("Can't find owner by email. 'email' not defined");
-    }
+  if (!email) {
+    throw new Error("Can't find owner by email. 'email' not defined");
+  }
 
-    const res: Response<OwnerData>
-        = await axios.get(Api.Repairs.FIND_OWNER_BY_EMAIL + `/${email}`);
+  const res: Response<OwnerData> = await axios.get(Api.Repairs.FIND_OWNER_BY_EMAIL + `/${email}`);
 
-    if (!res.status) {
-        throw new Error(res.msg);
-    }
+  if (!res.status) {
+    throw new Error(res.msg);
+  }
 
-    return res;
+  return res;
 };
 
 /**
@@ -145,45 +141,44 @@ export const findOwnerByEmail = async (email: string): Promise<Response<OwnerDat
  * @returns Promise which resolves a response object with data.repairs, or rejects
  */
 export const findIncompleteRepairsByOwner = async (email: string): Promise<Response<RepairsData>> => {
-    if (!email) {
-        console.error("Can't find incomplete repairs by owner. 'email' not defined");
-        throw new Error("Can't find incomplete repairs by owner. 'email' not defined");
-    }
+  if (!email) {
+    console.error("Can't find incomplete repairs by owner. 'email' not defined");
+    throw new Error("Can't find incomplete repairs by owner. 'email' not defined");
+  }
 
-    const res: Response<RepairsData>
-        = await axios.get(Api.Repairs.FIND_INCOMPLETE_REPAIRS_BY_OWNER + `/${email}`);
+  const res: Response<RepairsData> = await axios.get(Api.Repairs.FIND_INCOMPLETE_REPAIRS_BY_OWNER + `/${email}`);
 
-    if (!res.status) {
-        throw new Error(res.msg);
-    }
+  if (!res.status) {
+    throw new Error(res.msg);
+  }
 
-    if (!res.data.repairs) {
-        throw new Error("No previous repairs found");
-    }
+  if (!res.data.repairs) {
+    throw new Error("No previous repairs found");
+  }
 
-    return res;
-}
+  return res;
+};
 
 const createRepair = (repair: Repair) => {
-    return {
-        _id: repair._id,
-        acceptsWaiver: repair.acceptsWaiver ?? true,
-        brand: repair.brand ?? "",
-        cost: repair.cost ?? COST_UNITS,
-        eventId: repair.eventId ?? "",
-        isFollowUpRepair: repair.isFollowUpRepair ?? false,
-        model: repair.model ?? "",
-        ownersEmail: repair.ownersEmail ?? "",
-        ownersFirstName: repair.ownersFirstName ?? "",
-        ownersLastName: repair.ownersLastName ?? "",
-        product: repair.product ?? "",
-        repairBarrier: repair.repairBarrier ?? "",
-        repairNotes: repair.repairNotes ?? "",
-        repairStatus: repair.repairStatus ?? "",
-        repairerFirstName: repair.repairerFirstName ?? "",
-        repairerLastName: repair.repairerLastName ?? "",
-        type: repair.type ?? "",
-        symptoms: repair.symptoms ?? "",
-        weight: repair.weight ?? WEIGHT_UNITS,
-    };
+  return {
+    _id: repair._id,
+    acceptsWaiver: repair.acceptsWaiver ?? true,
+    brand: repair.brand ?? "",
+    cost: repair.cost ?? COST_UNITS,
+    eventId: repair.eventId ?? "",
+    isFollowUpRepair: repair.isFollowUpRepair ?? false,
+    model: repair.model ?? "",
+    ownersEmail: repair.ownersEmail ?? "",
+    ownersFirstName: repair.ownersFirstName ?? "",
+    ownersLastName: repair.ownersLastName ?? "",
+    product: repair.product ?? "",
+    repairBarrier: repair.repairBarrier ?? "",
+    repairNotes: repair.repairNotes ?? "",
+    repairStatus: repair.repairStatus ?? "",
+    repairerFirstName: repair.repairerFirstName ?? "",
+    repairerLastName: repair.repairerLastName ?? "",
+    type: repair.type ?? "",
+    symptoms: repair.symptoms ?? "",
+    weight: repair.weight ?? WEIGHT_UNITS,
+  };
 };

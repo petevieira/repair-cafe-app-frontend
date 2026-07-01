@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { View, Platform, KeyboardAvoidingView, ScrollView, Dimensions, ImageStyle } from "react-native";
+import { View, Platform, KeyboardAvoidingView, ScrollView, Dimensions, ImageStyle, Pressable } from "react-native";
 import { Button, Dialog, Divider, Portal, TextInput, HelperText, Text } from "react-native-paper";
 import DropDown from "react-native-paper-dropdown";
 const PaperDropDown = DropDown;
@@ -25,15 +25,22 @@ import {
   unsubscribeEmailFromNewsletter,
   getIsSubscribed,
 } from "requests/subscriber-requests";
-import { ProductCategoryValues, RepairStatusValues, RepairBarrierValues } from "globals/ords";
+import {
+  buildProductCategoryDropdownList,
+  MiscCategoryIdx,
+  ProductCategoryDropdownItem,
+  RepairStatusValues,
+  RepairBarrierValues,
+} from "globals/ords";
 import Terms from "globals/Terms";
 import { WEIGHT_UNITS, COST_UNITS } from "@env";
 import { emailIsValid, eventInThePast, eventInTheFuture } from "lib/helpers";
 import { Response, RepairData, RepairsData, OwnerData, VolunteersData, SubscribedData } from "types/Response";
 
-const ordsProductCategoryList = ProductCategoryValues.map((el, idx) => {
-  return { label: `${el.text} (${el.description})`, value: idx };
-});
+const { selectableItems: ordsProductCategoryList, dropdownData: ordsProductCategoryDropdownData } =
+  buildProductCategoryDropdownList();
+
+const defaultProductCategoryIdx = MiscCategoryIdx >= 0 ? MiscCategoryIdx : 0;
 
 const ordsRepairStatusList = RepairStatusValues.map((el, idx) => {
   return { label: el, value: idx };
@@ -42,8 +49,6 @@ const ordsRepairStatusList = RepairStatusValues.map((el, idx) => {
 const ordsRepairBarrierList = RepairBarrierValues.map((el, idx) => {
   return { label: el, value: idx };
 });
-
-const MiscCategoryIdx = 17;
 
 /**
  * Add/Edit Repair component
@@ -64,7 +69,7 @@ const AddEditRepair = ({ route, navigation }) => {
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [barrierIdx, setBarrierIdx] = useState(-1);
   const [showBarrierDropdown, setShowBarrierDropdown] = useState(false);
-  const [productCategoryIdx, setProductCategoryIdx] = useState(MiscCategoryIdx);
+  const [productCategoryIdx, setProductCategoryIdx] = useState(defaultProductCategoryIdx);
   const [productCategoryFocused, setProductCategoryFocused] = useState(false);
   const [showDeleteConfirmationDialog, setShowDeleteConfirmationDialog] = useState(false);
   const [previousIncompleteRepairs, setPreviousIncompleteRepairs] = useState([]);
@@ -265,12 +270,12 @@ const AddEditRepair = ({ route, navigation }) => {
         fullRepair = initStatus(fullRepair);
       }
       if (!fullRepair.type) {
-        fullRepair.type = ordsProductCategoryList[MiscCategoryIdx].label;
-        setProductCategoryIdx(MiscCategoryIdx);
+        fullRepair.type = ordsProductCategoryList[defaultProductCategoryIdx].label;
+        setProductCategoryIdx(defaultProductCategoryIdx);
       } else {
         // Find the matching index for the existing type
         const matchingIdx = ordsProductCategoryList.findIndex((cat) => cat.label === fullRepair.type);
-        setProductCategoryIdx(matchingIdx >= 0 ? matchingIdx : MiscCategoryIdx);
+        setProductCategoryIdx(matchingIdx >= 0 ? matchingIdx : defaultProductCategoryIdx);
       }
       setRepairDetails(fullRepair);
       setWaiverBoxChecked(fullRepair.acceptsWaiver);
@@ -738,7 +743,7 @@ const AddEditRepair = ({ route, navigation }) => {
               inputSearchStyle={styles.inputSearchStyle}
               itemTextStyle={styles.itemTextStyle}
               iconStyle={styles.iconStyle as ImageStyle}
-              data={ordsProductCategoryList}
+              data={ordsProductCategoryDropdownData}
               search
               maxHeight={300}
               labelField="label"
@@ -750,6 +755,22 @@ const AddEditRepair = ({ route, navigation }) => {
               onBlur={() => setProductCategoryFocused(false)}
               onChange={(v) => {
                 setProductCategoryIdx(v.value);
+              }}
+              renderItem={(item: ProductCategoryDropdownItem) => {
+                if (item.isGroupLabel) {
+                  return (
+                    <Pressable disabled>
+                      <Text style={{ fontWeight: "bold", paddingVertical: 8, paddingHorizontal: 12, color: "#49454f" }}>
+                        {item.label}
+                      </Text>
+                    </Pressable>
+                  );
+                }
+                return (
+                  <View style={{ paddingVertical: 8, paddingHorizontal: 12, paddingLeft: 28 }}>
+                    <Text style={styles.itemTextStyle}>{item.label}</Text>
+                  </View>
+                );
               }}
             />
           </View>
@@ -941,22 +962,22 @@ const AddEditRepair = ({ route, navigation }) => {
                 if (eventInThePast(appEvent)) {
                   if (repairDetails._id) {
                     setSaveConfirmationDialogMsg(
-                      "You are editing a repair from a past event. Are you sure you want to save it?"
+                      "You are editing a repair from a past event. Are you sure you want to save it?",
                     );
                   } else {
                     setSaveConfirmationDialogMsg(
-                      "You are adding a repair to a past event. Are you sure you want to save it?"
+                      "You are adding a repair to a past event. Are you sure you want to save it?",
                     );
                   }
                   setShowSaveConfirmationDialog(true);
                 } else if (eventInTheFuture(appEvent)) {
                   if (repairDetails._id) {
                     setSaveConfirmationDialogMsg(
-                      "You are editing a repair from a future event. Are you sure you want to save it?"
+                      "You are editing a repair from a future event. Are you sure you want to save it?",
                     );
                   } else {
                     setSaveConfirmationDialogMsg(
-                      "You are adding a repair to a future event. Are you sure you want to save it?"
+                      "You are adding a repair to a future event. Are you sure you want to save it?",
                     );
                   }
                   setShowSaveConfirmationDialog(true);

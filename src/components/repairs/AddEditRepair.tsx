@@ -9,6 +9,7 @@ import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import SubmitButton from "globals/SubmitButton";
 import styles from "globals/Styles";
 import Repair from "models/Repair";
+import Volunteer from "models/Volunteer";
 import CheckBox from "globals/CheckBox";
 import { useAuth } from "contexts/auth-context";
 import { getVolunteersByEvent } from "requests/volunteer-requests";
@@ -19,6 +20,7 @@ import {
   deleteRepair,
   findOwnerByEmail,
   findIncompleteRepairsByOwner,
+  getRepairsByEvent,
 } from "requests/repair-requests";
 import {
   subscribeEmailToNewsletter,
@@ -50,6 +52,95 @@ const ordsRepairBarrierList = RepairBarrierValues.map((el, idx) => {
   return { label: el, value: idx };
 });
 
+type RepairerDropdownItem = {
+  label: string;
+  value: number;
+  isOccupied?: boolean;
+};
+
+const UNASSIGNED_REPAIRER_IDX = -1;
+const UNASSIGNED_REPAIRER_ITEM: RepairerDropdownItem = {
+  label: "Unassigned",
+  value: UNASSIGNED_REPAIRER_IDX,
+};
+
+const OCCUPIED_REPAIR_STATUSES = ["In Queue", "In Progress"];
+
+const repairerMatchesVolunteer = (repair: Repair, volunteer: Volunteer): boolean => {
+  const repairFirst = repair.repairerFirstName?.trim().toLowerCase() ?? "";
+  const repairLast = repair.repairerLastName?.trim() ?? "";
+  const volunteerFirst = volunteer.firstName?.trim().toLowerCase() ?? "";
+  const volunteerLast = volunteer.lastName?.trim() ?? "";
+
+  if (!repairFirst || repairFirst !== volunteerFirst) {
+    return false;
+  }
+
+  if (!repairLast || !volunteerLast) {
+    return !repairLast && !volunteerLast;
+  }
+
+  if (repairLast.toLowerCase() === volunteerLast.toLowerCase()) {
+    return true;
+  }
+
+  const abbreviatedVolunteerLast = `${volunteerLast.charAt(0).toUpperCase()}.`;
+  return repairLast === abbreviatedVolunteerLast;
+};
+
+const isVolunteerOccupied = (volunteer: Volunteer, repairs: Repair[], excludeRepairId?: string): boolean => {
+  return repairs.some(
+    (repair) =>
+      repair._id !== excludeRepairId &&
+      OCCUPIED_REPAIR_STATUSES.includes(repair.repairStatus) &&
+      repairerMatchesVolunteer(repair, volunteer),
+  );
+};
+
+const buildRepairerDropdownLists = (
+  volunteers: Volunteer[],
+  repairs: Repair[],
+  excludeRepairId?: string,
+): { available: RepairerDropdownItem[]; occupied: RepairerDropdownItem[] } => {
+  const compareLabel = (a: RepairerDropdownItem, b: RepairerDropdownItem) =>
+    a.label.localeCompare(b.label, undefined, { sensitivity: "base" });
+
+  const items: RepairerDropdownItem[] = volunteers.map((volunteer, idx) => {
+    const occupied = isVolunteerOccupied(volunteer, repairs, excludeRepairId);
+    return {
+      label: `${volunteer.firstName} ${volunteer.lastName}`,
+      value: idx,
+      isOccupied: occupied,
+    };
+  });
+
+  return {
+    available: items.filter((item) => !item.isOccupied).sort(compareLabel),
+    occupied: items.filter((item) => item.isOccupied).sort(compareLabel),
+  };
+};
+
+const getRepairerDropdownValue = (volunteers: Volunteer[], repairerIdx: number): RepairerDropdownItem | null => {
+  if (repairerIdx === UNASSIGNED_REPAIRER_IDX) {
+    return UNASSIGNED_REPAIRER_ITEM;
+  }
+
+  if (repairerIdx < 0 || !volunteers[repairerIdx]) {
+    return null;
+  }
+
+  const volunteer = volunteers[repairerIdx];
+  return {
+    label: `${volunteer.firstName} ${volunteer.lastName}`,
+    value: repairerIdx,
+  };
+};
+
+const withUnassignedRepairerOption = (available: RepairerDropdownItem[]): RepairerDropdownItem[] => [
+  UNASSIGNED_REPAIRER_ITEM,
+  ...available,
+];
+
 /**
  * Add/Edit Repair component
  * @param {Object} route - the route object
@@ -61,9 +152,11 @@ const AddEditRepair = ({ route, navigation }) => {
   const [waiverBoxChecked, setWaiverBoxChecked] = useState(false);
   const [pageTitle, setPageTitle] = useState("");
   const [termsModalVisible, setTermsModalVisible] = useState(false);
-  const [repairerList, setRepairerList] = useState([]);
-  const [volunteers, setVolunteers] = useState([]);
-  const [repairerIdx, setRepairerIdx] = useState(-1);
+  const [availableRepairerList, setAvailableRepairerList] = useState<RepairerDropdownItem[]>([]);
+  const [occupiedRepairerList, setOccupiedRepairerList] = useState<RepairerDropdownItem[]>([]);
+  const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
+  const [eventRepairs, setEventRepairs] = useState<Repair[]>([]);
+  const [repairerIdx, setRepairerIdx] = useState(UNASSIGNED_REPAIRER_IDX);
   const [showRepairerDropdown, setShowRepairerDropdown] = useState(false);
   const [statusIdx, setStatusIdx] = useState(-1);
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
@@ -210,25 +303,48 @@ const AddEditRepair = ({ route, navigation }) => {
   };
 
   /**
+   * Get repairs for the current event (used to determine busy repairers)
+   * @returns {Promise<Repair[]>}
+   */
+  const refreshEventRepairs = async (): Promise<Repair[]> => {
+    if (!appEvent?._id) {
+      return [];
+    }
+
+    try {
+      const res: Response<RepairsData> = await getRepairsByEvent(appEvent._id);
+      return res.data.repairs ?? [];
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  };
+
+  /**
    * Get the volunteers for the current event
    * @returns {Promise<void>}
    */
   const getVolunteers = async (): Promise<void> => {
     try {
-      const res: Response<VolunteersData> = await getVolunteersByEvent(appEvent._id);
-      let list = [];
-      if (res.data.volunteers.length <= 0) {
-        setRepairerList(list);
+      const [volRes, repairs]: [Response<VolunteersData>, Repair[]] = await Promise.all([
+        getVolunteersByEvent(appEvent._id),
+        refreshEventRepairs(),
+      ]);
+
+      setEventRepairs(repairs);
+
+      if (volRes.data.volunteers.length <= 0) {
+        setAvailableRepairerList([]);
+        setOccupiedRepairerList([]);
         setVolunteers([]);
         return;
       }
 
-      let tempVolunteers = res.data.volunteers;
-      tempVolunteers.forEach((v, idx) => {
-        list.push({ label: `${v.firstName} ${v.lastName}`, value: idx });
-      });
-      setRepairerList(list);
+      const tempVolunteers = volRes.data.volunteers;
+      const { available, occupied } = buildRepairerDropdownLists(tempVolunteers, repairs, repairDetails._id);
       setVolunteers(tempVolunteers);
+      setAvailableRepairerList(withUnassignedRepairerOption(available));
+      setOccupiedRepairerList(occupied);
     } catch (error) {
       console.error(error);
       setSnackbarMsg(error.message);
@@ -446,6 +562,21 @@ const AddEditRepair = ({ route, navigation }) => {
   };
 
   /**
+   * Rebuild the repairer dropdown when volunteers, event repairs, or the current repair changes
+   */
+  useEffect(() => {
+    if (volunteers.length <= 0) {
+      setAvailableRepairerList([]);
+      setOccupiedRepairerList([]);
+      return;
+    }
+
+    const { available, occupied } = buildRepairerDropdownLists(volunteers, eventRepairs, repairDetails._id);
+    setAvailableRepairerList(withUnassignedRepairerOption(available));
+    setOccupiedRepairerList(occupied);
+  }, [volunteers, eventRepairs, repairDetails._id]);
+
+  /**
    * Fetch the volunteers for the current event when the app event changes.
    */
   useEffect(() => {
@@ -506,11 +637,17 @@ const AddEditRepair = ({ route, navigation }) => {
    * Set the repairer info when the repairer index changes
    */
   useEffect(() => {
-    if (repairerIdx >= 0) {
+    if (repairerIdx >= 0 && volunteers[repairerIdx]) {
       setRepairDetails({
         ...repairDetails,
         repairerFirstName: volunteers[repairerIdx].firstName,
         repairerLastName: volunteers[repairerIdx].lastName,
+      });
+    } else if (repairerIdx === UNASSIGNED_REPAIRER_IDX) {
+      setRepairDetails({
+        ...repairDetails,
+        repairerFirstName: "",
+        repairerLastName: "",
       });
     }
     return () => {
@@ -550,18 +687,19 @@ const AddEditRepair = ({ route, navigation }) => {
    * Set the repairer index when the repairer changes
    */
   useEffect(() => {
-    volunteers.forEach((v, idx) => {
-      if (
+    if (!repairDetails.repairerFirstName?.trim() && !repairDetails.repairerLastName?.trim()) {
+      setRepairerIdx(UNASSIGNED_REPAIRER_IDX);
+      return;
+    }
+
+    const matchingIdx = volunteers.findIndex(
+      (v) =>
         v.firstName.toLowerCase() === repairDetails.repairerFirstName.toLowerCase() &&
-        v.lastName.toLowerCase() === repairDetails.repairerLastName.toLowerCase()
-      ) {
-        setRepairerIdx(idx);
-      }
-    });
-    return () => {
-      setRepairerIdx(-1);
-    };
-  }, [volunteers, repairDetails]);
+        v.lastName.toLowerCase() === repairDetails.repairerLastName.toLowerCase(),
+    );
+
+    setRepairerIdx(matchingIdx >= 0 ? matchingIdx : UNASSIGNED_REPAIRER_IDX);
+  }, [volunteers, repairDetails.repairerFirstName, repairDetails.repairerLastName]);
 
   // Component's view
   return (
@@ -860,34 +998,54 @@ const AddEditRepair = ({ route, navigation }) => {
             placeholder="Fuse was blown. Replaced. / Soldered severed wire / ..."
             placeholderTextColor={"#717171"}
           />
-          {repairerList.length > 0 && (
-            <View style={styles.dropdownContainer}>
-              <View style={[styles.label]}>
-                <Text style={{ color: "#717171" }}>
-                  Repairer
-                  <Text style={{ color: "red" }}>*</Text>
-                </Text>
+          {volunteers.length > 0 && (
+            <>
+              <View style={styles.dropdownContainer}>
+                <View style={[styles.label]}>
+                  <Text style={{ color: "#717171" }}>Repairer</Text>
+                </View>
+                <ElementDropdown
+                  placeholder={"Select repairer"}
+                  value={getRepairerDropdownValue(volunteers, repairerIdx)}
+                  data={availableRepairerList}
+                  style={[styles.dropdown, { flex: 0, minHeight: 50 }, showRepairerDropdown && { borderWidth: 1 }]}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  inputSearchStyle={styles.inputSearchStyle}
+                  itemTextStyle={styles.itemTextStyle}
+                  iconStyle={styles.iconStyle as ImageStyle}
+                  maxHeight={300}
+                  labelField="label"
+                  valueField="value"
+                  flatListProps={{
+                    ListFooterComponent:
+                      occupiedRepairerList.length > 0
+                        ? () => (
+                            <View>
+                              {occupiedRepairerList.map((item) => (
+                                <View key={item.value} style={{ paddingVertical: 8, paddingHorizontal: 12 }}>
+                                  <Text style={[styles.itemTextStyle, { color: "#bbb" }]}>{item.label}</Text>
+                                </View>
+                              ))}
+                            </View>
+                          )
+                        : undefined,
+                  }}
+                  onFocus={async () => {
+                    setShowRepairerDropdown(true);
+                    const repairs = await refreshEventRepairs();
+                    setEventRepairs(repairs);
+                  }}
+                  onBlur={() => setShowRepairerDropdown(false)}
+                  onChange={(v) => {
+                    setRepairerIdx(v.value);
+                  }}
+                />
               </View>
-              <ElementDropdown
-                placeholder={"Select repairer"}
-                value={repairerIdx}
-                data={repairerList}
-                style={[styles.dropdown, showStatusDropdown && { borderWidth: 1 }]}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                inputSearchStyle={styles.inputSearchStyle}
-                itemTextStyle={styles.itemTextStyle}
-                iconStyle={styles.iconStyle as ImageStyle}
-                maxHeight={300}
-                labelField="label"
-                valueField="value"
-                onFocus={() => setShowRepairerDropdown(true)}
-                onBlur={() => setShowRepairerDropdown(false)}
-                onChange={(v) => {
-                  setRepairerIdx(v.value);
-                }}
-              />
-            </View>
+              <HelperText type="info" visible={true} style={{ marginTop: -8, marginBottom: 8 }}>
+                Available repairers are listed first. Gray names already have an item In Queue or In Progress.
+              </HelperText>
+            </>
           )}
           <View style={styles.dropdownContainer}>
             <View style={[styles.label]}>

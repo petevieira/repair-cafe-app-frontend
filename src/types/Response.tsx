@@ -17,7 +17,10 @@ export interface VolunteersData {
 
 export interface PastVolunteersData {
     pastVolunteers: Volunteer[];
+<<<<<<< HEAD
     meta?: { sortBy: string; version: number };
+=======
+>>>>>>> 5eb95be6ea0311ea75d78850c9e23cdf39d10ead
 };
 
 export interface RepairData {

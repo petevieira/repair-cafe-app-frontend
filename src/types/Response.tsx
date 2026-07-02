@@ -15,6 +15,10 @@ export interface VolunteersData {
     volunteers: Volunteer[];
 };
 
+export interface PastVolunteersData {
+    pastVolunteers: Volunteer[];
+};
+
 export interface RepairData {
     repair: Repair;
 };

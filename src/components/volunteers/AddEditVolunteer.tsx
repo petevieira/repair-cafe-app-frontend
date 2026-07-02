@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-    View, ScrollView, KeyboardAvoidingView, Platform, Dimensions,
+    View, ScrollView, KeyboardAvoidingView, Platform, Dimensions, ImageStyle,
 } from 'react-native';
-import { Button, TextInput, Text, Dialog, Portal
+import { Button, TextInput, Text, Dialog, Portal, Divider
 } from 'react-native-paper';
+import { Dropdown as ElementDropdown } from 'react-native-element-dropdown';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 // Custom Components
@@ -13,12 +14,46 @@ import styles from 'globals/Styles'
 import Volunteer from 'models/Volunteer';
 import {
     addVolunteer, getVolunteer,
-    updateVolunteer, deleteVolunteer, findVolunteerByEmail
+    updateVolunteer, deleteVolunteer, findVolunteerByEmail,
+    getPastVolunteers, getVolunteersByEvent,
 } from 'requests/volunteer-requests';
 import { useAuth } from 'contexts/auth-context';
 import Terms from 'globals/Terms';
 import { emailIsValid, eventInThePast, eventInTheFuture } from 'lib/helpers';
-import { Response, VolunteerData } from 'types/Response';
+import { Response, VolunteerData, VolunteersData, PastVolunteersData } from 'types/Response';
+
+type PreviousVolunteerDropdownItem = {
+    label: string;
+    value: number;
+    email: string;
+    firstName: string;
+    lastName: string;
+};
+
+const buildPreviousVolunteerDropdownList = (
+    pastVolunteers: Volunteer[],
+    eventVolunteerEmails: Set<string>,
+): PreviousVolunteerDropdownItem[] => {
+    return pastVolunteers
+        .filter((volunteer) => {
+            const email = volunteer.email?.trim().toLowerCase();
+            return !email || !eventVolunteerEmails.has(email);
+        })
+        .sort((a, b) => {
+            const byFirstName = a.firstName.localeCompare(b.firstName, "en", { sensitivity: "base" });
+            if (byFirstName !== 0) {
+                return byFirstName;
+            }
+            return a.lastName.localeCompare(b.lastName, "en", { sensitivity: "base" });
+        })
+        .map((volunteer, idx) => ({
+            label: `${volunteer.firstName} ${volunteer.lastName}`,
+            value: idx,
+            email: volunteer.email ?? "",
+            firstName: volunteer.firstName,
+            lastName: volunteer.lastName,
+        }));
+};
 
 /**
  * Component for adding or editing Volunteers
@@ -42,6 +77,9 @@ const AddEditVolunteer = ({route, navigation}) => {
     const [showDeleteConfirmationDialog, setShowDeleteConfirmationDialog] = useState(false);
     const [showSaveConfirmationDialog, setShowSaveConfirmationDialog] = useState(false);
     const [saveConfirmationDialogMsg, setSaveConfirmationDialogMsg] = useState("");
+    const [previousVolunteerList, setPreviousVolunteerList] = useState<PreviousVolunteerDropdownItem[]>([]);
+    const [selectedPreviousVolunteer, setSelectedPreviousVolunteer] = useState<PreviousVolunteerDropdownItem | null>(null);
+    const [showPreviousVolunteerDropdown, setShowPreviousVolunteerDropdown] = useState(false);
     let emailInputRef = useRef<React.ElementRef<typeof TextInput> | null>(null);
     const screenWidth = Dimensions.get('window').width;
     const screenHeight = Dimensions.get('window').height;
@@ -166,12 +204,58 @@ const AddEditVolunteer = ({route, navigation}) => {
         }
     }
 
+    /**
+     * Load previous volunteers who are not already signed up for this event
+     * @returns Promise<void>
+     */
+    const loadPreviousVolunteers = async (): Promise<void> => {
+        if (!appEvent?._id) {
+            return;
+        }
+
+        try {
+            const [pastRes, eventRes]: [Response<PastVolunteersData>, Response<VolunteersData>] = await Promise.all([
+                getPastVolunteers(),
+                getVolunteersByEvent(appEvent._id),
+            ]);
+
+            const eventVolunteerEmails = new Set(
+                eventRes.data.volunteers
+                    .map((eventVolunteer) => eventVolunteer.email?.trim().toLowerCase())
+                    .filter(Boolean),
+            );
+
+            setPreviousVolunteerList(
+                buildPreviousVolunteerDropdownList(pastRes.data.pastVolunteers, eventVolunteerEmails),
+            );
+        } catch (error) {
+            console.error(error);
+            setSnackbarMsg(error.message);
+        }
+    };
+
+    /**
+     * Fill the form with a previous volunteer's details
+     * @param {PreviousVolunteerDropdownItem} item - the selected previous volunteer
+     */
+    const selectPreviousVolunteer = (item: PreviousVolunteerDropdownItem): void => {
+        setSelectedPreviousVolunteer(item);
+        setVolunteer({
+            ...volunteer,
+            email: item.email,
+            firstName: item.firstName,
+            lastName: item.lastName,
+            eventId: appEvent._id,
+        });
+    };
+
     useEffect(() => {
         if (!!paramVolunteer._id) {
             getExistingVolunteer(paramVolunteer._id);
         } else {
             setVolunteer(paramVolunteer);
             setWaiverBoxChecked(paramVolunteer.acceptsWaiver ?? false);
+            loadPreviousVolunteers();
             emailInputRef.current?.focus();
         }
     }, []);
@@ -186,6 +270,53 @@ const AddEditVolunteer = ({route, navigation}) => {
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
             >
                 <View style={styles.content}>
+
+                    { !volunteer._id && previousVolunteerList.length > 0 &&
+                        <>
+                            <Text
+                                style={{
+                                    fontWeight: "bold",
+                                    fontSize: 20,
+                                    alignSelf: "center",
+                                    marginBottom: 12,
+                                }}
+                            >
+                                Select a previous volunteer
+                            </Text>
+                            <View style={styles.dropdownContainer}>
+                                <ElementDropdown
+                                    placeholder={"Search by name..."}
+                                    value={selectedPreviousVolunteer}
+                                    data={previousVolunteerList}
+                                    style={[styles.dropdown, { flex: 0, minHeight: 50 }, showPreviousVolunteerDropdown && { borderWidth: 1 }]}
+                                    placeholderStyle={styles.placeholderStyle}
+                                    selectedTextStyle={styles.selectedTextStyle}
+                                    inputSearchStyle={styles.inputSearchStyle}
+                                    itemTextStyle={styles.itemTextStyle}
+                                    iconStyle={styles.iconStyle as ImageStyle}
+                                    search
+                                    maxHeight={300}
+                                    labelField="label"
+                                    valueField="value"
+                                    searchPlaceholder="Search..."
+                                    onFocus={() => setShowPreviousVolunteerDropdown(true)}
+                                    onBlur={() => setShowPreviousVolunteerDropdown(false)}
+                                    onChange={(item) => {
+                                        selectPreviousVolunteer(item);
+                                    }}
+                                />
+                            </View>
+                            <View style={{ width: "100%", marginVertical: 20, alignItems: "center" }}>
+                                <Divider style={{ width: "100%", height: 1, backgroundColor: "#ccc" }} />
+                                <Text style={{ color: "#717171", fontSize: 12, marginTop: 8 }}>
+                                    or add a new volunteer
+                                </Text>
+                            </View>
+                            <Text style={{ color: "#717171", fontSize: 12, marginBottom: 8, alignSelf: "center" }}>
+                                Only shows volunteers not already signed up for this event.
+                            </Text>
+                        </>
+                    }
 
                     <TextInput
                         label={<><Text style={{color: '#717171'}}>Email</Text><Text style={{color: 'red'}}>*</Text></>}

@@ -5,7 +5,7 @@
 import axios from 'axios';
 import Api from 'requests/request-consts';
 import Volunteer from 'models/Volunteer';
-import { Response, VolunteerData, VolunteersData } from 'types/Response';
+import { Response, VolunteerData, VolunteersData, PastVolunteersData } from 'types/Response';
 
 /**
  * Get all volunteers associated with the event
@@ -116,8 +116,18 @@ export const deleteVolunteer = async (id: string): Promise<Response<VolunteerDat
     return response;
 };
 
-export const getPastVolunteers = async () => {
-    return await axios.get(Api.Volunteers.GET_PAST_VOLUNTEERS);
+export const getPastVolunteers = async (): Promise<Response<PastVolunteersData>> => {
+    const res: Response<PastVolunteersData> = await axios.get(Api.Volunteers.GET_PAST_VOLUNTEERS);
+
+    if (!res.status) {
+        throw new Error(res.msg);
+    }
+
+    if (res.data?.pastVolunteers === undefined) {
+        throw new Error("Error getting past volunteers");
+    }
+
+    return res;
 }
 
 /**

@@ -2,52 +2,49 @@ import Volunteer from "models/Volunteer";
 import Repair from "models/Repair";
 
 export type Response<T> = {
-    status: boolean;
-    msg: string;
-    data: T;
+  status: boolean;
+  msg: string;
+  data: T;
 };
 
 export interface VolunteerData {
-    volunteer: Volunteer;
-};
+  volunteer: Volunteer;
+}
 
 export interface VolunteersData {
-    volunteers: Volunteer[];
-};
+  volunteers: Volunteer[];
+}
 
 export interface PastVolunteersData {
-    pastVolunteers: Volunteer[];
-<<<<<<< HEAD
-    meta?: { sortBy: string; version: number };
-=======
->>>>>>> 5eb95be6ea0311ea75d78850c9e23cdf39d10ead
-};
+  pastVolunteers: Volunteer[];
+  meta?: { sortBy: string; version: number };
+}
 
 export interface RepairData {
-    repair: Repair;
-};
+  repair: Repair;
+}
 
 export interface RepairsData {
-    repairs: Repair[];
-};
+  repairs: Repair[];
+}
 
 export interface OwnerData {
-    owner: { firstName: string; lastName: string; subscribedToNewsletter: boolean };
-};
+  owner: { firstName: string; lastName: string; subscribedToNewsletter: boolean };
+}
 
 export interface SubscribedData {
-    isSubscribed: boolean;
-};
+  isSubscribed: boolean;
+}
 
 export interface IsAdminData {
-    isAdmin: boolean;
-};
+  isAdmin: boolean;
+}
 
 export interface IsRegisteredData {
-    isRegistered: boolean;
-};
+  isRegistered: boolean;
+}
 
 export interface SignInData {
-    token: string;
-    user: any;
-};
+  token: string;
+  user: any;
+}

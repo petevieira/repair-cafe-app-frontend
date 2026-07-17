@@ -1,5 +1,5 @@
 {
-  "name": "repaircafemobile",
+  "name": "repair-cafe-app-frontend",
   "version": "1.0.0",
   "scripts": {
     "start": "expo start --dev-client",
@@ -10,7 +10,7 @@
     "ts:check": "tsc"
   },
   "engines": {
-    "node": "20.11.1"
+    "node": "22.14.0"
   },
   "dependencies": {
     "@expo/metro-config": "^0.17.3",

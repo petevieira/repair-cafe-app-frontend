@@ -12,6 +12,55 @@ import appColors from 'globals/colors';
 import EventHeader from 'globals/EventHeader';
 import { Response, RepairsData } from 'types/Response';
 
+const getStatusRank = (status: string): number => {
+    if (status === "In Queue") {
+        return 0;
+    }
+    if (status === "In Progress") {
+        return 1;
+    }
+    return 2;
+};
+
+const compareRepairsForQueue = (a: Repair, b: Repair): number => {
+    const rankDiff = getStatusRank(a.repairStatus) - getStatusRank(b.repairStatus);
+    if (rankDiff !== 0) {
+        return rankDiff;
+    }
+
+    const aCreated = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const bCreated = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    if (aCreated !== bCreated) {
+        return aCreated - bCreated;
+    }
+
+    return (a._id || "").localeCompare(b._id || "");
+};
+
+const compareByIntakeOrder = (a: Repair, b: Repair): number => {
+    const aCreated = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const bCreated = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    if (aCreated !== bCreated) {
+        return aCreated - bCreated;
+    }
+    return (a._id || "").localeCompare(b._id || "");
+};
+
+const buildIntakeOrderById = (repairs: Repair[]): Record<string, number> => {
+    const byIntake = [...repairs].sort(compareByIntakeOrder);
+    return Object.fromEntries(byIntake.map((repair, idx) => [repair._id, idx + 1]));
+};
+
+const getRepairRowColor = (status: string): string => {
+    if (status === "In Progress") {
+        return appColors.bgAmber;
+    }
+    if (status === "In Queue") {
+        return appColors.bgGray;
+    }
+    return appColors.bgGreen;
+};
+
 /**
  * Repairs component
  * Displays a table of the repairs for the current event.
@@ -19,6 +68,7 @@ import { Response, RepairsData } from 'types/Response';
  */
 const Repairs = () => {
     const [repairs, setRepairs] = useState([]);
+    const [intakeOrderById, setIntakeOrderById] = useState<Record<string, number>>({});
     const {
         isLoggedIn,
         setShowLoader,
@@ -42,48 +92,12 @@ const Repairs = () => {
             const resRepairs = res.data.repairs;
             if (resRepairs.length <= 0) {
                 setRepairs([]);
+                setIntakeOrderById({});
                 return;
             }
-            // Sort with follow-up repairs first, the In Queue progress, then In Progress, then the rest.
-            resRepairs.sort((a: Repair, b: Repair) => {
-                if (a.isFollowUpRepair && !b.isFollowUpRepair) {
-                    return -1;
-                }
-                if (!a.isFollowUpRepair && b.isFollowUpRepair) {
-                    return 1;
-                }
-                if (a.repairStatus === "In Queue" && b.repairStatus !== "In Queue") {
-                    return -1;
-                }
-                if (a.repairStatus !== "In Queue" && b.repairStatus === "In Queue") {
-                    return 1;
-                }
-                if (a.repairStatus === "In Progress" && b.repairStatus !== "In Progress") {
-                    return -1;
-                }
-                if (a.repairStatus !== "In Progress" && b.repairStatus === "In Progress") {
-                    return 1;
-                }
-                if (a.repairStatus === "Repairable" && b.repairStatus !== "Repairable") {
-                    return -1;
-                }
-                if (a.repairStatus !== "Repairable" && b.repairStatus === "Repairable") {
-                    return 1;
-                }
-                if (a.repairStatus === "End of life" && b.repairStatus !== "End of life") {
-                    return -1;
-                }
-                if (a.repairStatus !== "End of life" && b.repairStatus === "End of life") {
-                    return 1;
-                }
-                if (a.repairStatus === "Unknown" && b.repairStatus !== "Unknown") {
-                    return -1;
-                }
-                if (a.repairStatus !== "Unknown" && b.repairStatus === "Unknown") {
-                    return 1;
-                }
-                return 0;
-            });
+            setIntakeOrderById(buildIntakeOrderById(resRepairs));
+            // In Queue, then In Progress, then finished — FIFO by createdAt within each group.
+            resRepairs.sort(compareRepairsForQueue);
             setRepairs(resRepairs);
         } catch (error) {
             console.error(error);
@@ -148,11 +162,11 @@ const Repairs = () => {
                             <DataTable.Title style={{flex: 4}}>Status</DataTable.Title>
                         </DataTable.Header>
 
-                    {repairs.map((repair, idx) => (
+                    {repairs.map((repair) => (
                         <DataTable.Row
                             key={repair._id}
                             onPress={isLoggedIn ? (() => repairPressed(repair)) : undefined}
-                            style={{backgroundColor: ["In Queue", "In Progress"].indexOf(repair.repairStatus) >= 0 ? appColors.bgGray : appColors.bgGreen}}
+                            style={{backgroundColor: getRepairRowColor(repair.repairStatus)}}
                         >
                             <DataTable.Cell style={{flex: 1}}>
                                 {repair.isFollowUpRepair ? (
@@ -162,7 +176,9 @@ const Repairs = () => {
                                 ) : (""
                                 )}
                             </DataTable.Cell>
-                            <DataTable.Cell style={{flex: 1}}>{idx+1}</DataTable.Cell>
+                            <DataTable.Cell style={{flex: 1}}>
+                                {intakeOrderById[repair._id] ?? ""}
+                            </DataTable.Cell>
                             <DataTable.Cell style={{flex: 3}}>
                                 <Text style={{flex: 1, flexWrap: 'wrap'}} numberOfLines={0}>
                                     {repair.product}

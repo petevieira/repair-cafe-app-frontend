@@ -4,6 +4,7 @@ const appColors = {
     ...MD3LightTheme.colors,
     primary: '#565656',
     bgGray: "#f2f2f2",
+    bgAmber: "#fff4d6",
     bgGreen: "#e6ffe6",
     bgRed: "#ffe6e6",
     textGreen: "#034f03",

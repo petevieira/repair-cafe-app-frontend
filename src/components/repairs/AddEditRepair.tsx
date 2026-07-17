@@ -29,7 +29,6 @@ import {
 } from "requests/subscriber-requests";
 import {
   buildProductCategoryDropdownList,
-  MiscCategoryIdx,
   ProductCategoryDropdownItem,
   RepairStatusValues,
   RepairBarrierValues,
@@ -42,7 +41,8 @@ import { Response, RepairData, RepairsData, OwnerData, VolunteersData, Subscribe
 const { selectableItems: ordsProductCategoryList, dropdownData: ordsProductCategoryDropdownData } =
   buildProductCategoryDropdownList();
 
-const defaultProductCategoryIdx = MiscCategoryIdx >= 0 ? MiscCategoryIdx : 0;
+const UNSELECTED_PRODUCT_CATEGORY_IDX = -1;
+const PRODUCT_CATEGORY_PLACEHOLDER = "Please Select the Closest Option";
 
 const ordsRepairStatusList = RepairStatusValues.map((el, idx) => {
   return { label: el, value: idx };
@@ -141,6 +141,16 @@ const withUnassignedRepairerOption = (available: RepairerDropdownItem[]): Repair
   ...available,
 ];
 
+const formatPreviousRepairer = (firstName?: string, lastName?: string): string => {
+  const first = firstName?.trim() ?? "";
+  const last = lastName?.trim() ?? "";
+  if (!first && !last) {
+    return "";
+  }
+  const initial = last ? `${last.charAt(0).toUpperCase()}.` : "";
+  return [first, initial].filter(Boolean).join(" ");
+};
+
 /**
  * Add/Edit Repair component
  * @param {Object} route - the route object
@@ -162,7 +172,7 @@ const AddEditRepair = ({ route, navigation }) => {
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [barrierIdx, setBarrierIdx] = useState(-1);
   const [showBarrierDropdown, setShowBarrierDropdown] = useState(false);
-  const [productCategoryIdx, setProductCategoryIdx] = useState(defaultProductCategoryIdx);
+  const [productCategoryIdx, setProductCategoryIdx] = useState(UNSELECTED_PRODUCT_CATEGORY_IDX);
   const [productCategoryFocused, setProductCategoryFocused] = useState(false);
   const [showDeleteConfirmationDialog, setShowDeleteConfirmationDialog] = useState(false);
   const [previousIncompleteRepairs, setPreviousIncompleteRepairs] = useState([]);
@@ -198,7 +208,7 @@ const AddEditRepair = ({ route, navigation }) => {
   const repairOkToSave = (repair: Repair): boolean => {
     let msg = "";
     if (!waiverBoxChecked) {
-      msg = "Please agree to the terms";
+      msg = "The Item Owner must agree to the terms at the top";
     } else if (!repair.ownersEmail) {
       msg = "Please enter the owner's email";
     } else if (!emailIsValid(repair.ownersEmail)) {
@@ -372,6 +382,8 @@ const AddEditRepair = ({ route, navigation }) => {
     if (isNewRepair(repair)) {
       setPageTitle("New Repair");
       repair = initStatus(repair);
+      repair.type = "";
+      setProductCategoryIdx(UNSELECTED_PRODUCT_CATEGORY_IDX);
       setRepairDetails(repair);
       setWaiverBoxChecked(repair.acceptsWaiver);
       setShowLoader(false);
@@ -386,12 +398,10 @@ const AddEditRepair = ({ route, navigation }) => {
         fullRepair = initStatus(fullRepair);
       }
       if (!fullRepair.type) {
-        fullRepair.type = ordsProductCategoryList[defaultProductCategoryIdx].label;
-        setProductCategoryIdx(defaultProductCategoryIdx);
+        setProductCategoryIdx(UNSELECTED_PRODUCT_CATEGORY_IDX);
       } else {
-        // Find the matching index for the existing type
         const matchingIdx = ordsProductCategoryList.findIndex((cat) => cat.label === fullRepair.type);
-        setProductCategoryIdx(matchingIdx >= 0 ? matchingIdx : defaultProductCategoryIdx);
+        setProductCategoryIdx(matchingIdx >= 0 ? matchingIdx : UNSELECTED_PRODUCT_CATEGORY_IDX);
       }
       setRepairDetails(fullRepair);
       setWaiverBoxChecked(fullRepair.acceptsWaiver);
@@ -496,6 +506,11 @@ const AddEditRepair = ({ route, navigation }) => {
       }
     } else {
       setPreviousIncompleteRepairs([]);
+      setSelectedPreviousRepairIdx(null);
+      setRepairDetails((prev) => ({
+        ...prev,
+        previousRepairer: "",
+      }));
     }
   };
 
@@ -522,6 +537,11 @@ const AddEditRepair = ({ route, navigation }) => {
     }
 
     const prevRepair = previousRepairsList[idx];
+    const previousRepairer =
+      formatPreviousRepairer(prevRepair.repairerFirstName, prevRepair.repairerLastName) ||
+      prevRepair.previousRepairer ||
+      "";
+
     setRepairDetails({
       ...repairDetails,
       product: prevRepair.product,
@@ -529,14 +549,18 @@ const AddEditRepair = ({ route, navigation }) => {
       brand: prevRepair.brand,
       model: prevRepair.model,
       symptoms: prevRepair.symptoms,
-      repairerFirstName: prevRepair.repairerFirstName,
-      repairerLastName: prevRepair.repairerLastName,
+      repairerFirstName: "",
+      repairerLastName: "",
+      previousRepairer,
       repairNotes: prevRepair.repairNotes,
       repairStatus: "In Queue",
       weight: prevRepair.weight,
       cost: prevRepair.cost,
       isFollowUpRepair: true,
     });
+
+    const matchingCategoryIdx = ordsProductCategoryList.findIndex((cat) => cat.label === prevRepair.type);
+    setProductCategoryIdx(matchingCategoryIdx >= 0 ? matchingCategoryIdx : UNSELECTED_PRODUCT_CATEGORY_IDX);
   };
 
   /**
@@ -611,7 +635,7 @@ const AddEditRepair = ({ route, navigation }) => {
    */
   useEffect(() => {
     if (statusIdx >= 0) {
-      setRepairDetails({ ...repairDetails, repairStatus: ordsRepairStatusList[statusIdx].label });
+      setRepairDetails((prev) => ({ ...prev, repairStatus: ordsRepairStatusList[statusIdx].label }));
     }
   }, [statusIdx]);
 
@@ -620,7 +644,7 @@ const AddEditRepair = ({ route, navigation }) => {
    */
   useEffect(() => {
     if (barrierIdx >= 0) {
-      setRepairDetails({ ...repairDetails, repairBarrier: ordsRepairBarrierList[barrierIdx].label });
+      setRepairDetails((prev) => ({ ...prev, repairBarrier: ordsRepairBarrierList[barrierIdx].label }));
     }
   }, [barrierIdx]);
 
@@ -629,7 +653,10 @@ const AddEditRepair = ({ route, navigation }) => {
    */
   useEffect(() => {
     if (productCategoryIdx >= 0) {
-      setRepairDetails({ ...repairDetails, type: ordsProductCategoryList[productCategoryIdx].label });
+      setRepairDetails((prev) => ({
+        ...prev,
+        type: ordsProductCategoryList[productCategoryIdx].label,
+      }));
     }
   }, [productCategoryIdx]);
 
@@ -638,21 +665,18 @@ const AddEditRepair = ({ route, navigation }) => {
    */
   useEffect(() => {
     if (repairerIdx >= 0 && volunteers[repairerIdx]) {
-      setRepairDetails({
-        ...repairDetails,
+      setRepairDetails((prev) => ({
+        ...prev,
         repairerFirstName: volunteers[repairerIdx].firstName,
         repairerLastName: volunteers[repairerIdx].lastName,
-      });
+      }));
     } else if (repairerIdx === UNASSIGNED_REPAIRER_IDX) {
-      setRepairDetails({
-        ...repairDetails,
+      setRepairDetails((prev) => ({
+        ...prev,
         repairerFirstName: "",
         repairerLastName: "",
-      });
+      }));
     }
-    return () => {
-      setRepairDetails(new Repair());
-    };
   }, [repairerIdx]);
 
   /**
@@ -847,6 +871,20 @@ const AddEditRepair = ({ route, navigation }) => {
             placeholder="e.g. Cordless vacuum, coffee maker, toaster, etc."
             placeholderTextColor={"#717171"}
           />
+          {repairDetails.isFollowUpRepair && (
+            <TextInput
+              label="Previous Repairer"
+              mode="outlined"
+              autoCorrect={false}
+              style={styles.short_text_input}
+              value={repairDetails.previousRepairer ?? ""}
+              onChangeText={(newPreviousRepairer) =>
+                setRepairDetails({ ...repairDetails, previousRepairer: newPreviousRepairer })
+              }
+              placeholder="Jane D."
+              placeholderTextColor={"#717171"}
+            />
+          )}
 
           <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
             <CheckBox
@@ -886,12 +924,17 @@ const AddEditRepair = ({ route, navigation }) => {
               maxHeight={300}
               labelField="label"
               valueField="value"
-              placeholder="Select Product Category"
+              placeholder={PRODUCT_CATEGORY_PLACEHOLDER}
               searchPlaceholder="Search..."
-              value={ordsProductCategoryList[productCategoryIdx]}
+              value={
+                productCategoryIdx >= 0 ? ordsProductCategoryList[productCategoryIdx] : null
+              }
               onFocus={() => setProductCategoryFocused(true)}
               onBlur={() => setProductCategoryFocused(false)}
               onChange={(v) => {
+                if (v.value === null || v.value === undefined) {
+                  return;
+                }
                 setProductCategoryIdx(v.value);
               }}
               renderItem={(item: ProductCategoryDropdownItem) => {

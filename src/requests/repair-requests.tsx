@@ -177,6 +177,7 @@ const createRepair = (repair: Repair) => {
     repairStatus: repair.repairStatus ?? "",
     repairerFirstName: repair.repairerFirstName ?? "",
     repairerLastName: repair.repairerLastName ?? "",
+    previousRepairer: repair.previousRepairer ?? "",
     type: repair.type ?? "",
     symptoms: repair.symptoms ?? "",
     weight: repair.weight ?? WEIGHT_UNITS,

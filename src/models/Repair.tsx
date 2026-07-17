@@ -11,6 +11,7 @@ class Repair {
     symptoms: string;
     repairerFirstName: string;
     repairerLastName: string;
+    previousRepairer: string;
     repairNotes: string;
     repairStatus: string;
     repairBarrier: string;
@@ -18,6 +19,7 @@ class Repair {
     cost: string;
     isFollowUpRepair: boolean;
     eventId: string;
+    createdAt?: string;
 
     constructor(
         id: string = "",
@@ -32,13 +34,15 @@ class Repair {
         symptoms: string = "",
         repairerFirstName: string = "",
         repairerLastName: string = "",
+        previousRepairer: string = "",
         repairNotes: string = "",
         repairStatus: string = "In Queue",
         repairBarrier: string = "TBD",
         weight: string = "",
         cost: string = "",
         isFollowUpRepair: boolean = false,
-        eventId: string = ""
+        eventId: string = "",
+        createdAt: string = ""
     ) {
         this._id = id;
         this.acceptsWaiver = acceptsWaiver;
@@ -52,6 +56,7 @@ class Repair {
         this.symptoms = symptoms;
         this.repairerFirstName = repairerFirstName;
         this.repairerLastName = repairerLastName;
+        this.previousRepairer = previousRepairer;
         this.repairNotes = repairNotes;
         this.repairStatus = repairStatus;
         this.repairBarrier = repairBarrier;
@@ -59,6 +64,7 @@ class Repair {
         this.cost = cost;
         this.isFollowUpRepair = isFollowUpRepair;
         this.eventId = eventId;
+        this.createdAt = createdAt;
     }
 };
 

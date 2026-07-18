@@ -3,6 +3,7 @@ import { useAuth } from 'contexts/auth-context';
 
 import Login from 'components/login/Login';
 import Repairs from 'components/repairs/Repairs';
+import Dashboard from 'components/dashboard/Dashboard';
 import AddEditRepair from 'components/repairs/AddEditRepair';
 import Volunteers from 'components/volunteers/Volunteers';
 import AddEditVolunteer from 'components/volunteers/AddEditVolunteer';
@@ -41,6 +42,10 @@ const ScreensNav = (props) => {
                         component={Repairs}
                     />
                     <Stack.Screen
+                        name="Dashboard"
+                        component={Dashboard}
+                    />
+                    <Stack.Screen
                         name="Volunteers"
                         component={Volunteers}
                     />
@@ -74,6 +79,10 @@ const ScreensNav = (props) => {
                     <Stack.Screen
                         name="Repairs"
                         component={Repairs}
+                    />
+                    <Stack.Screen
+                        name="Dashboard"
+                        component={Dashboard}
                     />
                     <Stack.Screen
                         name="Volunteers"

@@ -926,9 +926,7 @@ const AddEditRepair = ({ route, navigation }) => {
               valueField="value"
               placeholder={PRODUCT_CATEGORY_PLACEHOLDER}
               searchPlaceholder="Search..."
-              value={
-                productCategoryIdx >= 0 ? ordsProductCategoryList[productCategoryIdx] : null
-              }
+              value={productCategoryIdx >= 0 ? ordsProductCategoryList[productCategoryIdx] : null}
               onFocus={() => setProductCategoryFocused(true)}
               onBlur={() => setProductCategoryFocused(false)}
               onChange={(v) => {
@@ -1117,7 +1115,7 @@ const AddEditRepair = ({ route, navigation }) => {
               }}
             />
           </View>
-          {statusIdx >= 0 && ordsRepairStatusList[statusIdx].label === "End of life" && (
+          {statusIdx >= 0 && ordsRepairStatusList[statusIdx].label === "End of Life" && (
             <View style={{ marginTop: 10, width: "100%" }}>
               <PaperDropDown
                 label={"Repair Barrier"}

@@ -1,11 +1,16 @@
 import Volunteer from "models/Volunteer";
 import Repair from "models/Repair";
+import { RepairStats } from "types/Stats";
 
 export type Response<T> = {
   status: boolean;
   msg: string;
   data: T;
 };
+
+export interface StatsData {
+  stats: RepairStats;
+}
 
 export interface VolunteerData {
   volunteer: Volunteer;

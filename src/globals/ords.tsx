@@ -390,7 +390,7 @@ export const ProductCategoryValues: ProductCategory[] = ProductCategoryGroupName
 
 export const MiscCategoryIdx = ProductCategoryValues.findIndex((category) => category.text === "Misc");
 
-export const RepairStatusValues = ["In Queue", "In Progress", "Fixed", "Repairable", "End of life", "Unknown"];
+export const RepairStatusValues = ["In Queue", "In Progress", "Fixed", "Repairable", "End of Life", "Unknown"];
 
 export const RepairBarrierValues = [
   "Not applicable",

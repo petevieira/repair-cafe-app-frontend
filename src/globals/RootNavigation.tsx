@@ -21,6 +21,7 @@ export type RootStackParamList = {
     "Home": undefined;
     "Volunteer Login": undefined;
     "Repairs": undefined;
+    "Dashboard": undefined;
     "Add/Edit Repair": { repair: Repair };
     "Volunteers": undefined;
     "Add/Edit Volunteer": { volunteer: Volunteer };

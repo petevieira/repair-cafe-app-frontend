@@ -18,6 +18,7 @@ const Repairs = {
     UPDATE_REPAIR:                   `${REPAIRS_PREFIX}/update-repair`,
     GET_REPAIR:                      `${REPAIRS_PREFIX}/get-repair`,
     GET_REPAIRS_BASIC:               `${REPAIRS_PREFIX}/get-repairs-basic`,
+    GET_STATS:                       `${REPAIRS_PREFIX}/get-stats`,
     FIND_OWNER_BY_EMAIL:             `${REPAIRS_PREFIX}/find-owner-by-email`,
     FIND_INCOMPLETE_REPAIRS_BY_OWNER:`${REPAIRS_PREFIX}/find-incomplete-repairs-by-owner`,
 };

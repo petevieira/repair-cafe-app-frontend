@@ -13,6 +13,7 @@ import { getRepairStats } from "requests/stats-requests";
 import { Response, StatsData } from "types/Response";
 import { RepairStats, StatsBucket, OutcomeScope } from "types/Stats";
 import { WEIGHT_UNITS, COST_UNITS } from "@env";
+import { canonicalProductCategory } from "globals/ords";
 
 const weightUnit = WEIGHT_UNITS || "lbs";
 const costUnit = COST_UNITS || "$";
@@ -46,10 +47,7 @@ const formatNumber = (value: number, decimals: number = 0): string => {
  * e.g. "Laptop (Portable computer)". Show just the leading name.
  */
 const shortenCategory = (category: string): string => {
-  if (!category) {
-    return "Unknown";
-  }
-  return category.split(" (")[0];
+  return canonicalProductCategory(category) || "Unknown";
 };
 
 /**

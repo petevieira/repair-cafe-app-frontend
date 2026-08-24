@@ -29,6 +29,7 @@ import {
 } from "requests/subscriber-requests";
 import {
   buildProductCategoryDropdownList,
+  findProductCategoryIndex,
   ProductCategoryDropdownItem,
   RepairStatusValues,
   RepairBarrierValues,
@@ -400,7 +401,7 @@ const AddEditRepair = ({ route, navigation }) => {
       if (!fullRepair.type) {
         setProductCategoryIdx(UNSELECTED_PRODUCT_CATEGORY_IDX);
       } else {
-        const matchingIdx = ordsProductCategoryList.findIndex((cat) => cat.label === fullRepair.type);
+        const matchingIdx = findProductCategoryIndex(fullRepair.type, ordsProductCategoryList);
         setProductCategoryIdx(matchingIdx >= 0 ? matchingIdx : UNSELECTED_PRODUCT_CATEGORY_IDX);
       }
       setRepairDetails(fullRepair);
@@ -559,7 +560,7 @@ const AddEditRepair = ({ route, navigation }) => {
       isFollowUpRepair: true,
     });
 
-    const matchingCategoryIdx = ordsProductCategoryList.findIndex((cat) => cat.label === prevRepair.type);
+    const matchingCategoryIdx = findProductCategoryIndex(prevRepair.type, ordsProductCategoryList);
     setProductCategoryIdx(matchingCategoryIdx >= 0 ? matchingCategoryIdx : UNSELECTED_PRODUCT_CATEGORY_IDX);
   };
 
@@ -655,7 +656,7 @@ const AddEditRepair = ({ route, navigation }) => {
     if (productCategoryIdx >= 0) {
       setRepairDetails((prev) => ({
         ...prev,
-        type: ordsProductCategoryList[productCategoryIdx].label,
+        type: ordsProductCategoryList[productCategoryIdx].text,
       }));
     }
   }, [productCategoryIdx]);

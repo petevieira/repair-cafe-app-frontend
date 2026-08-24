@@ -11,6 +11,11 @@ const BicyclesCategories: ProductCategory[] = [
     group: "Bicycles",
   },
   { text: "Bicycle", description: "e.g. bicycle, electric bicycle, mountain bike", group: "Bicycles" },
+  {
+    text: "Bicycle accessory",
+    description: "e.g. pump, lock, rack, inner tube",
+    group: "Bicycles",
+  },
 ];
 
 const ClocksCategories: ProductCategory[] = [
@@ -138,7 +143,7 @@ const DisplayAndSoundCategories: ProductCategory[] = [
     description: "Any powered instrument e.g. keyboard, guitar",
     group: "Display and sound equipment",
   },
-  { text: "Portable radio", description: "e.g. radio alarm, transistor radio", group: "Display and sound equipment" },
+  { text: "Portable radio", description: "e.g. clock radio, radio alarm, transistor radio", group: "Display and sound equipment" },
   {
     text: "Projector",
     description: "e.g. slide projector, video projector, digital projector",
@@ -169,7 +174,7 @@ const HouseholdAppliancesElectricCategories: ProductCategory[] = [
   },
   {
     text: "Blender / Food Processor",
-    description: "e.g. blender, juicer, coffee grinder, stick blender, hand mixer",
+    description: "e.g. blender, juicer, stand mixer, KitchenAid, coffee grinder, stick blender, hand mixer",
     group: "Household appliances electric",
   },
   { text: "Breadmaker", description: "Kitchen appliance for baking bread", group: "Household appliances electric" },
@@ -317,6 +322,22 @@ const ToolsNonElectricCategories: ProductCategory[] = [
   { text: "Hand tool", description: "e.g. screwdriver, wrench, pliers, hammer, etc.", group: "Tools non-electric" },
 ];
 
+const ClothingTextilesCategories: ProductCategory[] = [
+  {
+    text: "Clothing / textiles",
+    description: "e.g. clothing, bags, backpacks, zippers",
+    group: "Clothing / textiles",
+  },
+];
+
+const FurnitureCategories: ProductCategory[] = [
+  {
+    text: "Furniture",
+    description: "e.g. chairs, tables, shelves, cabinets, sofas",
+    group: "Furniture",
+  },
+];
+
 const ToysElectricCategories: ProductCategory[] = [
   {
     text: "Animatronics",
@@ -348,6 +369,8 @@ export const ProductCategoryGroups: Record<string, ProductCategory[]> = {
   "Household appliances electric": HouseholdAppliancesElectricCategories,
   "Tools electric": ToolsElectricCategories,
   "Tools non-electric": ToolsNonElectricCategories,
+  "Clothing / textiles": ClothingTextilesCategories,
+  Furniture: FurnitureCategories,
   "Toys electric": ToysElectricCategories,
   Other: OtherCategories,
 };
@@ -362,13 +385,20 @@ export type ProductCategoryDropdownItem = {
   label: string;
   value: number | null;
   isGroupLabel?: boolean;
+  text?: string;
+};
+
+export type ProductCategorySelectableItem = {
+  label: string;
+  value: number;
+  text: string;
 };
 
 export const buildProductCategoryDropdownList = (): {
-  selectableItems: { label: string; value: number }[];
+  selectableItems: ProductCategorySelectableItem[];
   dropdownData: ProductCategoryDropdownItem[];
 } => {
-  const selectableItems: { label: string; value: number }[] = [];
+  const selectableItems: ProductCategorySelectableItem[] = [];
   const dropdownData: ProductCategoryDropdownItem[] = [];
 
   for (const group of ProductCategoryGroupNames) {
@@ -376,8 +406,8 @@ export const buildProductCategoryDropdownList = (): {
     for (const cat of sortCategories(ProductCategoryGroups[group])) {
       const value = selectableItems.length;
       const label = `${cat.text} (${cat.description})`;
-      selectableItems.push({ label, value });
-      dropdownData.push({ label, value });
+      selectableItems.push({ label, value, text: cat.text });
+      dropdownData.push({ label, value, text: cat.text });
     }
   }
 
@@ -387,6 +417,59 @@ export const buildProductCategoryDropdownList = (): {
 export const ProductCategoryValues: ProductCategory[] = ProductCategoryGroupNames.flatMap((group) =>
   sortCategories(ProductCategoryGroups[group]),
 );
+
+/**
+ * Canonical category names that themselves contain parentheses. These must not
+ * have a trailing parenthetical stripped, or "Kitchen appliance (heating)"
+ * would collapse to "Kitchen appliance".
+ */
+export const CanonicalCategoryNamesWithParens = ProductCategoryValues.filter((category) =>
+  category.text.includes(" ("),
+).map((category) => category.text);
+
+/**
+ * Stored `type` should be the short category name (e.g. "Misc"), not the
+ * dropdown label with description. Older records may still have the full
+ * "Misc (Any electronic device...)" form. This returns the canonical name.
+ */
+export const canonicalProductCategory = (stored?: string): string => {
+  const trimmed = stored?.trim() ?? "";
+  if (!trimmed) {
+    return "";
+  }
+  if (CanonicalCategoryNamesWithParens.includes(trimmed)) {
+    return trimmed;
+  }
+  const lastSep = trimmed.lastIndexOf(" (");
+  if (lastSep > 0 && trimmed.endsWith(")")) {
+    return trimmed.slice(0, lastSep);
+  }
+  return trimmed;
+};
+
+/**
+ * Match a stored repair.type against dropdown items, accepting both the
+ * canonical short name and the old "text (description)" label.
+ */
+export const findProductCategoryIndex = (
+  stored: string,
+  items: { text: string; label: string }[],
+): number => {
+  const trimmed = stored?.trim() ?? "";
+  if (!trimmed) {
+    return -1;
+  }
+  const byText = items.findIndex((cat) => cat.text === trimmed);
+  if (byText >= 0) {
+    return byText;
+  }
+  const byLabel = items.findIndex((cat) => cat.label === trimmed);
+  if (byLabel >= 0) {
+    return byLabel;
+  }
+  const canonical = canonicalProductCategory(trimmed);
+  return items.findIndex((cat) => cat.text === canonical);
+};
 
 export const MiscCategoryIdx = ProductCategoryValues.findIndex((category) => category.text === "Misc");
 
